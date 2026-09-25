@@ -614,11 +614,6 @@
       </div>
 
       <div class="rmc-panel">
-        <h3>Common mistakes</h3>
-        <ul class="rmc-mistakes-list">${concept.commonMistakes.map((m) => `<li>${esc(m)}</li>`).join('')}</ul>
-      </div>
-
-      <div class="rmc-panel">
         <h3>Recall — self-assessed mastery</h3>
         <div class="rmc-mastery-scale">
           ${[0,1,2,3,4,5].map((v) => `<button type="button" class="rmc-mastery-dot${v <= selfRating && selfRating > 0 ? ' filled' : ''}${v === 5 && selfRating === 5 ? ' max' : ''}" title="${v}/5" data-action="set-mastery" data-concept="${esc(concept.id)}" data-value="${v}">${v}</button>`).join('')}
