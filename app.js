@@ -254,6 +254,65 @@
     return esc(value).replace(/\n/g, '<br>');
   }
 
+  // Lightweight quiz formatter (zero dependencies): inline `code` becomes a
+  // badge, fenced or bare multiline code becomes an isolated <pre> block.
+  // XSS hygiene: input is escaped BEFORE any markup is introduced, so spans
+  // and <pre> contents can never inject HTML.
+  function formatInlineCode(escapedHtml) {
+    return String(escapedHtml).replace(/`([^`\n]+)`/g, '<code class="rmc-code-inline">$1</code>');
+  }
+
+  // A blank-line-separated paragraph counts as code when it spans 2+ lines
+  // and carries Rust/code markers. Single-line `snippets` stay inline badges.
+  function looksLikeCode(paragraphRaw) {
+    const lines = String(paragraphRaw).split('\n').filter((l) => l.trim() !== '');
+    if (lines.length < 2) return false;
+    return lines.some((l) => /(;\s*$|{\s*$|}\s*;?\s*$|^\s*(fn|let|mut|use|struct|enum|impl|for|while|loop|if|match|return|println!|print!|eprint!|assert!|const|static|pub|mod|trait|where)\b|::|->|=>)/.test(l));
+  }
+
+  // Split raw quiz text into segments: { kind: 'text', html } (inline code
+  // parsed, single newlines as <br>) or { kind: 'code', html } (isolated <pre>).
+  function quizSegments(text) {
+    const raw = String(text ?? '');
+    const chunks = [];
+    const fenceRe = /```(\w*)\n?([\s\S]*?)```/g;
+    let last = 0, m;
+    while ((m = fenceRe.exec(raw)) !== null) {
+      if (m.index > last) chunks.push({ type: 'text', value: raw.slice(last, m.index) });
+      chunks.push({ type: 'code', value: m[2].replace(/\n$/, '') });
+      last = m.index + m[0].length;
+    }
+    if (last < raw.length) chunks.push({ type: 'text', value: raw.slice(last) });
+    const segs = [];
+    for (const c of chunks) {
+      if (c.type === 'code') {
+        if (c.value.trim() !== '') segs.push({ kind: 'code', html: `<pre class="rmc-code-block"><code>${esc(c.value.trim())}</code></pre>` });
+        continue;
+      }
+      for (const p of c.value.split(/\n\s*\n/)) {
+        if (p.trim() === '') continue;
+        if (looksLikeCode(p)) {
+          segs.push({ kind: 'code', html: `<pre class="rmc-code-block"><code>${esc(p.trim())}</code></pre>` });
+        } else {
+          segs.push({ kind: 'text', html: formatInlineCode(esc(p)).replace(/\n/g, '<br>') });
+        }
+      }
+    }
+    return segs;
+  }
+
+  // Flat rendering for <div> contexts (verdicts, explanations): paragraphs
+  // rejoin with double breaks, code stays isolated. Never emits bare backticks.
+  function formatQuizContent(text) {
+    const segs = quizSegments(text);
+    let out = '';
+    segs.forEach((s, i) => {
+      if (i > 0 && s.kind === 'text' && segs[i - 1].kind === 'text') out += '<br><br>';
+      out += s.html;
+    });
+    return out;
+  }
+
   const CONCEPT_BY_ID = (typeof concepts !== 'undefined' && Array.isArray(concepts))
     ? Object.fromEntries(concepts.map((c) => [c.id, c]))
     : {};
@@ -494,12 +553,33 @@
   }
 
   // Shared single source for result markup (full renders and surgical paints).
+  // Apple-HIG callout: verdict pill on its own line, explanation below it.
   function quizResultHTML(ok, strong, explain) {
-    return `<div class="rmc-checkpoint-result ${ok ? 'pass' : 'fail'}"><strong>${strong}</strong> ${fmtMultiline(explain)}</div>`;
+    const icon = ok ? '✓' : '✕';
+    return `<div class="rmc-checkpoint-result ${ok ? 'pass' : 'fail'}"><span class="rmc-verdict-badge ${ok ? 'pass' : 'fail'}"><span aria-hidden="true">${icon}</span> ${esc(strong)}</span><div class="rmc-checkpoint-explain">${formatQuizContent(explain)}</div></div>`;
   }
 
+  // Question header: qnum on its own line, prose and code as siblings — a
+  // "Q3." prefix can never share a line with a code block. Returns ONE root
+  // node (replaceQuizTail keeps the first child and rebuilds the rest).
   function quizQuestionHead(q, qi) {
-    return `<p class="rmc-checkpoint-prompt"><strong>Q${qi + 1}.</strong> ${fmtMultiline(q.prompt)}</p>`;
+    const segs = quizSegments(q.prompt);
+    const hasCode = segs.some((s) => s.kind === 'code');
+    let promptIdx = -1;
+    if (hasCode) {
+      for (let i = segs.length - 1; i >= 0; i--) {
+        if (segs[i].kind === 'text') { promptIdx = i; break; }
+      }
+    }
+    let html = `<div class="rmc-quiz-question-header"><p class="rmc-quiz-qnum">Question ${qi + 1}</p>`;
+    segs.forEach((s, i) => {
+      if (s.kind === 'code') { html += s.html; return; }
+      if (s.html === '') return;
+      html += (hasCode && i === promptIdx)
+        ? `<div class="rmc-quiz-prompt">${s.html}</div>`
+        : `<div class="rmc-quiz-qtext">${s.html}</div>`;
+    });
+    return html + `</div>`;
   }
 
   function quizQuestionTail(concept, q, qi, a) {
@@ -511,18 +591,18 @@
           let cls = 'rmc-option-btn';
           if (judged && opt.id === q.correct) cls += ' correct';
           else if (judged && opt.id === (a && a.selected)) cls += ' incorrect';
-          return `<button type="button" class="${cls}" ${judged ? 'disabled' : ''} data-action="answer-mc" data-concept="${cid}" data-q="${qi}" data-option="${esc(opt.id)}">${esc(opt.text)}</button>`;
+          return `<button type="button" class="${cls}" ${judged ? 'disabled' : ''} data-action="answer-mc" data-concept="${cid}" data-q="${qi}" data-option="${esc(opt.id)}">${formatInlineCode(esc(opt.text))}</button>`;
         }).join('')}`
         + (judged
           ? quizResultHTML(state === 'correct', state === 'correct' ? 'Correct' : 'Not Quite', q.explain)
           : '');
     }
-    // Self-assessed (predict_output / find_bug / explain): reveal, then honest Yes/No.
+    // Self-assessed (predict_output / find_bug / explain): reveal, then Yes/No.
     if (state === 'open') {
       return `<button type="button" class="rmc-btn-ghost" data-action="reveal-checkpoint" data-concept="${cid}" data-q="${qi}">Reveal Answer</button>`;
     }
     if (state === 'revealed') {
-      return `<div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${fmtMultiline(q.explain)}</div>
+      return `<div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${formatQuizContent(q.explain)}</div>
         <p style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Did you get it right before revealing?</p>
         <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="true">Yes</button>
         <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="false">No</button>`;
@@ -546,9 +626,9 @@
     box.append(...Array.from(tmp.childNodes));
   }
 
-  // Replace everything after the prompt head (<p class="rmc-checkpoint-prompt">)
+  // Replace everything after the prompt head (.rmc-quiz-question-header)
   // with fresh tail markup. Fixes duplication where the old explanation +
-  // honesty prompt were left in place and the result was appended on top.
+  // self-check prompt were left in place and the result was appended on top.
   function replaceQuizTail(box, html) {
     if (!box) return;
     while (box.childNodes.length > 1) box.removeChild(box.lastChild);
@@ -823,10 +903,10 @@
       return `
       <div class="rmc-review-card">
         <p class="rmc-review-meta">Recall · ${esc(c.concept)}</p>
-        <p class="rmc-recall-q">${fmtMultiline((q1 && q1.prompt) || 'Review this concept in the course module.')}</p>
+        <p class="rmc-recall-q">${formatInlineCode(esc((q1 && q1.prompt) || 'Review this concept in the course module.')).replace(/\n/g, '<br>')}</p>
         <details style="margin: 8px 0 12px">
           <summary style="cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:500">Show Answer</summary>
-          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${fmtMultiline((q1 && q1.explain) || 'Review this concept in the course module.')}</div>
+          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${formatQuizContent((q1 && q1.explain) || 'Review this concept in the course module.')}</div>
         </details>
         <div style="display:flex;gap:8px">
           <button type="button" class="rmc-btn-primary" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="true">Got It</button>
