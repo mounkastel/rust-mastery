@@ -270,6 +270,12 @@
     return lines.some((l) => /(;\s*$|{\s*$|}\s*;?\s*$|^\s*(fn|let|mut|use|struct|enum|impl|for|while|loop|if|match|return|println!|print!|eprint!|assert!|const|static|pub|mod|trait|where)\b|::|->|=>)/.test(l));
   }
 
+  // macOS window chrome for code blocks: traffic lights + language pill.
+  // Single builder so prompt and explanation blocks always match.
+  function codeBlockHTML(code) {
+    return `<pre class="rmc-code-block"><span class="rmc-code-chrome" aria-hidden="true"><span class="rmc-code-dots"></span><span class="rmc-code-lang">Rust</span></span><code>${esc(String(code).trim())}</code></pre>`;
+  }
+
   // Split raw quiz text into segments: { kind: 'text', html } (inline code
   // parsed, single newlines as <br>) or { kind: 'code', html } (isolated <pre>).
   function quizSegments(text) {
@@ -286,13 +292,13 @@
     const segs = [];
     for (const c of chunks) {
       if (c.type === 'code') {
-        if (c.value.trim() !== '') segs.push({ kind: 'code', html: `<pre class="rmc-code-block"><code>${esc(c.value.trim())}</code></pre>` });
+        if (c.value.trim() !== '') segs.push({ kind: 'code', html: codeBlockHTML(c.value) });
         continue;
       }
       for (const p of c.value.split(/\n\s*\n/)) {
         if (p.trim() === '') continue;
         if (looksLikeCode(p)) {
-          segs.push({ kind: 'code', html: `<pre class="rmc-code-block"><code>${esc(p.trim())}</code></pre>` });
+          segs.push({ kind: 'code', html: codeBlockHTML(p) });
         } else {
           segs.push({ kind: 'text', html: formatInlineCode(esc(p)).replace(/\n/g, '<br>') });
         }
@@ -953,11 +959,8 @@
     // loses scrollTop when innerHTML is replaced).
     const prevSidebar = root.querySelector('#rmc-sidebar');
     const prevSidebarScroll = prevSidebar ? prevSidebar.scrollTop : 0;
-    // Avoid touching body overflow unless it actually flips (style recalc).
-    if (document.body) {
-      const want = ui.menuOpen ? 'hidden' : '';
-      if (document.body.style.overflow !== want) document.body.style.overflow = want;
-    }
+    // Viewport-locked shell: body never scrolls, so no overflow juggling here.
+    // The mobile drawer is a fixed overlay; .rmc-main owns its own scroll.
     ensureSidebarExpanded();
     const { byId, statusMap } = derived();
     root.innerHTML = `<div class="rmc-app">`
@@ -982,10 +985,8 @@
     open = open === true;
     ui.menuOpen = open;
     if (!root) return true;
-    if (document.body) {
-      const want = open ? 'hidden' : '';
-      if (document.body.style.overflow !== want) document.body.style.overflow = want;
-    }
+    // No body-overflow writes: the shell locks the viewport (body is always
+    // overflow:hidden); only the fixed drawer + scrim toggle here.
     const sidebar = root.querySelector('#rmc-sidebar');
     const app = root.querySelector('.rmc-app');
     if (!sidebar || !app) { render(); return true; }
@@ -1097,6 +1098,9 @@
   }
 
   function scrollTop() {
+    // Viewport-locked shell: the page never scrolls; reset the main column.
+    const main = root ? root.querySelector('.rmc-main') : null;
+    if (main) { main.scrollTop = 0; return; }
     if (typeof window.scrollTo === 'function') {
       try { window.scrollTo(0, 0); } catch (_) {}
     }
