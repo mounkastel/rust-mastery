@@ -231,6 +231,12 @@
       .replace(/'/g, '&#39;');
   }
 
+  // Line breaks as markup, not whitespace: in-page translators rewrite text
+  // nodes and collapse literal newlines, but <br> elements survive translation.
+  function fmtMultiline(value) {
+    return esc(value).replace(/\n/g, '<br>');
+  }
+
   const CONCEPT_BY_ID = Object.fromEntries(concepts.map((c) => [c.id, c]));
 
   function conceptById() {
@@ -441,7 +447,7 @@
 
   function quizQuestionMarkup(concept, q, qi, a) {
     const state = quizQuestionState(q, a);
-    const head = `<p class="rmc-checkpoint-prompt"><strong>Q${qi + 1}.</strong> ${esc(q.prompt)}</p>`;
+    const head = `<p class="rmc-checkpoint-prompt"><strong>Q${qi + 1}.</strong> ${fmtMultiline(q.prompt)}</p>`;
     if (q.type === 'multiple_choice') {
       const judged = state === 'correct' || state === 'wrong';
       return `<div style="margin-bottom:14px">${head}
@@ -451,7 +457,7 @@
           else if (judged && opt.id === (a && a.selected)) cls += ' incorrect';
           return `<button type="button" class="${cls}" ${judged ? 'disabled' : ''} data-action="answer-mc" data-concept="${esc(concept.id)}" data-q="${qi}" data-option="${esc(opt.id)}">${esc(opt.text)}</button>`;
         }).join('')}
-        ${judged ? `<div class="rmc-checkpoint-result ${state === 'correct' ? 'pass' : 'fail'}"><strong>${state === 'correct' ? 'Correct.' : 'Not quite.'}</strong> ${esc(q.explain)}</div>` : ''}
+        ${judged ? `<div class="rmc-checkpoint-result ${state === 'correct' ? 'pass' : 'fail'}"><strong>${state === 'correct' ? 'Correct.' : 'Not quite.'}</strong> ${fmtMultiline(q.explain)}</div>` : ''}
       </div>`;
     }
     // Self-assessed (predict_output / find_bug / explain): reveal, then honest Yes/No.
@@ -462,14 +468,14 @@
     }
     if (state === 'revealed') {
       return `<div style="margin-bottom:14px">${head}
-        <div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${esc(q.explain)}</div>
+        <div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${fmtMultiline(q.explain)}</div>
         <p style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Be honest: did you get this right before revealing the answer?</p>
         <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${esc(concept.id)}" data-q="${qi}" data-passed="true">Yes — mark passed</button>
         <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${esc(concept.id)}" data-q="${qi}" data-passed="false">No — needs review</button>
       </div>`;
     }
     return `<div style="margin-bottom:14px">${head}
-      <div class="rmc-checkpoint-result ${state === 'correct' ? 'pass' : 'fail'}"><strong>${state === 'correct' ? 'Marked as passed.' : 'Marked as needs review.'}</strong> ${esc(q.explain)}</div>
+      <div class="rmc-checkpoint-result ${state === 'correct' ? 'pass' : 'fail'}"><strong>${state === 'correct' ? 'Marked as passed.' : 'Marked as needs review.'}</strong> ${fmtMultiline(q.explain)}</div>
     </div>`;
   }
 
@@ -700,10 +706,10 @@
       return `
       <div class="rmc-review-card">
         <p class="rmc-review-meta">Recall fundamental · ${esc(c.concept)}</p>
-        <p class="rmc-recall-q">${esc((q1 && q1.prompt) || 'Review this concept in the course module.')}</p>
+        <p class="rmc-recall-q">${fmtMultiline((q1 && q1.prompt) || 'Review this concept in the course module.')}</p>
         <details style="margin: 8px 0 12px">
           <summary style="cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:500">Show explanation &amp; answer</summary>
-          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${esc((q1 && q1.explain) || 'Review this concept in the course module.')}</div>
+          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${fmtMultiline((q1 && q1.explain) || 'Review this concept in the course module.')}</div>
         </details>
         <div style="display:flex;gap:8px">
           <button type="button" class="rmc-btn-primary" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="true">Got it</button>
