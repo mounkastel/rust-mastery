@@ -221,11 +221,11 @@
 
   const STATUS_LABELS = {
     locked: 'Locked',
-    'up-next': 'Up next',
-    'in-progress': 'In progress',
+    'up-next': 'Up Next',
+    'in-progress': 'In Progress',
     completed: 'Completed',
-    'needs-review': 'Needs review',
-    'not-started': 'Not started',
+    'needs-review': 'Needs Review',
+    'not-started': 'Ready',
   };
 
   function statusLabel(s) {
@@ -385,7 +385,7 @@
             }).join('')}
           </div>
         </div>
-        <div class="rmc-sidebar-foot"><span>Completed ${completedCount} / ${conceptList.length}</span><button type="button" class="rmc-theme-toggle" data-action="toggle-theme" aria-label="Toggle dark theme" title="Toggle dark theme">${themeToggleInner()}</button></div>
+        <div class="rmc-sidebar-foot"><span>${completedCount} of ${conceptList.length} completed</span><button type="button" class="rmc-theme-toggle" data-action="toggle-theme" aria-label="Toggle dark theme" title="Toggle dark theme">${themeToggleInner()}</button></div>
       </nav>`;
   }
 
@@ -440,9 +440,9 @@
     }).length;
 
     return `<div>
-      <p class="rmc-quiz-progress" data-quiz-progress="${esc(concept.id)}">Answered ${judged} of ${qs.length} — all must be correct to pass.</p>
+      <p class="rmc-quiz-progress" data-quiz-progress="${esc(concept.id)}">${judged} of ${qs.length} answered · All must be correct</p>
       ${qs.map((q, i) => quizQuestionMarkup(concept, q, i, answers[i])).join('')}
-      <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Restart quiz</button>
+      <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Restart Quiz</button>
     </div>`;
   }
 
@@ -514,21 +514,21 @@
           return `<button type="button" class="${cls}" ${judged ? 'disabled' : ''} data-action="answer-mc" data-concept="${cid}" data-q="${qi}" data-option="${esc(opt.id)}">${esc(opt.text)}</button>`;
         }).join('')}`
         + (judged
-          ? quizResultHTML(state === 'correct', state === 'correct' ? 'Correct.' : 'Not quite.', q.explain)
+          ? quizResultHTML(state === 'correct', state === 'correct' ? 'Correct' : 'Not Quite', q.explain)
           : '');
     }
     // Self-assessed (predict_output / find_bug / explain): reveal, then honest Yes/No.
     if (state === 'open') {
-      return `<button type="button" class="rmc-btn-ghost" data-action="reveal-checkpoint" data-concept="${cid}" data-q="${qi}">Reveal answer &amp; self-check</button>`;
+      return `<button type="button" class="rmc-btn-ghost" data-action="reveal-checkpoint" data-concept="${cid}" data-q="${qi}">Reveal Answer</button>`;
     }
     if (state === 'revealed') {
       return `<div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${fmtMultiline(q.explain)}</div>
-        <p style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Be honest: did you get this right before revealing the answer?</p>
-        <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="true">Yes — mark passed</button>
-        <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="false">No — needs review</button>`;
+        <p style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Did you get it right before revealing?</p>
+        <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="true">Yes</button>
+        <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="false">No</button>`;
     }
     const ok = state === 'correct';
-    return quizResultHTML(ok, ok ? 'Marked as passed.' : 'Marked as needs review.', q.explain);
+    return quizResultHTML(ok, ok ? 'Correct' : 'Needs Review', q.explain);
   }
 
   function findQuizBox(id, qi) {
@@ -576,7 +576,7 @@
     const bars = root.querySelectorAll('[data-quiz-progress]');
     for (const bar of bars) {
       if (bar.dataset.quizProgress === id) {
-        bar.textContent = `Answered ${judged} of ${qs.length} — all must be correct to pass.`;
+        bar.textContent = `${judged} of ${qs.length} answered · All must be correct`;
       }
     }
   }
@@ -681,11 +681,20 @@
       return `<div>
         <h2 class="rmc-block-title">${esc(concept.concept)}</h2>
         <div class="rmc-locked-banner">
-          <strong>This block is locked.</strong> Finish and pass the checkpoint for its prerequisite${prereqs.length > 1 ? 's' : ''} first:
-          <div class="rmc-chip-list" style="margin-top:10px">
+          <div class="rmc-locked-head">
+            <span class="rmc-lock-ico" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="7" width="10" height="7" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.4"/></svg></span>
+            <div class="rmc-locked-titles">
+              <strong class="rmc-locked-title">Prerequisites Required</strong>
+              <span class="rmc-locked-sub">Complete preceding topics to unlock</span>
+            </div>
+          </div>
+          <div class="rmc-chip-list">
             ${prereqs.map((pid) => {
               const met = statusMap[pid] === 'completed';
-              return `<button type="button" class="rmc-prereq-chip ${met ? 'met' : 'unmet'}" data-action="open-concept" data-concept="${esc(pid)}">${met ? '✓' : '○'} ${esc(byId[pid] ? byId[pid].concept : pid)} — ${esc(statusLabel(statusMap[pid]))}</button>`;
+              const ico = met
+                ? '<span class="rmc-chip-ico met" aria-hidden="true">✓</span>'
+                : '<span class="rmc-chip-ico unmet" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="7" width="10" height="7" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.6"/></svg></span>';
+              return `<button type="button" class="rmc-prereq-chip ${met ? 'met' : 'unmet'}" data-action="open-concept" data-concept="${esc(pid)}">${ico}<span class="rmc-chip-text">${esc(byId[pid] ? byId[pid].concept : pid)} — ${esc(statusLabel(statusMap[pid]))}</span></button>`;
             }).join('')}
           </div>
         </div>
@@ -707,7 +716,7 @@
       </div>
 
       <div class="rmc-panel">
-        <h3>Read — The Book (TRPL) <span class="rmc-panel-tag">master sequence</span></h3>
+        <h3>Read · TRPL <span class="rmc-panel-tag">Core</span></h3>
         ${trplList.map((t) => `<div class="rmc-resource-row">
           <span class="rmc-resource-name">${esc(t.num)} ${esc(t.title)}</span>
           <div class="rmc-resource-actions">
@@ -717,7 +726,7 @@
       </div>
 
       ${rbeList.length === 0 ? '' : `<div class="rmc-panel">
-        <h3>See — Rust by Example</h3>
+        <h3>See · Rust by Example</h3>
         ${rbeList.map((r) => `<div class="rmc-resource-row">
               <div class="rmc-check-row">
                 <input type="checkbox" class="rmc-checkbox" ${p.rbeSeen[r.url] ? 'checked' : ''} data-action="toggle-rbe" data-concept="${esc(concept.id)}" data-url="${esc(r.url)}">
@@ -731,23 +740,23 @@
       </div>`}
 
       ${rustlingsList.length === 0 && practiceTasks.length === 0 ? '' : `<div class="rmc-panel">
-        <h3>Do — Rustlings practice</h3>
+        <h3>Practice · Rustlings</h3>
         ${rustlingsList.map((r) => resourceExerciseMarkup(concept, p, r)).join('')}
             ${practiceTasks.map((t) => practiceTaskMarkup(concept, p, t)).join('')}
       </div>`}
 
       <div class="rmc-panel rmc-checkpoint-panel">
-        <h3>Check — quiz · ${concept.checkpoint && concept.checkpoint.questions ? concept.checkpoint.questions.length : 3} questions · pass all to complete</h3>
-        ${!cUi.show && checkpointOutcome === null ? `<button type="button" class="rmc-btn-primary" data-action="show-checkpoint" data-concept="${esc(concept.id)}">Take checkpoint</button>` : ''}
+        <h3>Checkpoint · ${concept.checkpoint && concept.checkpoint.questions ? concept.checkpoint.questions.length : 3} questions</h3>
+        ${!cUi.show && checkpointOutcome === null ? `<button type="button" class="rmc-btn-primary" data-action="show-checkpoint" data-concept="${esc(concept.id)}">Start Checkpoint</button>` : ''}
         ${!cUi.show && checkpointOutcome !== null ? `<div>
             <div class="rmc-checkpoint-result ${checkpointOutcome ? 'pass' : 'fail'}">
-              ${checkpointOutcome ? 'Checkpoint passed.' : 'Checkpoint not passed yet — this block is marked "needs review".'}
+              ${checkpointOutcome ? 'Passed' : 'Not passed yet'}
             </div>
-            <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Retake checkpoint</button>
+            <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Retake Checkpoint</button>
           </div>` : ''}
         ${cUi.show ? CheckpointMarkup(concept) : ''}
         ${checkpointOutcome === false ? `<div class="rmc-remediation">
-          <strong>Remediation:</strong>
+          <strong>Review:</strong>
           ${trplList[0] ? `<a href="${esc(trplList[0].url)}" target="_blank" rel="noopener noreferrer">Review TRPL</a>` : ''}
           ${rbeList[0] ? `<span class="arrow">→</span><a href="${esc(rbeList[0].url)}" target="_blank" rel="noopener noreferrer">Review RBE</a>` : ''}
           ${rustlingsList[0] ? `<span class="arrow">→</span><a href="${esc(rustlingsList[0].url)}" target="_blank" rel="noopener noreferrer">Redo ${esc(rustlingsList[0].name)}</a>` : ''}
@@ -756,8 +765,8 @@
 
       ${lessonPagination(concept)}
       ${status === 'completed'
-        ? '<p class="rmc-mastery-label">Completed — earned by passing the checkpoint above. Re-take it any time to refresh mastery.</p>'
-        : '<p class="rmc-mastery-label">Complete this block by passing its checkpoint — there is no manual override.</p>'}
+        ? '<p class="rmc-mastery-label">Completed · Retake anytime to refresh</p>'
+        : '<p class="rmc-mastery-label">Pass the checkpoint to complete this block</p>'}
     </div>`;
   }
 
@@ -807,21 +816,21 @@
   function ReviewQueue(statusMap, limit) {
     const queue = reviewQueue(statusMap);
     const shown = limit ? queue.slice(0, limit) : queue;
-    if (!shown.length) return '<div class="rmc-empty">Nothing due for review right now. Cards reappear here on their spaced schedule once due.</div>';
+    if (!shown.length) return '<div class="rmc-empty">All caught up — reviews reappear on schedule.</div>';
 
     return `<div>${shown.map((c) => {
       const q1 = c.checkpoint && c.checkpoint.questions && c.checkpoint.questions[0];
       return `
       <div class="rmc-review-card">
-        <p class="rmc-review-meta">Recall fundamental · ${esc(c.concept)}</p>
+        <p class="rmc-review-meta">Recall · ${esc(c.concept)}</p>
         <p class="rmc-recall-q">${fmtMultiline((q1 && q1.prompt) || 'Review this concept in the course module.')}</p>
         <details style="margin: 8px 0 12px">
-          <summary style="cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:500">Show explanation &amp; answer</summary>
+          <summary style="cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:500">Show Answer</summary>
           <div class="rmc-checkpoint-result pass" style="margin-top:8px">${fmtMultiline((q1 && q1.explain) || 'Review this concept in the course module.')}</div>
         </details>
         <div style="display:flex;gap:8px">
-          <button type="button" class="rmc-btn-primary" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="true">Got it</button>
-          <button type="button" class="rmc-btn-ghost" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="false">Fuzzy — revisit</button>
+          <button type="button" class="rmc-btn-primary" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="true">Got It</button>
+          <button type="button" class="rmc-btn-ghost" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="false">Still Learning</button>
         </div>
       </div>`;}).join('')}</div>`;
   }
@@ -1134,7 +1143,7 @@
         if (b.dataset.option === q.correct) b.classList.add('correct');
         else if (b.dataset.option === option) b.classList.add('incorrect');
       });
-      moveChildrenInto(box, quizResultHTML(correct, correct ? 'Correct.' : 'Not quite.', q.explain));
+      moveChildrenInto(box, quizResultHTML(correct, correct ? 'Correct' : 'Not Quite', q.explain));
       refreshQuizProgress(id);
       return;
     }
@@ -1155,9 +1164,9 @@
       if (maybeFinishQuiz(id)) return;
       const box = findQuizBox(id, qi);
       if (!box) { render(); return; }
-      // BUGFIX: the revealed tail (explanation + honesty prompt + Yes/No) must
+      // BUGFIX: the revealed tail (explanation + self-check prompt + Yes/No) must
       // be replaced, not appended to — otherwise the explanation renders twice
-      // and the stale "Be honest" paragraph lingers next to the verdict.
+      // and the stale prompt paragraph lingers next to the verdict.
       replaceQuizTail(box, quizQuestionTail(concept, q, qi, answers[qi]));
       box.focus({ preventScroll: true });
       refreshQuizProgress(id);

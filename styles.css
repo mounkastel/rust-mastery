@@ -42,10 +42,10 @@
   --accent-soft: rgba(196, 98, 10, 0.1);
   --ok: #0d7a5f;
   --ok-soft: rgba(13, 122, 95, 0.1);
-  --bad: #c93434;
-  --bad-soft: rgba(201, 52, 52, 0.09);
+  --bad: #d70015;
+  --bad-soft: rgba(255, 59, 48, 0.08);
   --bad-deep: #7f1d1d;
-  --fail-ink: #8f2b2b;
+  --fail-ink: #b42318;
   --violet-bg: rgba(94, 70, 165, 0.09);
   --violet-ink: #5e46a5;
   --dot-idle: rgba(0, 0, 0, 0.18);
@@ -68,6 +68,7 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --space-7: 28px;
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
@@ -129,12 +130,12 @@ html[data-theme="dark"] {
   --accent: #fb923c;
   --accent-ink: #fdba74;
   --accent-soft: rgba(251, 146, 60, 0.14);
-  --ok: #34d399;
-  --ok-soft: rgba(52, 211, 153, 0.13);
-  --bad: #f87171;
-  --bad-soft: rgba(248, 113, 113, 0.13);
-  --bad-deep: #fca5a5;
-  --fail-ink: #fca5a5;
+  --ok: #30d158;
+  --ok-soft: rgba(48, 209, 88, 0.12);
+  --bad: #ff453a;
+  --bad-soft: rgba(255, 69, 58, 0.1);
+  --bad-deep: #ff9d94;
+  --fail-ink: #ffb3ab;
   --violet-bg: rgba(167, 139, 250, 0.15);
   --violet-ink: #c4b5fd;
   --dot-idle: rgba(255, 255, 255, 0.22);
@@ -244,7 +245,7 @@ img, svg, video, canvas, pre, table { max-width: 100%; }
   font-weight: 700;
   letter-spacing: -0.022em;
   line-height: 1.15;
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-8);
   overflow-wrap: break-word;
   hyphens: auto;
   text-wrap: balance;
@@ -485,7 +486,7 @@ button.rmc-brand:hover { background: var(--surface-hover); box-shadow: none; }
 
 /* ============ 5. Roadmap — airy cards, no collisions ============ */
 .rmc-roadmap-chapter {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
   overflow: hidden;
   overflow: clip;
   background: var(--surface-panel);
@@ -581,7 +582,7 @@ html[data-theme="dark"] .rmc-badge-needs-review { color: var(--bad); }
 /* ============ 6. Lesson — optimal reading measure ============ */
 .rmc-block-header {
   display: flex; justify-content: space-between; align-items: flex-start;
-  gap: var(--space-4); margin-bottom: var(--space-5); flex-wrap: wrap;
+  gap: var(--space-4); margin-bottom: var(--space-7); flex-wrap: wrap;
 }
 .rmc-block-header > div { min-width: 0; flex: 1 1 240px; }
 .rmc-block-header .rmc-badge { margin-top: 4px; }
@@ -601,7 +602,7 @@ html[data-theme="dark"] .rmc-badge-needs-review { color: var(--bad); }
   background: var(--surface-panel);
   border: 1px solid var(--border-panel);
   border-radius: var(--radius-lg);
-  padding: var(--space-6);
+  padding: var(--space-7);
   margin-bottom: var(--space-5);
   box-shadow: var(--shadow-sm);
   min-width: 0;
@@ -706,7 +707,7 @@ html[data-theme="dark"] .rmc-badge-needs-review { color: var(--bad); }
 .rmc button.rmc-option-btn.incorrect { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); font-weight: 600; }
 .rmc button.rmc-option-btn.incorrect::before { background: var(--bad); border-color: var(--bad); }
 .rmc-checkpoint-result {
-  margin-top: var(--space-3); padding: 13px 15px;
+  margin-top: var(--space-4); padding: var(--space-4) var(--space-5);
   font-size: 13.5px; line-height: 1.6;
   border: 1px solid transparent; border-radius: var(--radius);
   overflow-wrap: break-word; word-break: break-word;
@@ -727,22 +728,42 @@ html[data-theme="dark"] .rmc-badge-needs-review { color: var(--bad); }
 .rmc-remediation .arrow { font-family: var(--font-mono); color: var(--text-4); }
 
 .rmc-locked-banner {
-  margin-bottom: var(--space-4); padding: var(--space-5);
+  margin-top: var(--space-7); margin-bottom: var(--space-5); padding: var(--space-7);
   font-size: 13.5px; line-height: 1.6;
   color: var(--text-2);
-  background: var(--surface-header);
+  background: var(--surface-panel);
   border: 1px solid var(--border-panel);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
   overflow-wrap: break-word;
 }
-.rmc-chip-list { display: flex; flex-direction: column; gap: 8px; }
-/* Fixed: was hardcoded #37352f on #fff — invisible/wrong in dark mode. Now tokenized. */
+html[data-theme="dark"] .rmc-locked-banner {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.rmc-locked-head {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: var(--space-4); min-width: 0;
+}
+.rmc-lock-ico {
+  width: 36px; height: 36px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-radius: 11px;
+}
+.rmc-lock-ico svg { display: block; }
+.rmc-locked-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rmc-locked-title { font-size: 15px; font-weight: 650; letter-spacing: -0.012em; color: var(--text); line-height: 1.35; }
+.rmc-locked-sub { font-size: 13px; font-weight: 500; color: var(--text-3); line-height: 1.5; }
+.rmc-chip-list { display: flex; flex-direction: column; gap: var(--space-3); }
+/* Apple-tinted state chips: translucent fills, never bare red outlines. */
 .rmc button.rmc-prereq-chip {
   display: flex; align-items: center; justify-content: flex-start;
+  gap: var(--space-3);
   width: 100%; max-width: 100%; min-width: 0; height: auto;
-  padding: 10px 12px;
-  font-size: 12.5px; font-weight: 500; line-height: 1.5;
+  padding: 12px 16px;
+  font-size: 13px; font-weight: 500; line-height: 1.5;
   white-space: normal; text-align: left;
   cursor: pointer;
   overflow-wrap: break-word; word-break: break-word;
@@ -752,9 +773,29 @@ html[data-theme="dark"] .rmc-badge-needs-review { color: var(--bad); }
   border-radius: var(--radius);
   box-shadow: none;
 }
-.rmc button.rmc-prereq-chip:hover { background: var(--surface-hover); border-color: var(--border-strong); box-shadow: var(--shadow-xs); }
-.rmc button.rmc-prereq-chip.met { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 30%, transparent); }
-.rmc button.rmc-prereq-chip.unmet { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 25%, transparent); }
+.rmc button.rmc-prereq-chip:hover { border-color: var(--border-strong); box-shadow: var(--shadow-xs); }
+.rmc button.rmc-prereq-chip.met {
+  color: var(--ok);
+  background: var(--ok-soft);
+  border-color: color-mix(in srgb, var(--ok) 28%, transparent);
+}
+.rmc button.rmc-prereq-chip.met:hover { background: var(--ok-soft); }
+.rmc button.rmc-prereq-chip.unmet {
+  color: var(--bad);
+  background: var(--bad-soft);
+  border-color: color-mix(in srgb, var(--bad) 22%, transparent);
+}
+.rmc button.rmc-prereq-chip.unmet:hover { background: var(--bad-soft); }
+.rmc-chip-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 12px; font-weight: 700; line-height: 1;
+}
+.rmc-chip-ico svg { display: block; }
+.rmc-chip-ico.met { color: var(--ok); background: color-mix(in srgb, var(--ok) 16%, transparent); }
+.rmc-chip-ico.unmet { color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); }
+.rmc-chip-text { flex: 1; min-width: 0; overflow-wrap: break-word; word-break: break-word; }
 
 .rmc-pagination {
   display: flex; align-items: center; justify-content: space-between;
@@ -766,7 +807,7 @@ html[data-theme="dark"] .rmc-badge-needs-review { color: var(--bad); }
 
 /* ============ 7. Review ============ */
 .rmc-review-card {
-  margin-bottom: var(--space-4); padding: var(--space-5);
+  margin-bottom: var(--space-5); padding: var(--space-6);
   background: var(--surface-callout);
   border: 1px solid var(--border-panel);
   border-left: 3px solid var(--accent);
@@ -880,7 +921,9 @@ html[data-theme="dark"] .rmc-badge-needs-review { color: var(--bad); }
   .rmc button.rmc-scrim:hover { background: var(--scrim); border: none; box-shadow: none; transform: none; }
   .rmc-main { padding: var(--space-6) var(--space-4) 96px; }
   .rmc-main > div { max-width: none; }
-  .rmc-panel { padding: var(--space-5) var(--space-4); }
+  .rmc-panel { padding: var(--space-5); }
+  .rmc-locked-banner { padding: var(--space-5); margin-top: var(--space-5); }
+  .rmc-review-card { padding: var(--space-5); }
   .rmc-roadmap-row { flex-wrap: wrap; gap: 10px; }
   .rmc-roadmap-num { width: auto; min-width: 0; }
   .rmc-roadmap-title { overflow-wrap: break-word; word-break: break-word; }
@@ -894,7 +937,7 @@ html[data-theme="dark"] .rmc-badge-needs-review { color: var(--bad); }
 }
 
 @media (max-width: 640px) {
-  .rmc-page-title { margin-bottom: var(--space-4); }
+  .rmc-page-title { margin-bottom: var(--space-6); }
   .rmc-roadmap-chapter > .rmc-roadmap-row:first-child { padding: 14px 16px; }
   .rmc-roadmap-children .rmc-roadmap-row { padding: 12px; }
   .rmc-checkpoint-prompt { padding: 13px 14px; font-size: 12.5px; }
