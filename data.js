@@ -3,8 +3,7 @@
 const BOOK = 'book-html/';
 // NOTE: "Run" buttons inside RBE pages need network (play.rust-lang.org); reading works offline.
 const RBE = 'rbe-html/';
-// Local rustlings checkout (~/rustlings) — exercises are plain .rs files, readable offline.
-// NOTE: paths are relative to ~/rust/, so serve/open the app from there.
+// Vendored rustlings exercises (rustlings/exercises/) — plain .rs files, readable offline.
 // Exercise `name` equals the file stem; checkbox progress is keyed by it.
 const RL = 'rustlings/exercises/';
 
