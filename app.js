@@ -536,8 +536,6 @@
       </div>`;
     }
 
-    const rustlingsCore = concept.rustlings.filter((r) => r.tier === 'CORE');
-    const rustlingsOther = concept.rustlings.filter((r) => r.tier !== 'CORE');
     const practiceTasks = Array.isArray(concept.practice) ? concept.practice : [];
 
     return `<div>
@@ -566,11 +564,9 @@
         </div>`).join('')}
       </div>
 
-      <div class="rmc-panel">
+      ${concept.rbe.length === 0 ? '' : `<div class="rmc-panel">
         <h3>See — Rust by Example</h3>
-        ${concept.rbe.length === 0
-          ? `<div class="rmc-gap-note"><strong>GAP.</strong> ${esc(concept.rbeNote || 'No corresponding Rust by Example page exists for this concept.')}</div>`
-          : `${concept.rbe.map((r) => `<div class="rmc-resource-row">
+        ${concept.rbe.map((r) => `<div class="rmc-resource-row">
               <div class="rmc-check-row">
                 <input type="checkbox" class="rmc-checkbox" ${p.rbeSeen[r.url] ? 'checked' : ''} data-action="toggle-rbe" data-concept="${esc(concept.id)}" data-url="${esc(r.url)}">
                 <span class="rmc-resource-name">${esc(r.title)}</span>
@@ -579,18 +575,14 @@
                 ${TypeTag(r.type)}
                 <a class="rmc-btn rmc-btn-ghost" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" data-action="open-resource" data-concept="${esc(concept.id)}">Open RBE</a>
               </div>
-            </div>`).join('')}${concept.rbeNote ? `<div class="rmc-uncertain-note" style="margin-top:8px">${esc(concept.rbeNote)}</div>` : ''}`}
-      </div>
+            </div>`).join('')}
+      </div>`}
 
-      <div class="rmc-panel">
+      ${concept.rustlings.length === 0 && practiceTasks.length === 0 ? '' : `<div class="rmc-panel">
         <h3>Do — Rustlings practice</h3>
-        ${concept.rustlings.length === 0 && practiceTasks.length === 0
-          ? `<div class="rmc-gap-note"><strong>GAP.</strong> ${esc(concept.rustlingsNote || 'No corresponding Rustlings exercise exists for this concept.')}</div>`
-          : `${rustlingsCore.map((r) => resourceExerciseMarkup(concept, p, r)).join('')}
-            ${rustlingsOther.length > 0 ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12.5px;color:var(--text-2)">${rustlingsOther.length} additional reinforcement/optional exercise${rustlingsOther.length > 1 ? 's' : ''}</summary><div style="margin-top:6px">${rustlingsOther.map((r) => resourceExerciseMarkup(concept, p, r)).join('')}</div></details>` : ''}
+        ${concept.rustlings.map((r) => resourceExerciseMarkup(concept, p, r)).join('')}
             ${practiceTasks.map((t) => practiceTaskMarkup(concept, p, t)).join('')}
-            ${concept.rustlingsNote ? `<div class="rmc-uncertain-note" style="margin-top:8px">${esc(concept.rustlingsNote)}</div>` : ''}`}
-      </div>
+      </div>`}
 
       <div class="rmc-panel rmc-checkpoint-panel">
         <h3>Check — ${concept.checkpoint && concept.checkpoint.type === 'multiple_choice' ? 'Checkpoint' : 'Self-Assessed Verification'}</h3>
@@ -624,7 +616,6 @@
         <span class="rmc-resource-name mono">${esc(r.name)}</span>
       </div>
       <div class="rmc-resource-actions">
-        ${TypeTag(r.tier)}
         <a class="rmc-btn rmc-btn-ghost" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" data-action="open-resource" data-concept="${esc(concept.id)}">Open Rustlings</a>
       </div>
     </div>`;

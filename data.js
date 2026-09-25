@@ -21,10 +21,9 @@ const concepts = [
     prerequisites: [],
     objective: 'Get a working Rust toolchain and compile/run a minimal program from the command line.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'intro1', url: RL + '00_intro/intro1.rs', tier: 'CORE' },
-      { name: 'intro2', url: RL + '00_intro/intro2.rs', tier: 'CORE' },
+      { name: 'intro1', url: RL + '00_intro/intro1.rs' },
+      { name: 'intro2', url: RL + '00_intro/intro2.rs' },
     ],
     difficulty: 1, estMinutes: 20,
     checkpoint: {
@@ -46,9 +45,7 @@ const concepts = [
     prerequisites: ['installation-hello'],
     objective: 'Create, build, and run a project with Cargo instead of invoking rustc directly.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [],
-    rustlingsNote: 'No dedicated Rustlings exercise — every later exercise is itself run through `rustlings run`, which wraps Cargo, so this is practiced implicitly from here on.',
     difficulty: 1, estMinutes: 15,
     checkpoint: {
       type: 'multiple_choice',
@@ -67,9 +64,7 @@ const concepts = [
     prerequisites: ['cargo-basics'],
     objective: 'Follow a guided, complete program that previews variables, I/O, external crates, match, and Result before any of them are taught in depth.',
     rbe: [],
-    rbeNote: 'GAP — this chapter is a guided walkthrough rather than a single concept, so no single RBE page corresponds to it 1:1. Its pieces (I/O, match, Result, crates) are covered later, each at its own TRPL point.',
     rustlings: [],
-    rustlingsNote: 'GAP — Rustlings has no equivalent "build one small game" exercise here; it starts drilling the individual concepts (01_variables) immediately afterward instead.',
     difficulty: 2, estMinutes: 30,
     checkpoint: {
       type: 'multiple_choice',
@@ -95,14 +90,13 @@ const concepts = [
     prerequisites: ['guessing-game'],
     objective: 'Understand why Rust bindings are immutable by default, when to use `mut`, and how shadowing differs from mutation.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'variables1', url: RL + '01_variables/variables1.rs', tier: 'CORE' },
-      { name: 'variables2', url: RL + '01_variables/variables2.rs', tier: 'CORE' },
-      { name: 'variables3', url: RL + '01_variables/variables3.rs', tier: 'CORE' },
-      { name: 'variables4', url: RL + '01_variables/variables4.rs', tier: 'CORE' },
-      { name: 'variables5', url: RL + '01_variables/variables5.rs', tier: 'REINFORCEMENT' },
-      { name: 'variables6', url: RL + '01_variables/variables6.rs', tier: 'OPTIONAL' },
+      { name: 'variables1', url: RL + '01_variables/variables1.rs' },
+      { name: 'variables2', url: RL + '01_variables/variables2.rs' },
+      { name: 'variables3', url: RL + '01_variables/variables3.rs' },
+      { name: 'variables4', url: RL + '01_variables/variables4.rs' },
+      { name: 'variables5', url: RL + '01_variables/variables5.rs' },
+      { name: 'variables6', url: RL + '01_variables/variables6.rs' },
     ],
     difficulty: 1, estMinutes: 30,
     checkpoint: {
@@ -118,13 +112,12 @@ const concepts = [
     prerequisites: ['variables-mutability'],
     objective: 'Know Rust’s scalar types and the difference between the two compound types: tuples (fixed, mixed types) and arrays (fixed, same type).',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'primitive_types1', url: RL + '04_primitive_types/primitive_types1.rs', tier: 'CORE' },
-      { name: 'primitive_types2', url: RL + '04_primitive_types/primitive_types2.rs', tier: 'CORE' },
-      { name: 'primitive_types3', url: RL + '04_primitive_types/primitive_types3.rs', tier: 'CORE' },
-      { name: 'primitive_types5', url: RL + '04_primitive_types/primitive_types5.rs', tier: 'CORE' },
-      { name: 'primitive_types6', url: RL + '04_primitive_types/primitive_types6.rs', tier: 'REINFORCEMENT' },
+      { name: 'primitive_types1', url: RL + '04_primitive_types/primitive_types1.rs' },
+      { name: 'primitive_types2', url: RL + '04_primitive_types/primitive_types2.rs' },
+      { name: 'primitive_types3', url: RL + '04_primitive_types/primitive_types3.rs' },
+      { name: 'primitive_types5', url: RL + '04_primitive_types/primitive_types5.rs' },
+      { name: 'primitive_types6', url: RL + '04_primitive_types/primitive_types6.rs' },
     ],
     difficulty: 2, estMinutes: 35,
     checkpoint: {
@@ -146,13 +139,12 @@ const concepts = [
     prerequisites: ['data-types'],
     objective: 'Write functions with typed parameters and understand why a trailing `;` turns an expression into a unit-returning statement.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'functions1', url: RL + '02_functions/functions1.rs', tier: 'CORE' },
-      { name: 'functions2', url: RL + '02_functions/functions2.rs', tier: 'CORE' },
-      { name: 'functions3', url: RL + '02_functions/functions3.rs', tier: 'CORE' },
-      { name: 'functions4', url: RL + '02_functions/functions4.rs', tier: 'CORE' },
-      { name: 'functions5', url: RL + '02_functions/functions5.rs', tier: 'CORE' },
+      { name: 'functions1', url: RL + '02_functions/functions1.rs' },
+      { name: 'functions2', url: RL + '02_functions/functions2.rs' },
+      { name: 'functions3', url: RL + '02_functions/functions3.rs' },
+      { name: 'functions4', url: RL + '02_functions/functions4.rs' },
+      { name: 'functions5', url: RL + '02_functions/functions5.rs' },
     ],
     difficulty: 2, estMinutes: 30,
     checkpoint: {
@@ -171,12 +163,11 @@ const concepts = [
     prerequisites: ['functions'],
     objective: 'Use if as an expression (both branches must agree in type), and choose the right loop construct.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'if1', url: RL + '03_if/if1.rs', tier: 'CORE' },
-      { name: 'if2', url: RL + '03_if/if2.rs', tier: 'CORE' },
-      { name: 'if3', url: RL + '03_if/if3.rs', tier: 'CORE' },
-      { name: 'quiz1', url: RL + 'quizzes/quiz1.rs', tier: 'REINFORCEMENT' },
+      { name: 'if1', url: RL + '03_if/if1.rs' },
+      { name: 'if2', url: RL + '03_if/if2.rs' },
+      { name: 'if3', url: RL + '03_if/if3.rs' },
+      { name: 'quiz1', url: RL + 'quizzes/quiz1.rs' },
     ],
     difficulty: 2, estMinutes: 30,
     checkpoint: {
@@ -203,12 +194,11 @@ const concepts = [
     prerequisites: ['control-flow'],
     objective: 'Internalize the three ownership rules and predict when a value is moved vs. copied vs. cloned.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'move_semantics1', url: RL + '06_move_semantics/move_semantics1.rs', tier: 'CORE' },
-      { name: 'move_semantics2', url: RL + '06_move_semantics/move_semantics2.rs', tier: 'CORE' },
-      { name: 'move_semantics3', url: RL + '06_move_semantics/move_semantics3.rs', tier: 'CORE' },
-      { name: 'move_semantics4', url: RL + '06_move_semantics/move_semantics4.rs', tier: 'CORE' },
+      { name: 'move_semantics1', url: RL + '06_move_semantics/move_semantics1.rs' },
+      { name: 'move_semantics2', url: RL + '06_move_semantics/move_semantics2.rs' },
+      { name: 'move_semantics3', url: RL + '06_move_semantics/move_semantics3.rs' },
+      { name: 'move_semantics4', url: RL + '06_move_semantics/move_semantics4.rs' },
     ],
     difficulty: 3, estMinutes: 40,
     checkpoint: {
@@ -224,9 +214,8 @@ const concepts = [
     prerequisites: ['ownership'],
     objective: 'Use `&` and `&mut` to borrow values without taking ownership, and understand the aliasing rule (many immutable OR one mutable, never both).',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'move_semantics5', url: RL + '06_move_semantics/move_semantics5.rs', tier: 'CORE' },
+      { name: 'move_semantics5', url: RL + '06_move_semantics/move_semantics5.rs' },
     ],
     difficulty: 3, estMinutes: 35,
     checkpoint: {
@@ -248,8 +237,7 @@ const concepts = [
     prerequisites: ['borrowing'],
     objective: 'Use `&str` and `&[T]` slices to reference a contiguous portion of a collection without owning it.',
     rbe: [],
-    rbeNote: 'PARTIAL — RBE has no page dedicated purely to the slice type; array/slice indexing appears only briefly inside the Primitives chapter.',
-    rustlings: [{ name: 'primitive_types4', url: RL + '04_primitive_types/primitive_types4.rs', tier: 'CORE' }],
+    rustlings: [{ name: 'primitive_types4', url: RL + '04_primitive_types/primitive_types4.rs' }],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
       type: 'predict_output',
@@ -270,10 +258,9 @@ const concepts = [
     prerequisites: ['ownership', 'data-types'],
     objective: 'Define and instantiate all three struct kinds, and use field-init shorthand / struct update syntax.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'structs1', url: RL + '07_structs/structs1.rs', tier: 'CORE' },
-      { name: 'structs2', url: RL + '07_structs/structs2.rs', tier: 'CORE' },
+      { name: 'structs1', url: RL + '07_structs/structs1.rs' },
+      { name: 'structs2', url: RL + '07_structs/structs2.rs' },
     ],
     difficulty: 2, estMinutes: 30,
     checkpoint: {
@@ -295,8 +282,7 @@ const concepts = [
     prerequisites: ['structs'],
     objective: 'Attach behavior to a struct with `impl`, distinguishing methods (take self) from associated functions (like `String::new`).',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'structs3', url: RL + '07_structs/structs3.rs', tier: 'CORE' }],
+    rustlings: [{ name: 'structs3', url: RL + '07_structs/structs3.rs' }],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
       type: 'multiple_choice',
@@ -322,10 +308,9 @@ const concepts = [
     prerequisites: ['structs'],
     objective: 'Define enum variants carrying different payload shapes, and understand why Option<T> replaces null.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'enums1', url: RL + '08_enums/enums1.rs', tier: 'CORE' },
-      { name: 'enums2', url: RL + '08_enums/enums2.rs', tier: 'CORE' },
+      { name: 'enums1', url: RL + '08_enums/enums1.rs' },
+      { name: 'enums2', url: RL + '08_enums/enums2.rs' },
     ],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
@@ -350,10 +335,9 @@ const concepts = [
     prerequisites: ['enums'],
     objective: 'Understand how Rust replaces null pointers with the Option<T> enum (Some(T) and None). Learn to safely unwrap or provide a default fallback with .unwrap_or() without causing panics.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'options1', url: RL + '12_options/options1.rs', tier: 'CORE' },
-      { name: 'options2', url: RL + '12_options/options2.rs', tier: 'CORE' },
+      { name: 'options1', url: RL + '12_options/options1.rs' },
+      { name: 'options2', url: RL + '12_options/options2.rs' },
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
@@ -369,8 +353,7 @@ const concepts = [
     prerequisites: ['enums'],
     objective: 'Use `match` to destructure enum variants exhaustively, including the `_` catch-all pattern.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs', tier: 'CORE' }],
+    rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs' }],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
       type: 'explain',
@@ -385,8 +368,7 @@ const concepts = [
     prerequisites: ['match'],
     objective: 'Use `if let` as sugar for a match that only cares about one pattern.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'options2', url: RL + '12_options/options2.rs', tier: 'REINFORCEMENT' }],
+    rustlings: [{ name: 'options2', url: RL + '12_options/options2.rs' }],
     difficulty: 2, estMinutes: 20,
     checkpoint: {
       type: 'multiple_choice',
@@ -412,9 +394,7 @@ const concepts = [
     prerequisites: ['functions'],
     objective: 'Distinguish a package (Cargo.toml + crates) from a crate (compilation unit, binary or library).',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [],
-    rustlingsNote: 'GAP — purely conceptual/organizational; Rustlings has no exercise that tests package-vs-crate vocabulary directly.',
     difficulty: 2, estMinutes: 15,
     checkpoint: {
       type: 'multiple_choice',
@@ -438,8 +418,7 @@ const concepts = [
     prerequisites: ['packages-crates'],
     objective: 'Organize code with `mod`, and understand that everything is private by default until marked `pub`.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'modules1', url: RL + '10_modules/modules1.rs', tier: 'CORE' }],
+    rustlings: [{ name: 'modules1', url: RL + '10_modules/modules1.rs' }],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
       type: 'multiple_choice',
@@ -462,10 +441,9 @@ const concepts = [
     prerequisites: ['modules-privacy'],
     objective: 'Import items with `use`, re-export them with `pub use`, and split a growing module tree into separate files.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'modules2', url: RL + '10_modules/modules2.rs', tier: 'CORE' },
-      { name: 'modules3', url: RL + '10_modules/modules3.rs', tier: 'CORE' },
+      { name: 'modules2', url: RL + '10_modules/modules2.rs' },
+      { name: 'modules3', url: RL + '10_modules/modules3.rs' },
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
@@ -492,10 +470,9 @@ const concepts = [
     prerequisites: ['slices'],
     objective: 'Use Vec<T> as Rust’s primary growable, heap-allocated list type, safely.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'vecs1', url: RL + '05_vecs/vecs1.rs', tier: 'CORE' },
-      { name: 'vecs2', url: RL + '05_vecs/vecs2.rs', tier: 'CORE' },
+      { name: 'vecs1', url: RL + '05_vecs/vecs1.rs' },
+      { name: 'vecs2', url: RL + '05_vecs/vecs2.rs' },
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
@@ -513,12 +490,11 @@ const concepts = [
     prerequisites: ['vectors'],
     objective: 'Understand String is a growable UTF-8 buffer, why byte-indexing a String directly is disallowed, and how to slice/iterate it safely.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'strings1', url: RL + '09_strings/strings1.rs', tier: 'CORE' },
-      { name: 'strings2', url: RL + '09_strings/strings2.rs', tier: 'CORE' },
-      { name: 'strings3', url: RL + '09_strings/strings3.rs', tier: 'CORE' },
-      { name: 'strings4', url: RL + '09_strings/strings4.rs', tier: 'REINFORCEMENT' },
+      { name: 'strings1', url: RL + '09_strings/strings1.rs' },
+      { name: 'strings2', url: RL + '09_strings/strings2.rs' },
+      { name: 'strings3', url: RL + '09_strings/strings3.rs' },
+      { name: 'strings4', url: RL + '09_strings/strings4.rs' },
     ],
     difficulty: 3, estMinutes: 35,
     checkpoint: {
@@ -534,12 +510,11 @@ const concepts = [
     prerequisites: ['vectors'],
     objective: 'Use HashMap for key-value storage and the `entry().or_insert()` pattern for conditional insertion/update.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'hashmaps1', url: RL + '11_hashmaps/hashmaps1.rs', tier: 'CORE' },
-      { name: 'hashmaps2', url: RL + '11_hashmaps/hashmaps2.rs', tier: 'CORE' },
-      { name: 'hashmaps3', url: RL + '11_hashmaps/hashmaps3.rs', tier: 'CORE' },
-      { name: 'quiz2', url: RL + 'quizzes/quiz2.rs', tier: 'REINFORCEMENT' },
+      { name: 'hashmaps1', url: RL + '11_hashmaps/hashmaps1.rs' },
+      { name: 'hashmaps2', url: RL + '11_hashmaps/hashmaps2.rs' },
+      { name: 'hashmaps3', url: RL + '11_hashmaps/hashmaps3.rs' },
+      { name: 'quiz2', url: RL + 'quizzes/quiz2.rs' },
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
@@ -560,9 +535,7 @@ const concepts = [
     prerequisites: ['control-flow'],
     objective: 'Know when panic! is appropriate (unrecoverable bugs/invariant violations) versus when Result is appropriate (expected failure).',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [],
-    rustlingsNote: 'No dedicated Rustlings exercise — `panic!` is drilled implicitly via `#[should_panic]` tests in the testing exercises.',
     difficulty: 2, estMinutes: 20,
     checkpoint: {
       type: 'multiple_choice',
@@ -592,12 +565,12 @@ const concepts = [
       { title: 'Iterating over `Result`s', url: RBE + 'error/iter_result.html', type: 'REINFORCEMENT' },
     ],
     rustlings: [
-      { name: 'errors1', url: RL + '13_error_handling/errors1.rs', tier: 'CORE' },
-      { name: 'errors2', url: RL + '13_error_handling/errors2.rs', tier: 'CORE' },
-      { name: 'errors3', url: RL + '13_error_handling/errors3.rs', tier: 'CORE' },
-      { name: 'errors4', url: RL + '13_error_handling/errors4.rs', tier: 'CORE' },
-      { name: 'errors5', url: RL + '13_error_handling/errors5.rs', tier: 'REINFORCEMENT' },
-      { name: 'errors6', url: RL + '13_error_handling/errors6.rs', tier: 'OPTIONAL' },
+      { name: 'errors1', url: RL + '13_error_handling/errors1.rs' },
+      { name: 'errors2', url: RL + '13_error_handling/errors2.rs' },
+      { name: 'errors3', url: RL + '13_error_handling/errors3.rs' },
+      { name: 'errors4', url: RL + '13_error_handling/errors4.rs' },
+      { name: 'errors5', url: RL + '13_error_handling/errors5.rs' },
+      { name: 'errors6', url: RL + '13_error_handling/errors6.rs' },
     ],
     difficulty: 3, estMinutes: 40,
     checkpoint: {
@@ -618,10 +591,9 @@ const concepts = [
     prerequisites: ['structs', 'enums'],
     objective: 'Write code that is generic over a type parameter `<T>` instead of duplicating it per concrete type.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'generics1', url: RL + '14_generics/generics1.rs', tier: 'CORE' },
-      { name: 'generics2', url: RL + '14_generics/generics2.rs', tier: 'CORE' },
+      { name: 'generics1', url: RL + '14_generics/generics1.rs' },
+      { name: 'generics2', url: RL + '14_generics/generics2.rs' },
     ],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
@@ -643,13 +615,12 @@ const concepts = [
     prerequisites: ['generics'],
     objective: 'Define a trait as shared behavior, implement it for multiple types, and use trait bounds to constrain generics.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'traits1', url: RL + '15_traits/traits1.rs', tier: 'CORE' },
-      { name: 'traits2', url: RL + '15_traits/traits2.rs', tier: 'CORE' },
-      { name: 'traits3', url: RL + '15_traits/traits3.rs', tier: 'CORE' },
-      { name: 'traits4', url: RL + '15_traits/traits4.rs', tier: 'CORE' },
-      { name: 'traits5', url: RL + '15_traits/traits5.rs', tier: 'REINFORCEMENT' },
+      { name: 'traits1', url: RL + '15_traits/traits1.rs' },
+      { name: 'traits2', url: RL + '15_traits/traits2.rs' },
+      { name: 'traits3', url: RL + '15_traits/traits3.rs' },
+      { name: 'traits4', url: RL + '15_traits/traits4.rs' },
+      { name: 'traits5', url: RL + '15_traits/traits5.rs' },
     ],
     difficulty: 3, estMinutes: 40,
     checkpoint: {
@@ -671,11 +642,10 @@ const concepts = [
     prerequisites: ['borrowing', 'traits'],
     objective: 'Understand what lifetime annotations actually promise the compiler (a relationship between input/output reference lifetimes).',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'lifetimes1', url: RL + '16_lifetimes/lifetimes1.rs', tier: 'CORE' },
-      { name: 'lifetimes2', url: RL + '16_lifetimes/lifetimes2.rs', tier: 'CORE' },
-      { name: 'lifetimes3', url: RL + '16_lifetimes/lifetimes3.rs', tier: 'CORE' },
+      { name: 'lifetimes1', url: RL + '16_lifetimes/lifetimes1.rs' },
+      { name: 'lifetimes2', url: RL + '16_lifetimes/lifetimes2.rs' },
+      { name: 'lifetimes3', url: RL + '16_lifetimes/lifetimes3.rs' },
     ],
     difficulty: 4, estMinutes: 45,
     checkpoint: {
@@ -700,9 +670,9 @@ const concepts = [
       { title: 'Development dependencies', url: RBE + 'testing/dev_dependencies.html', type: 'REINFORCEMENT' },
     ],
     rustlings: [
-      { name: 'tests1', url: RL + '17_tests/tests1.rs', tier: 'CORE' },
-      { name: 'tests2', url: RL + '17_tests/tests2.rs', tier: 'CORE' },
-      { name: 'tests3', url: RL + '17_tests/tests3.rs', tier: 'CORE' },
+      { name: 'tests1', url: RL + '17_tests/tests1.rs' },
+      { name: 'tests2', url: RL + '17_tests/tests2.rs' },
+      { name: 'tests3', url: RL + '17_tests/tests3.rs' },
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
@@ -720,9 +690,7 @@ const concepts = [
     prerequisites: ['writing-tests'],
     objective: 'Know where integration tests live (tests/ directory) versus unit tests (inline, #[cfg(test)] modules).',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [],
-    rustlingsNote: 'GAP — no Rustlings exercise for the tests/ layout; practice by adding a tests/ directory with an integration test to your own minigrep crate.',
     difficulty: 2, estMinutes: 15,
     checkpoint: {
       type: 'multiple_choice',
@@ -765,7 +733,6 @@ const concepts = [
       { title: 'Wait', url: RBE + 'std_misc/process/wait.html', type: 'REINFORCEMENT' },
     ],
     rustlings: [],
-    rustlingsNote: 'No separate drills by design — building minigrep itself is the practice for this block.',
     difficulty: 3, estMinutes: 60,
     checkpoint: {
       type: 'explain',
@@ -785,9 +752,7 @@ const concepts = [
     prerequisites: ['functions', 'ownership'],
     objective: 'Write closures that capture their environment, and understand the Fn/FnMut/FnOnce trait hierarchy.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [],
-    rustlingsNote: 'GAP — Rustlings’ numbered curriculum has no dedicated closures topic; they are drilled indirectly inside iterators and threads.',
     practice: [
       { id: 'sort-by-key', text: 'Sort vec![3, 1, 2] with sort_by_key and a closure, then rewrite the key as a named fn — note what changes at the call site.' },
       { id: 'move-to-thread', text: 'Capture s: String by reference in a closure, pass it to thread::spawn, read the compiler error, then fix it with move.' },
@@ -811,14 +776,13 @@ const concepts = [
     prerequisites: ['closures', 'generics', 'vectors'],
     objective: 'Chain iterator adaptors lazily and understand that nothing runs until a consuming method is called.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'iterators1', url: RL + '18_iterators/iterators1.rs', tier: 'CORE' },
-      { name: 'iterators2', url: RL + '18_iterators/iterators2.rs', tier: 'CORE' },
-      { name: 'iterators3', url: RL + '18_iterators/iterators3.rs', tier: 'CORE' },
-      { name: 'iterators4', url: RL + '18_iterators/iterators4.rs', tier: 'CORE' },
-      { name: 'iterators5', url: RL + '18_iterators/iterators5.rs', tier: 'REINFORCEMENT' },
-      { name: 'quiz3', url: RL + 'quizzes/quiz3.rs', tier: 'REINFORCEMENT' },
+      { name: 'iterators1', url: RL + '18_iterators/iterators1.rs' },
+      { name: 'iterators2', url: RL + '18_iterators/iterators2.rs' },
+      { name: 'iterators3', url: RL + '18_iterators/iterators3.rs' },
+      { name: 'iterators4', url: RL + '18_iterators/iterators4.rs' },
+      { name: 'iterators5', url: RL + '18_iterators/iterators5.rs' },
+      { name: 'quiz3', url: RL + 'quizzes/quiz3.rs' },
     ],
     difficulty: 3, estMinutes: 40,
     checkpoint: {
@@ -848,9 +812,7 @@ const concepts = [
     prerequisites: ['packages-crates'],
     objective: 'Know how to tune build profiles, document and publish a crate, and structure a multi-crate workspace.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [],
-    rustlingsNote: 'GAP — tooling concepts are not drilled by Rustlings; practice by running `cargo build --release` on your minigrep and comparing binary size and speed.',
     difficulty: 2, estMinutes: 40,
     checkpoint: {
       type: 'multiple_choice',
@@ -875,8 +837,7 @@ const concepts = [
     prerequisites: ['ownership'],
     objective: 'Use Box<T> to store data on the heap, most commonly to give a recursive type a known, finite size.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'box1', url: RL + '19_smart_pointers/box1.rs', tier: 'CORE' }],
+    rustlings: [{ name: 'box1', url: RL + '19_smart_pointers/box1.rs' }],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
       type: 'explain',
@@ -894,9 +855,7 @@ const concepts = [
     prerequisites: ['box', 'traits'],
     objective: 'Understand how implementing Deref lets a custom type act like a reference, and how Drop runs cleanup code automatically at end of scope.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [],
-    rustlingsNote: 'GAP — no Rustlings exercise for Deref/Drop; DIY: implement Deref for a tuple struct holding a Vec, and add println! to a Drop impl to observe cleanup order.',
     difficulty: 3, estMinutes: 25,
     checkpoint: {
       type: 'multiple_choice',
@@ -917,10 +876,9 @@ const concepts = [
     prerequisites: ['box'],
     objective: 'Use Rc<T> to allow multiple owners of the same heap data (single-threaded only).',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'rc1', url: RL + '19_smart_pointers/rc1.rs', tier: 'CORE' },
-      { name: 'arc1', url: RL + '19_smart_pointers/arc1.rs', tier: 'CORE' },
+      { name: 'rc1', url: RL + '19_smart_pointers/rc1.rs' },
+      { name: 'arc1', url: RL + '19_smart_pointers/arc1.rs' },
     ],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
@@ -944,9 +902,7 @@ const concepts = [
     prerequisites: ['rc'],
     objective: 'Understand how RefCell moves borrow-checking to runtime, and how Weak<T> avoids memory leaks from reference cycles.',
     rbe: [],
-    rbeNote: 'GAP — RBE has no dedicated page covering RefCell or interior mutability.',
     rustlings: [],
-    rustlingsNote: 'GAP — neither this checkout nor upstream rustlings has a RefCell/interior-mutability exercise (upstream smart_pointers4 covers Cow instead). Practice by converting the book’s Rc<List> example to Rc<RefCell<List>> yourself.',
     difficulty: 4, estMinutes: 35,
     checkpoint: {
       type: 'explain',
@@ -966,10 +922,9 @@ const concepts = [
     prerequisites: ['closures'],
     objective: 'Spawn OS threads with thread::spawn and join them, understanding why closures usually need `move`.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [
-      { name: 'threads1', url: RL + '20_threads/threads1.rs', tier: 'CORE' },
-      { name: 'threads2', url: RL + '20_threads/threads2.rs', tier: 'CORE' },
+      { name: 'threads1', url: RL + '20_threads/threads1.rs' },
+      { name: 'threads2', url: RL + '20_threads/threads2.rs' },
     ],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
@@ -990,8 +945,7 @@ const concepts = [
     prerequisites: ['threads'],
     objective: 'Communicate between threads via an mpsc channel instead of shared memory.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'threads3', url: RL + '20_threads/threads3.rs', tier: 'CORE' }],
+    rustlings: [{ name: 'threads3', url: RL + '20_threads/threads3.rs' }],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
       type: 'multiple_choice',
@@ -1015,8 +969,7 @@ const concepts = [
     prerequisites: ['threads', 'rc'],
     objective: 'Share mutable state safely across threads with Arc<Mutex<T>>, and know what Send and Sync signify.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'threads2', url: RL + '20_threads/threads2.rs', tier: 'REINFORCEMENT' }],
+    rustlings: [{ name: 'threads2', url: RL + '20_threads/threads2.rs' }],
     difficulty: 4, estMinutes: 35,
     checkpoint: {
       type: 'find_bug',
@@ -1036,11 +989,9 @@ const concepts = [
     prerequisites: ['closures', 'traits'],
     objective: 'Understand that `async fn` returns a lazy Future that performs no work until polled.',
     rbe: [],
-    rbeNote: 'GAP — RBE has no chapter covering async/await or Futures.',
     rustlings: [
-      { name: 'async1', url: RL + '24_async/async1.rs', tier: 'CORE' },
+      { name: 'async1', url: RL + '24_async/async1.rs' },
     ],
-    rustlingsNote: 'Vendored from upstream — this checkout predates async exercises. Reading works locally; running needs tokio (a newer rustlings with async support).',
     difficulty: 4, estMinutes: 35,
     checkpoint: {
       type: 'predict_output',
@@ -1062,7 +1013,6 @@ const concepts = [
     objective: 'Run multiple futures concurrently and process asynchronous streams.',
     rbe: [],
     rustlings: [],
-    rustlingsNote: 'GAP — combining futures needs an executor/tokio setup outside this checkout; practice by re-reading 17.2–17.4 and diagramming join vs spawn for your own tasks.',
     difficulty: 4, estMinutes: 40,
     checkpoint: {
       type: 'multiple_choice',
@@ -1088,7 +1038,6 @@ const concepts = [
     objective: 'Understand how Rust expresses polymorphism and encapsulation without inheritance.',
     rbe: [],
     rustlings: [],
-    rustlingsNote: 'GAP — design-level material, not drills; practice by refactoring one of your structs to hide fields behind validating pub methods.',
     difficulty: 2, estMinutes: 15,
     checkpoint: {
       type: 'multiple_choice',
@@ -1111,9 +1060,7 @@ const concepts = [
     prerequisites: ['traits', 'generics'],
     objective: 'Use Box<dyn Trait> for runtime dynamic dispatch over heterogeneous types.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [],
-    rustlingsNote: 'GAP — no Rustlings exercise for trait objects; use the DIY tasks below (heterogeneous Vec, object-safety) instead.',
     practice: [
       { id: 'hetero-vec', text: 'Define trait Draw with fn draw(&self), implement it for two structs, store both in a Vec<Box<dyn Draw>> and render in a loop.' },
       { id: 'object-safety', text: 'Add fn name(&self) -> Self to the trait, read the object-safety error on dyn Draw, then fix it (e.g. return String).' },
@@ -1137,8 +1084,7 @@ const concepts = [
     prerequisites: ['match'],
     objective: 'Recognize pattern matching across diverse Rust syntactic constructs, including let-else as the diverging alternative to if let for early returns.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs', tier: 'REINFORCEMENT' }],
+    rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs' }],
     difficulty: 2, estMinutes: 20,
     checkpoint: {
       type: 'multiple_choice',
@@ -1161,8 +1107,7 @@ const concepts = [
     prerequisites: ['patterns-everywhere'],
     objective: 'Use match guards, range patterns, and the `@` binding operator.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'options3', url: RL + '12_options/options3.rs', tier: 'REINFORCEMENT' }],
+    rustlings: [{ name: 'options3', url: RL + '12_options/options3.rs' }],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
       type: 'find_bug',
@@ -1185,7 +1130,6 @@ const concepts = [
       { title: 'Foreign Function Interface', url: RBE + 'std_misc/ffi.html', type: 'REINFORCEMENT' },
     ],
     rustlings: [],
-    rustlingsNote: 'GAP — unsafe cannot be drilled safely here; re-do the checkpoint above and work through the book’s raw-pointer listings instead.',
     difficulty: 4, estMinutes: 30,
     checkpoint: {
       type: 'find_bug',
@@ -1204,8 +1148,7 @@ const concepts = [
     prerequisites: ['traits', 'generics'],
     objective: 'Recognize associated types, supertraits, and the newtype pattern for foreign trait impls.',
     rbe: [],
-    rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
-    rustlings: [{ name: 'traits5', url: RL + '15_traits/traits5.rs', tier: 'REINFORCEMENT' }],
+    rustlings: [{ name: 'traits5', url: RL + '15_traits/traits5.rs' }],
     difficulty: 4, estMinutes: 35,
     checkpoint: {
       type: 'explain',
@@ -1228,10 +1171,10 @@ const concepts = [
       { title: 'Domain Specific Languages (DSLs)', url: RBE + 'macros/dsl.html', type: 'REINFORCEMENT' },
       { title: 'Variadic Interfaces', url: RBE + 'macros/variadics.html', type: 'REINFORCEMENT' },
     ],
-    rustlings: [{ name: 'macros1', url: RL + '21_macros/macros1.rs', tier: 'CORE' },
-      { name: 'macros2', url: RL + '21_macros/macros2.rs', tier: 'CORE' },
-      { name: 'macros3', url: RL + '21_macros/macros3.rs', tier: 'CORE' },
-      { name: 'macros4', url: RL + '21_macros/macros4.rs', tier: 'CORE' },
+    rustlings: [{ name: 'macros1', url: RL + '21_macros/macros1.rs' },
+      { name: 'macros2', url: RL + '21_macros/macros2.rs' },
+      { name: 'macros3', url: RL + '21_macros/macros3.rs' },
+      { name: 'macros4', url: RL + '21_macros/macros4.rs' },
     ],
     difficulty: 4, estMinutes: 30,
     checkpoint: {
@@ -1260,7 +1203,6 @@ const concepts = [
     objective: 'Synthesize ownership, traits, closures, threads, and channels into a thread-pooled TCP server.',
     rbe: [],
     rustlings: [],
-    rustlingsNote: 'No separate drills by design — the working server itself is the practice for this block.',
     difficulty: 4, estMinutes: 120,
     checkpoint: {
       type: 'explain',
@@ -1278,9 +1220,9 @@ const concepts = [
     objective: 'Use cargo clippy to identify and fix non-idiomatic patterns.',
     rbe: [],
     rustlings: [
-      { name: 'clippy1', url: RL + '22_clippy/clippy1.rs', tier: 'CORE' },
-      { name: 'clippy2', url: RL + '22_clippy/clippy2.rs', tier: 'CORE' },
-      { name: 'clippy3', url: RL + '22_clippy/clippy3.rs', tier: 'REINFORCEMENT' },
+      { name: 'clippy1', url: RL + '22_clippy/clippy1.rs' },
+      { name: 'clippy2', url: RL + '22_clippy/clippy2.rs' },
+      { name: 'clippy3', url: RL + '22_clippy/clippy3.rs' },
     ],
     difficulty: 2, estMinutes: 20,
     checkpoint: {
@@ -1307,11 +1249,11 @@ const concepts = [
       { title: 'To and from Strings', url: RBE + 'conversion/string.html', type: 'REINFORCEMENT' },
     ],
     rustlings: [
-      { name: 'using_as', url: RL + '23_conversions/using_as.rs', tier: 'CORE' },
-      { name: 'from_into', url: RL + '23_conversions/from_into.rs', tier: 'CORE' },
-      { name: 'from_str', url: RL + '23_conversions/from_str.rs', tier: 'CORE' },
-      { name: 'try_from_into', url: RL + '23_conversions/try_from_into.rs', tier: 'CORE' },
-      { name: 'as_ref_mut', url: RL + '23_conversions/as_ref_mut.rs', tier: 'REINFORCEMENT' },
+      { name: 'using_as', url: RL + '23_conversions/using_as.rs' },
+      { name: 'from_into', url: RL + '23_conversions/from_into.rs' },
+      { name: 'from_str', url: RL + '23_conversions/from_str.rs' },
+      { name: 'try_from_into', url: RL + '23_conversions/try_from_into.rs' },
+      { name: 'as_ref_mut', url: RL + '23_conversions/as_ref_mut.rs' },
     ],
     difficulty: 3, estMinutes: 35,
     checkpoint: {
@@ -1340,7 +1282,6 @@ const concepts = [
     objective: 'Know where to look up the keyword list, operator precedence table, edition differences, and what Nightly Rust is.',
     rbe: [],
     rustlings: [],
-    rustlingsNote: 'No exercises by design — these pages are lookup references (keywords, operators, editions), not skills to drill.',
     difficulty: 1, estMinutes: 25,
     checkpoint: {
       type: 'multiple_choice',
@@ -1368,7 +1309,6 @@ const concepts = [
       { title: 'Custom cfg', url: RBE + 'attribute/cfg/custom.html', type: 'REINFORCEMENT' },
     ],
     rustlings: [],
-    rustlingsNote: 'No rustlings drills cover attributes — verify by compiling the RBE examples above in a scratch crate.',
     difficulty: 2, estMinutes: 20,
     checkpoint: {
       type: 'multiple_choice',
