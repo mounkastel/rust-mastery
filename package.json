@@ -1,0 +1,13 @@
+{
+  "name": "rust-mastery",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rust Mastery — one sequence across TRPL, Rust by Example, and Rustlings: read, see, do, recall, advance.",
+  "scripts": {
+    "serve": "python3 -m http.server 8080",
+    "fix-links": "python3 tools/fix-book-links.py book-html rbe-html",
+    "analyze-rbe": "python3 tools/analyze-rbe.py"
+  },
+  "keywords": ["rust", "trpl", "rustlings", "learning"],
+  "license": "MIT"
+}

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Python tooling
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Upstream sources (never vendored — only their built outputs are committed):
+# - TRPL source checkout (rust-lang/book)
+# - Rust by Example source checkout (rust-lang/rust-by-example)
+# - rustlings source checkout (rust-lang/rustlings)
+book/
+rust-by-example/
+rustlings-src/
+
+# mdbook build droppings
+*.tmp
