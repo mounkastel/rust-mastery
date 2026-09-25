@@ -123,6 +123,7 @@ html[data-theme="dark"] {
 
 /* ---------- 2. Page frame ---------- */
 html, body { overflow-x: clip; }
+html { background: var(--page-bg); }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;

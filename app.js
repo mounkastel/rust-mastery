@@ -819,6 +819,13 @@
       saveState();
     }
     render();
+    scrollTop();
+  }
+
+  function scrollTop() {
+    if (typeof window.scrollTo === 'function') {
+      try { window.scrollTo(0, 0); } catch (_) {}
+    }
   }
 
   // ---------- Global event delegation (attached once, survives re-renders) ----------
@@ -852,6 +859,7 @@
       if (ui.view !== 'block') ui.selectedConceptId = null;
       ui.menuOpen = false;
       render();
+      scrollTop();
     }
 
     if (action === 'toggle-sidebar-module') {
