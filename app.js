@@ -9,6 +9,13 @@
   const REVIEW_FIRST_INTERVAL_DAYS = REVIEW_INTERVALS_DAYS[0]; // 1 day — must be a ladder rung, not an off-ladder seed
   const root = document.getElementById('app');
 
+  // Hardening: data.js must define concepts/modules/courseMeta. If it failed
+  // to load, render a fallback instead of throwing on undefined globals.
+  function hasCourseData() {
+    return typeof concepts !== 'undefined' && Array.isArray(concepts)
+      && typeof modules !== 'undefined' && Array.isArray(modules) && modules.length > 0;
+  }
+
   // ---------- Theme (single path: stored choice, else OS preference) ----------
   function getTheme() {
     const stored = storageGet(THEME_KEY);
@@ -46,11 +53,12 @@
     applyTheme(getTheme());
   }
 
+  const __firstModule = (typeof modules !== 'undefined' && Array.isArray(modules) && modules[0]) ? String(modules[0].key) : null;
   const ui = {
     view: 'roadmap',
     selectedConceptId: null,
-    expandedModule: modules[0] ? String(modules[0].key) : null,
-    sidebarExpanded: modules[0] ? { [String(modules[0].key)]: true } : {},
+    expandedModule: __firstModule,
+    sidebarExpanded: __firstModule ? { [__firstModule]: true } : {},
     checkpoint: {},
     menuOpen: false,
   };
@@ -125,7 +133,7 @@
   }
 
   function isValidConceptId(id) {
-    return typeof id === 'string' && concepts.some((c) => c.id === id);
+    return typeof id === 'string' && typeof concepts !== 'undefined' && Array.isArray(concepts) && concepts.some((c) => c.id === id);
   }
 
   function loadState() {
@@ -156,6 +164,7 @@
 
   function setState(next) {
     state = typeof next === 'function' ? next(state) : next;
+    invalidateDerivedCache();
     saveState();
     render();
   }
@@ -165,6 +174,7 @@
   // A tick changes nothing visible except a possible not-started -> in-progress
   // flip, so re-render only then (restoring focus to the ticked box).
   function refocusCheckbox(action, id, key, value) {
+    if (!root) return;
     const boxes = root.querySelectorAll('input[data-action="' + action + '"]');
     for (const box of boxes) {
       if (box.dataset.concept === id && box.dataset[key] === value) {
@@ -177,6 +187,7 @@
   function setStateQuiet(next, id, refocus) {
     const before = getProgress(state, id).status;
     state = typeof next === 'function' ? next(state) : next;
+    invalidateDerivedCache();
     saveState();
     if (getProgress(state, id).status !== before) {
       render();
@@ -193,9 +204,13 @@
     return getProgress(s, id).checkpointPassed === true;
   }
 
+  function prereqsOf(concept) {
+    return concept && Array.isArray(concept.prerequisites) ? concept.prerequisites : [];
+  }
+
   function computeStatus(s, concept, upNextId) {
     const p = getProgress(s, concept.id);
-    const locked = concept.prerequisites.some((pid) => !isCompleted(s, pid));
+    const locked = prereqsOf(concept).some((pid) => !isCompleted(s, pid));
     if (locked) return 'locked';
     if (p.status === 'needs-review') return 'needs-review';
     if (p.status === 'completed') return 'completed';
@@ -204,15 +219,17 @@
     return 'not-started';
   }
 
+  const STATUS_LABELS = {
+    locked: 'Locked',
+    'up-next': 'Up next',
+    'in-progress': 'In progress',
+    completed: 'Completed',
+    'needs-review': 'Needs review',
+    'not-started': 'Not started',
+  };
+
   function statusLabel(s) {
-    return ({
-      locked: 'Locked',
-      'up-next': 'Up next',
-      'in-progress': 'In progress',
-      completed: 'Completed',
-      'needs-review': 'Needs review',
-      'not-started': 'Not started',
-    })[s] || s;
+    return STATUS_LABELS[s] || s;
   }
 
   function fmtMin(n) {
@@ -237,25 +254,42 @@
     return esc(value).replace(/\n/g, '<br>');
   }
 
-  const CONCEPT_BY_ID = Object.fromEntries(concepts.map((c) => [c.id, c]));
+  const CONCEPT_BY_ID = (typeof concepts !== 'undefined' && Array.isArray(concepts))
+    ? Object.fromEntries(concepts.map((c) => [c.id, c]))
+    : {};
 
   function conceptById() {
     return CONCEPT_BY_ID;
   }
 
+  // Cache derived status per state reference: many handlers call derived()
+  // several times per tick (Sidebar + main + quiz guards). N=54 concepts so
+  // this is a micro-opt, but it avoids 2-3x repeated sanitize/sort work.
+  let __derivedCache = null;
+  let __derivedCacheState = null;
+
   function derived() {
+    if (__derivedCache && __derivedCacheState === state) return __derivedCache;
     const byId = conceptById();
+    const list = (typeof concepts !== 'undefined' && Array.isArray(concepts)) ? concepts : [];
     let upNextId = null;
-    for (const c of concepts) {
-      const locked = c.prerequisites.some((pid) => !isCompleted(state, pid));
+    for (const c of list) {
+      const locked = prereqsOf(c).some((pid) => !isCompleted(state, pid));
       if (!locked && getProgress(state, c.id).status !== 'completed') {
         upNextId = c.id;
         break;
       }
     }
     const statusMap = {};
-    concepts.forEach((c) => { statusMap[c.id] = computeStatus(state, c, upNextId); });
-    return { byId, upNextId, statusMap };
+    list.forEach((c) => { statusMap[c.id] = computeStatus(state, c, upNextId); });
+    __derivedCache = { byId, upNextId, statusMap };
+    __derivedCacheState = state;
+    return __derivedCache;
+  }
+
+  function invalidateDerivedCache() {
+    __derivedCache = null;
+    __derivedCacheState = null;
   }
 
   function StatusBadge(status) {
@@ -272,9 +306,10 @@
   }
 
   function moduleStatus(m, selectedConceptId, statusMap) {
-    const firstUnlocked = m.concepts.find((c) => statusMap[c.id] !== 'locked') || m.concepts[0];
-    const allDone = m.concepts.every((c) => statusMap[c.id] === 'completed');
-    const anyActive = m.concepts.some((c) => c.id === selectedConceptId);
+    const list = Array.isArray(m.concepts) ? m.concepts : [];
+    const firstUnlocked = list.find((c) => statusMap[c.id] !== 'locked') || list[0];
+    const allDone = list.length > 0 && list.every((c) => statusMap[c.id] === 'completed');
+    const anyActive = list.some((c) => c.id === selectedConceptId);
     const dot = allDone ? 'completed' : (firstUnlocked && statusMap[firstUnlocked.id] === 'locked' ? 'locked' : 'in-progress');
     return { anyActive, dot };
   }
@@ -286,16 +321,17 @@
   function ensureSidebarExpanded() {
     if (ui.selectedConceptId && CONCEPT_BY_ID[ui.selectedConceptId]) {
       const c = CONCEPT_BY_ID[ui.selectedConceptId];
-      const mod = modules.find((m) => m.concepts.some((x) => x.id === c.id));
+      if (typeof modules === 'undefined' || !Array.isArray(modules)) return;
+      const mod = modules.find((m) => Array.isArray(m.concepts) && m.concepts.some((x) => x.id === c.id));
       if (mod) ui.sidebarExpanded[String(mod.key)] = true;
     }
   }
 
   function sidebarLessonLabel(c) {
-    if (c.trpl && c.trpl.length && c.trpl[0].num && c.trpl[0].title) {
+    if (c && c.trpl && c.trpl.length && c.trpl[0] && c.trpl[0].num && c.trpl[0].title) {
       return `${c.trpl[0].num} ${c.trpl[0].title}`;
     }
-    return c.concept;
+    return (c && c.concept) || '';
   }
 
   function Sidebar(view, selectedConceptId, statusMap) {
@@ -307,13 +343,16 @@
     ];
     const courseView = view === 'review' ? 'review' : 'roadmap';
 
-    const completedCount = concepts.filter((c) => statusMap[c.id] === 'completed').length;
+    const conceptList = (typeof concepts !== 'undefined' && Array.isArray(concepts)) ? concepts : [];
+    const moduleList = (typeof modules !== 'undefined' && Array.isArray(modules)) ? modules : [];
+    const appTitle = (typeof courseMeta !== 'undefined' && courseMeta && courseMeta.title) ? courseMeta.title : 'Course';
+    const completedCount = conceptList.filter((c) => statusMap[c.id] === 'completed').length;
 
     return `
       <nav class="rmc-sidebar${ui.menuOpen ? ' open' : ''}" id="rmc-sidebar" aria-label="Course navigation">
         <button type="button" class="rmc-brand" data-action="set-view" data-view="roadmap" title="Back to Course Roadmap" aria-label="Back to Course Roadmap">
           <span class="rmc-brand-mark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 2.8C3 2.36 3.36 2 3.8 2H8v11.2H3.8c-.44 0-.8-.36-.8-.8V2.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2h4.2c.44 0 .8.36.8.8v8.6c0 .44-.36.8-.8.8H8" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2v11.2" stroke="currentColor" stroke-width="1.2"/></svg></span>
-          <span class="rmc-brand-title">${esc(courseMeta.title)}</span>
+          <span class="rmc-brand-title">${esc(appTitle)}</span>
         </button>
         <div class="rmc-nav-section">
           ${navItems.map((item) => `<button type="button" class="rmc-nav-item${courseView === item.key ? ' active' : ''}" data-action="set-view" data-view="${esc(item.key)}">${esc(item.label)}${item.count > 0 ? `<span class="rmc-nav-count">${item.count}</span>` : ''}</button>`).join('')}
@@ -321,10 +360,11 @@
         <div class="rmc-nav-section rmc-nav-section--modules">
           <p class="rmc-nav-label">Course</p>
           <div class="rmc-module-list">
-            ${modules.map((m) => {
+            ${moduleList.map((m) => {
               const st = moduleStatus(m, selectedConceptId, statusMap);
               const open = isSidebarOpen(m.key);
               const activeChapter = st.anyActive;
+              const chapterConcepts = Array.isArray(m.concepts) ? m.concepts : [];
               return `<div class="rmc-tree-chapter" data-chapter="${esc(m.key)}">
                 <button type="button" class="rmc-tree-chapter-btn${activeChapter ? ' active' : ''}" aria-expanded="${open ? 'true' : 'false'}" title="${esc(m.title)}" data-action="toggle-sidebar-module" data-module="${esc(m.key)}">
                   <span class="rmc-tree-caret" aria-hidden="true">›</span>
@@ -333,7 +373,7 @@
                   <span class="rmc-dot rmc-dot-${st.dot}"></span>
                 </button>
                 <div class="rmc-tree-lessons"${open ? '' : ' hidden'}>
-                  ${m.concepts.map((c) => {
+                  ${chapterConcepts.map((c) => {
                     const active = c.id === selectedConceptId;
                     return `<button type="button" class="rmc-tree-lesson${active ? ' active' : ''}" title="${esc(c.concept)}" aria-current="${active ? 'true' : 'false'}" data-action="open-concept" data-concept="${esc(c.id)}">
                       <span class="rmc-dot rmc-dot-${esc(statusMap[c.id])}"></span>
@@ -345,31 +385,34 @@
             }).join('')}
           </div>
         </div>
-        <div class="rmc-sidebar-foot"><span>Completed ${completedCount} / ${concepts.length}</span><button type="button" class="rmc-theme-toggle" data-action="toggle-theme" aria-label="Toggle dark theme" title="Toggle dark theme">${themeToggleInner()}</button></div>
+        <div class="rmc-sidebar-foot"><span>Completed ${completedCount} / ${conceptList.length}</span><button type="button" class="rmc-theme-toggle" data-action="toggle-theme" aria-label="Toggle dark theme" title="Toggle dark theme">${themeToggleInner()}</button></div>
       </nav>`;
   }
 
   function MobileBar() {
+    const appTitle = (typeof courseMeta !== 'undefined' && courseMeta && courseMeta.title) ? courseMeta.title : 'Course';
     return `
       <div class="rmc-mobilebar">
-        <button type="button" class="rmc-mobilebar-brand" data-action="set-view" data-view="roadmap" title="Back to Course Roadmap" aria-label="Back to Course Roadmap"><span class="rmc-brand-mark" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 2.8C3 2.36 3.36 2 3.8 2H8v11.2H3.8c-.44 0-.8-.36-.8-.8V2.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2h4.2c.44 0 .8.36.8.8v8.6c0 .44-.36.8-.8.8H8" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2v11.2" stroke="currentColor" stroke-width="1.2"/></svg></span>${esc(courseMeta.title)}</button>
+        <button type="button" class="rmc-mobilebar-brand" data-action="set-view" data-view="roadmap" title="Back to Course Roadmap" aria-label="Back to Course Roadmap"><span class="rmc-brand-mark" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 2.8C3 2.36 3.36 2 3.8 2H8v11.2H3.8c-.44 0-.8-.36-.8-.8V2.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2h4.2c.44 0 .8.36.8.8v8.6c0 .44-.36.8-.8.8H8" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2v11.2" stroke="currentColor" stroke-width="1.2"/></svg></span>${esc(appTitle)}</button>
         <button type="button" class="rmc-btn-ghost" data-action="toggle-menu" aria-label="Toggle navigation" aria-expanded="${ui.menuOpen ? 'true' : 'false'}" aria-controls="rmc-sidebar"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
       </div>`;
   }
 
   function CourseRoadmap(statusMap) {
+    if (typeof modules === 'undefined' || !Array.isArray(modules)) return '';
     return modules.map((m) => {
-      const visibleConcepts = m.concepts;
-      const doneCount = m.concepts.filter((c) => statusMap[c.id] === 'completed').length;
+      const visibleConcepts = Array.isArray(m.concepts) ? m.concepts : [];
+      const doneCount = visibleConcepts.filter((c) => statusMap[c.id] === 'completed').length;
+      const total = visibleConcepts.length || 1;
       const isOpen = String(ui.expandedModule) === String(m.key);
       return `<div class="rmc-roadmap-chapter" data-chapter="${esc(m.key)}">
-        <div class="rmc-roadmap-row" role="button" tabindex="0" aria-expanded="${isOpen ? 'true' : 'false'}" aria-label="${esc(m.title)} — ${doneCount} of ${m.concepts.length} completed" data-action="toggle-module" data-module="${esc(m.key)}">
+        <div class="rmc-roadmap-row" role="button" tabindex="0" aria-expanded="${isOpen ? 'true' : 'false'}" aria-label="${esc(m.title)} — ${doneCount} of ${visibleConcepts.length} completed" data-action="toggle-module" data-module="${esc(m.key)}">
           <span class="rmc-roadmap-num">${m.bonus ? 'Bonus' : `Ch ${esc(m.chapterNum)}`}</span>
           <div class="rmc-roadmap-main">
             <p class="rmc-roadmap-title">${esc(m.title)}${m.integrative ? ' — integrative project' : ''}</p>
-            <p class="rmc-roadmap-meta">${doneCount}/${m.concepts.length} concepts completed</p>
+            <p class="rmc-roadmap-meta">${doneCount}/${visibleConcepts.length} concepts completed</p>
           </div>
-          ${RustBar(doneCount / m.concepts.length, doneCount === m.concepts.length)}
+          ${RustBar(doneCount / total, doneCount === visibleConcepts.length && visibleConcepts.length > 0)}
           <span class="rmc-roadmap-toggle" aria-hidden="true" style="display:inline-flex;transform:${isOpen ? 'rotate(90deg)' : 'none'};transition:transform 150ms ease">›</span>
         </div>
         <div class="rmc-roadmap-children"${isOpen ? '' : ' hidden'}>
@@ -489,6 +532,7 @@
   }
 
   function findQuizBox(id, qi) {
+    if (!root) return null;
     const boxes = root.querySelectorAll('[data-quiz-q]');
     for (const box of boxes) {
       if (box.dataset.quizQ === id + ':' + qi) return box;
@@ -502,7 +546,25 @@
     box.append(...Array.from(tmp.childNodes));
   }
 
+  // Replace everything after the prompt head (<p class="rmc-checkpoint-prompt">)
+  // with fresh tail markup. Fixes duplication where the old explanation +
+  // honesty prompt were left in place and the result was appended on top.
+  function replaceQuizTail(box, html) {
+    if (!box) return;
+    while (box.childNodes.length > 1) box.removeChild(box.lastChild);
+    moveChildrenInto(box, html);
+  }
+
+  // Escape for use inside a querySelector attribute value. Keys here are
+  // simple (chapter numbers + 'bonus'), but guard old browsers w/o CSS.escape.
+  function attrEscape(value) {
+    const s = String(value);
+    if (typeof CSS !== 'undefined' && CSS && typeof CSS.escape === 'function') return CSS.escape(s);
+    return s.replace(/["\\]/g, '\\$&');
+  }
+
   function refreshQuizProgress(id) {
+    if (!root) return;
     const concept = derived().byId[id];
     const qs = concept && concept.checkpoint && concept.checkpoint.questions;
     if (!qs) return;
@@ -522,7 +584,7 @@
   function isLockedByPrereqs(conceptId) {
     const c = CONCEPT_BY_ID[conceptId];
     if (!c) return true;
-    return c.prerequisites.some((pid) => !isCompleted(state, pid));
+    return prereqsOf(c).some((pid) => !isCompleted(state, pid));
   }
 
   // Opening an external resource promotes the block to in-progress (locked blocks never promote).
@@ -580,6 +642,7 @@
   }
 
   function lessonNeighbors(conceptId) {
+    if (typeof concepts === 'undefined' || !Array.isArray(concepts)) return { prev: null, next: null };
     const idx = concepts.findIndex((c) => c.id === conceptId);
     if (idx < 0) return { prev: null, next: null };
     return {
@@ -614,12 +677,13 @@
     const checkpointOutcome = cUi.outcome !== undefined ? cUi.outcome : persistedOutcome;
 
     if (status === 'locked') {
+      const prereqs = prereqsOf(concept);
       return `<div>
         <h2 class="rmc-block-title">${esc(concept.concept)}</h2>
         <div class="rmc-locked-banner">
-          <strong>This block is locked.</strong> Finish and pass the checkpoint for its prerequisite${concept.prerequisites.length > 1 ? 's' : ''} first:
+          <strong>This block is locked.</strong> Finish and pass the checkpoint for its prerequisite${prereqs.length > 1 ? 's' : ''} first:
           <div class="rmc-chip-list" style="margin-top:10px">
-            ${concept.prerequisites.map((pid) => {
+            ${prereqs.map((pid) => {
               const met = statusMap[pid] === 'completed';
               return `<button type="button" class="rmc-prereq-chip ${met ? 'met' : 'unmet'}" data-action="open-concept" data-concept="${esc(pid)}">${met ? '✓' : '○'} ${esc(byId[pid] ? byId[pid].concept : pid)} — ${esc(statusLabel(statusMap[pid]))}</button>`;
             }).join('')}
@@ -629,6 +693,9 @@
     }
 
     const practiceTasks = Array.isArray(concept.practice) ? concept.practice : [];
+    const trplList = Array.isArray(concept.trpl) ? concept.trpl : [];
+    const rbeList = Array.isArray(concept.rbe) ? concept.rbe : [];
+    const rustlingsList = Array.isArray(concept.rustlings) ? concept.rustlings : [];
 
     return `<div>
       <div class="rmc-block-header">
@@ -641,7 +708,7 @@
 
       <div class="rmc-panel">
         <h3>Read — The Book (TRPL) <span class="rmc-panel-tag">master sequence</span></h3>
-        ${concept.trpl.map((t) => `<div class="rmc-resource-row">
+        ${trplList.map((t) => `<div class="rmc-resource-row">
           <span class="rmc-resource-name">${esc(t.num)} ${esc(t.title)}</span>
           <div class="rmc-resource-actions">
             <a class="rmc-btn rmc-btn-ghost" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer" data-action="open-resource" data-concept="${esc(concept.id)}">Open TRPL</a>
@@ -649,9 +716,9 @@
         </div>`).join('')}
       </div>
 
-      ${concept.rbe.length === 0 ? '' : `<div class="rmc-panel">
+      ${rbeList.length === 0 ? '' : `<div class="rmc-panel">
         <h3>See — Rust by Example</h3>
-        ${concept.rbe.map((r) => `<div class="rmc-resource-row">
+        ${rbeList.map((r) => `<div class="rmc-resource-row">
               <div class="rmc-check-row">
                 <input type="checkbox" class="rmc-checkbox" ${p.rbeSeen[r.url] ? 'checked' : ''} data-action="toggle-rbe" data-concept="${esc(concept.id)}" data-url="${esc(r.url)}">
                 <span class="rmc-resource-name">${esc(r.title)}</span>
@@ -663,9 +730,9 @@
             </div>`).join('')}
       </div>`}
 
-      ${concept.rustlings.length === 0 && practiceTasks.length === 0 ? '' : `<div class="rmc-panel">
+      ${rustlingsList.length === 0 && practiceTasks.length === 0 ? '' : `<div class="rmc-panel">
         <h3>Do — Rustlings practice</h3>
-        ${concept.rustlings.map((r) => resourceExerciseMarkup(concept, p, r)).join('')}
+        ${rustlingsList.map((r) => resourceExerciseMarkup(concept, p, r)).join('')}
             ${practiceTasks.map((t) => practiceTaskMarkup(concept, p, t)).join('')}
       </div>`}
 
@@ -681,9 +748,9 @@
         ${cUi.show ? CheckpointMarkup(concept) : ''}
         ${checkpointOutcome === false ? `<div class="rmc-remediation">
           <strong>Remediation:</strong>
-          ${concept.trpl[0] ? `<a href="${esc(concept.trpl[0].url)}" target="_blank" rel="noopener noreferrer">Review TRPL</a>` : ''}
-          ${concept.rbe[0] ? `<span class="arrow">→</span><a href="${esc(concept.rbe[0].url)}" target="_blank" rel="noopener noreferrer">Review RBE</a>` : ''}
-          ${concept.rustlings[0] ? `<span class="arrow">→</span><a href="${esc(concept.rustlings[0].url)}" target="_blank" rel="noopener noreferrer">Redo ${esc(concept.rustlings[0].name)}</a>` : ''}
+          ${trplList[0] ? `<a href="${esc(trplList[0].url)}" target="_blank" rel="noopener noreferrer">Review TRPL</a>` : ''}
+          ${rbeList[0] ? `<span class="arrow">→</span><a href="${esc(rbeList[0].url)}" target="_blank" rel="noopener noreferrer">Review RBE</a>` : ''}
+          ${rustlingsList[0] ? `<span class="arrow">→</span><a href="${esc(rustlingsList[0].url)}" target="_blank" rel="noopener noreferrer">Redo ${esc(rustlingsList[0].name)}</a>` : ''}
         </div>` : ''}
       </div>
 
@@ -720,7 +787,8 @@
 
   function reviewQueue(statusMap) {
     const now = Date.now();
-    return concepts
+    const list = (typeof concepts !== 'undefined' && Array.isArray(concepts)) ? concepts : [];
+    return list
       .filter((c) => {
         if (!c.fundamental) return false;
         const p = getProgress(state, c.id);
@@ -783,11 +851,24 @@
 
 
   function render() {
+    if (!root) return;
+    if (!hasCourseData()) {
+      root.textContent = 'Course data failed to load. Check that data.js is present.';
+      return;
+    }
     if (!VALID_VIEWS.includes(ui.view)) ui.view = 'roadmap';
     if (ui.selectedConceptId !== null && !isValidConceptId(ui.selectedConceptId)) ui.selectedConceptId = null;
     if (ui.view === 'block' && !ui.selectedConceptId) ui.view = 'roadmap';
     if (typeof ui.menuOpen !== 'boolean') ui.menuOpen = false;
-    if (document.body) document.body.style.overflow = ui.menuOpen ? 'hidden' : '';
+    // Preserve sidebar scroll across the destructive rebuild (sticky drawer
+    // loses scrollTop when innerHTML is replaced).
+    const prevSidebar = root.querySelector('#rmc-sidebar');
+    const prevSidebarScroll = prevSidebar ? prevSidebar.scrollTop : 0;
+    // Avoid touching body overflow unless it actually flips (style recalc).
+    if (document.body) {
+      const want = ui.menuOpen ? 'hidden' : '';
+      if (document.body.style.overflow !== want) document.body.style.overflow = want;
+    }
     ensureSidebarExpanded();
     const { byId, statusMap } = derived();
     root.innerHTML = `<div class="rmc-app">`
@@ -797,10 +878,109 @@
       + `<main class="rmc-main">${mainContent(statusMap, byId)}</main>`
       + `</div>`;
     bindEvents();
+    if (prevSidebarScroll) {
+      const nextSidebar = root.querySelector('#rmc-sidebar');
+      if (nextSidebar) nextSidebar.scrollTop = prevSidebarScroll;
+    }
+  }
+
+  // ---------- Surgical (no-rebuild) updates ----------
+  // These mutate only the affected subtree so sidebar scroll, focus, window
+  // scroll, and in-page translation survive. Fall back to render() if the
+  // expected nodes are absent (e.g. view changed underneath us).
+
+  function setMenuOpenSurgical(open) {
+    open = open === true;
+    ui.menuOpen = open;
+    if (!root) return true;
+    if (document.body) {
+      const want = open ? 'hidden' : '';
+      if (document.body.style.overflow !== want) document.body.style.overflow = want;
+    }
+    const sidebar = root.querySelector('#rmc-sidebar');
+    const app = root.querySelector('.rmc-app');
+    if (!sidebar || !app) { render(); return true; }
+    sidebar.classList.toggle('open', open);
+    let scrim = root.querySelector('.rmc-scrim');
+    if (open && !scrim) {
+      scrim = document.createElement('button');
+      scrim.type = 'button';
+      scrim.className = 'rmc-scrim';
+      scrim.setAttribute('data-action', 'toggle-menu');
+      scrim.setAttribute('aria-label', 'Close navigation');
+      sidebar.after(scrim);
+    } else if (!open && scrim) {
+      scrim.remove();
+    }
+    const toggles = root.querySelectorAll('[data-action="toggle-menu"]');
+    for (const b of toggles) {
+      if (b !== scrim && b.getAttribute('aria-controls') === 'rmc-sidebar') {
+        b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+    }
+    return true;
+  }
+
+  function toggleThemeSurgical() {
+    applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+    if (!root) return true;
+    // applyTheme already flipped root + documentElement dataset.theme, which
+    // is what the CSS keys off. Only the toggle button label/icon needs a
+    // micro-mutation — no container rebuild.
+    const html = themeToggleInner();
+    const btns = root.querySelectorAll('[data-action="toggle-theme"]');
+    if (!btns.length) { render(); return true; }
+    for (const b of btns) b.innerHTML = html;
+    return true;
+  }
+
+  function toggleRoadmapModuleSurgical(key) {
+    toggleRoadmapModule(key);
+    if (!root) return true;
+    const isOpen = String(ui.expandedModule) === String(key);
+    const chapter = root.querySelector('.rmc-roadmap-chapter[data-chapter="' + attrEscape(key) + '"]');
+    if (!chapter) { render(); return true; }
+    const row = chapter.querySelector('[data-action="toggle-module"]');
+    const children = chapter.querySelector('.rmc-roadmap-children');
+    if (!row || !children) { render(); return true; }
+    // Batch writes together; no interleaved reads (no layout thrash).
+    if (isOpen) children.removeAttribute('hidden');
+    else children.setAttribute('hidden', '');
+    row.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    const caret = row.querySelector('.rmc-roadmap-toggle');
+    if (caret) caret.style.transform = isOpen ? 'rotate(90deg)' : 'none';
+    return true;
+  }
+
+  function toggleSidebarModuleSurgical(key) {
+    toggleSidebarModule(key);
+    if (!root) return true;
+    const open = isSidebarOpen(key);
+    const chapter = root.querySelector('.rmc-tree-chapter[data-chapter="' + attrEscape(key) + '"]');
+    if (!chapter) { render(); return true; }
+    const btn = chapter.querySelector('[data-action="toggle-sidebar-module"]');
+    const lessons = chapter.querySelector('.rmc-tree-lessons');
+    if (!btn || !lessons) { render(); return true; }
+    if (open) lessons.removeAttribute('hidden');
+    else lessons.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    return true;
+  }
+
+  function focusFirstQuizQuestion(id) {
+    if (!root) return;
+    const box = root.querySelector('[data-quiz-q^="' + attrEscape(id) + ':"]');
+    if (box && typeof box.focus === 'function') box.focus({ preventScroll: true });
   }
 
   function openConcept(id) {
     if (!isValidConceptId(id)) return;
+    // No-op navigation: already on this block — just ensure the drawer is
+    // closed (surgically) instead of tearing down the whole tree.
+    if (ui.view === 'block' && ui.selectedConceptId === id) {
+      if (ui.menuOpen) setMenuOpenSurgical(false);
+      return;
+    }
     ui.selectedConceptId = id;
     ui.view = 'block';
     // Promote not-started -> in-progress silently so we render exactly once.
@@ -812,12 +992,17 @@
         lastActiveConceptId: id,
         progress: { ...state.progress, [id]: { ...cur, status: 'in-progress' } },
       };
+      invalidateDerivedCache();
       saveState();
     } else {
       // Keep last-active tracking without mutating status.
       state = { ...state, lastActiveConceptId: id };
+      invalidateDerivedCache();
       saveState();
     }
+    // Opening a lesson always closes the mobile drawer; the fresh render
+    // already reflects menuOpen=false so no separate surgical close needed.
+    ui.menuOpen = false;
     render();
     scrollTop();
   }
@@ -833,15 +1018,15 @@
 
   function dispatchClick(action, el) {
     if (action === 'toggle-theme') {
-      applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
-      render();
+      // Surgical: only the toggle button label/icon changes; the CSS keys
+      // off documentElement dataset.theme (already flipped in applyTheme).
+      toggleThemeSurgical();
       return;
     }
 
     if (action === 'toggle-menu') {
       const opening = !ui.menuOpen;
-      ui.menuOpen = opening;
-      render();
+      setMenuOpenSurgical(opening);
 
       if (opening) {
         const first = root.querySelector('#rmc-sidebar button');
@@ -850,6 +1035,7 @@
         const btn = root.querySelector('[data-action="toggle-menu"]');
         if (btn) btn.focus();
       }
+      return;
     }
 
     if (action === 'set-view') {
@@ -860,24 +1046,25 @@
       ui.menuOpen = false;
       render();
       scrollTop();
+      return;
     }
 
     if (action === 'toggle-sidebar-module') {
-      toggleSidebarModule(el.dataset.module);
-      render();
+      // Surgical: flip hidden + aria-expanded in place, keep focus/scroll.
+      toggleSidebarModuleSurgical(el.dataset.module);
       return;
     }
 
     if (action === 'toggle-module') {
-      toggleRoadmapModule(el.dataset.module);
-      render();
+      // Surgical: flip hidden + caret rotation in place, keep focus/scroll.
+      toggleRoadmapModuleSurgical(el.dataset.module);
       return;
     }
 
     if (action === 'open-concept') {
       if (!isValidConceptId(el.dataset.concept)) return;
-      ui.menuOpen = false;
       openConcept(el.dataset.concept);
+      return;
     }
 
     if (action === 'show-checkpoint') {
@@ -885,6 +1072,8 @@
       if (!isValidConceptId(id)) return;
       ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true };
       render();
+      focusFirstQuizQuestion(id);
+      return;
     }
 
     if (action === 'retake-checkpoint') {
@@ -892,6 +1081,8 @@
       if (!isValidConceptId(id)) return;
       ui.checkpoint[id] = { show: true, answers: {}, outcome: null };
       render();
+      focusFirstQuizQuestion(id);
+      return;
     }
 
     if (action === 'reveal-checkpoint') {
@@ -913,6 +1104,7 @@
       btn.remove();
       const yes = box.querySelector('button[data-action="self-check"][data-passed="true"]');
       if (yes) yes.focus({ preventScroll: true });
+      return;
     }
 
     if (action === 'answer-mc') {
@@ -944,6 +1136,7 @@
       });
       moveChildrenInto(box, quizResultHTML(correct, correct ? 'Correct.' : 'Not quite.', q.explain));
       refreshQuizProgress(id);
+      return;
     }
 
     if (action === 'self-check') {
@@ -962,10 +1155,13 @@
       if (maybeFinishQuiz(id)) return;
       const box = findQuizBox(id, qi);
       if (!box) { render(); return; }
-      box.querySelectorAll('button[data-action="self-check"]').forEach((b) => b.remove());
-      moveChildrenInto(box, quizQuestionTail(concept, q, qi, answers[qi]));
+      // BUGFIX: the revealed tail (explanation + honesty prompt + Yes/No) must
+      // be replaced, not appended to — otherwise the explanation renders twice
+      // and the stale "Be honest" paragraph lingers next to the verdict.
+      replaceQuizTail(box, quizQuestionTail(concept, q, qi, answers[qi]));
       box.focus({ preventScroll: true });
       refreshQuizProgress(id);
+      return;
     }
 
     if (action === 'review-mark') {
@@ -978,16 +1174,37 @@
 
       const gotIt = el.dataset.gotIt === 'true';
       const now = Date.now();
+      const prevP = getProgress(state, id);
+      const prevReps = prevP.review && Number.isFinite(prevP.review.repetitions) && prevP.review.repetitions >= 0
+        ? Math.floor(prevP.review.repetitions) : 0;
+      const prevInterval = prevP.review && Number.isFinite(prevP.review.intervalDays) && prevP.review.intervalDays >= 1
+        ? Math.floor(prevP.review.intervalDays) : REVIEW_FIRST_INTERVAL_DAYS;
+      // SRS ladder [1,3,7,14,30,60]: success advances, failure resets to a
+      // 1-day interval due tomorrow. Self-rating dots are never touched here.
+      const intervalDays = gotIt ? nextIntervalDays(prevInterval) : 1;
+      const repetitions = gotIt ? prevReps + 1 : 0;
+      if (!gotIt) {
+        // Single-render path: apply the SRS reschedule silently, then let
+        // openConcept() perform the one and only render + scroll. The old
+        // code called setState() (render #1) followed by openConcept()
+        // (render #2) — two full innerHTML sweeps back-to-back.
+        state = {
+          ...state,
+          progress: {
+            ...state.progress,
+            [id]: {
+              ...prevP,
+              review: { nextReviewAt: now + intervalDays * DAY_MS, intervalDays, repetitions },
+            },
+          },
+        };
+        invalidateDerivedCache();
+        saveState();
+        openConcept(id);
+        return;
+      }
       setState((s) => {
         const p = getProgress(s, id);
-        const prevReps = p.review && Number.isFinite(p.review.repetitions) && p.review.repetitions >= 0
-          ? Math.floor(p.review.repetitions) : 0;
-        const prevInterval = p.review && Number.isFinite(p.review.intervalDays) && p.review.intervalDays >= 1
-          ? Math.floor(p.review.intervalDays) : REVIEW_FIRST_INTERVAL_DAYS;
-        // SRS ladder [1,3,7,14,30,60]: success advances, failure resets to a
-        // 1-day interval due tomorrow. Self-rating dots are never touched here.
-        const intervalDays = gotIt ? nextIntervalDays(prevInterval) : 1;
-        const repetitions = gotIt ? prevReps + 1 : 0;
         return {
           ...s,
           progress: {
@@ -997,16 +1214,17 @@
               review: { nextReviewAt: now + intervalDays * DAY_MS, intervalDays, repetitions },
             },
           },
-          reviewLog: gotIt ? { ...s.reviewLog, [id]: now } : s.reviewLog,
+          reviewLog: { ...s.reviewLog, [id]: now },
         };
       });
-      if (!gotIt) openConcept(id);
+      return;
     }
 
     if (action === 'open-resource') {
       const id = el.dataset.concept;
       if (!isValidConceptId(id)) return;
       markInProgress(id);
+      return;
     }
   }
 
@@ -1089,6 +1307,7 @@
 
   function bindEvents() {
     if (eventsBound) return;
+    if (!root) return;
     eventsBound = true;
     root.addEventListener('click', (e) => {
       const actionEl = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
@@ -1117,6 +1336,7 @@
   window.addEventListener('storage', (e) => {
     if (e.key === STORAGE_KEY) {
       state = loadState();
+      invalidateDerivedCache();
       render();
     }
   });
@@ -1126,9 +1346,9 @@
   document.addEventListener('keydown', (e) => {
     if (!ui.menuOpen) return;
     if (e.key === 'Escape') {
-      ui.menuOpen = false;
-      render();
-      const btn = root.querySelector('[data-action="toggle-menu"]');
+      // Surgical close: no full rebuild, focus returns to the Menu button.
+      setMenuOpenSurgical(false);
+      const btn = root ? root.querySelector('[data-action="toggle-menu"]') : null;
       if (btn) btn.focus();
       return;
     }
@@ -1144,12 +1364,14 @@
   });
 
   // Close the mobile drawer when crossing the 767px breakpoint.
+  // No-op when already closed: the old code re-rendered the entire tree on
+  // every breakpoint crossing even with nothing to close.
   (function syncDrawerOnViewportChange() {
     if (typeof window.matchMedia !== 'function') return;
     const mq = window.matchMedia('(max-width: 767px)');
     const onChange = () => {
-      ui.menuOpen = false;
-      render();
+      if (!ui.menuOpen) return;
+      setMenuOpenSurgical(false);
     };
     if (mq && typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
     else if (mq && typeof mq.addListener === 'function') mq.addListener(onChange);
