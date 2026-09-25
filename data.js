@@ -197,6 +197,7 @@ const concepts = [
       { name: 'primitive_types1', url: RL + '04_primitive_types/primitive_types1.rs' },
       { name: 'primitive_types2', url: RL + '04_primitive_types/primitive_types2.rs' },
       { name: 'primitive_types3', url: RL + '04_primitive_types/primitive_types3.rs' },
+      { name: 'primitive_types4', url: RL + '04_primitive_types/primitive_types4.rs' },
       { name: 'primitive_types5', url: RL + '04_primitive_types/primitive_types5.rs' },
       { name: 'primitive_types6', url: RL + '04_primitive_types/primitive_types6.rs' },
     ],
@@ -407,7 +408,7 @@ const concepts = [
     concept: 'String slices and array slices',
     prerequisites: ['borrowing'],
     rbe: [],
-    rustlings: [{ name: 'primitive_types4', url: RL + '04_primitive_types/primitive_types4.rs' }],
+    rustlings: [],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
       questions: [
@@ -1571,6 +1572,7 @@ const concepts = [
     rustlings: [
       { name: 'rc1', url: RL + '19_smart_pointers/rc1.rs' },
       { name: 'arc1', url: RL + '19_smart_pointers/arc1.rs' },
+      { name: 'cow1', url: RL + '19_smart_pointers/cow1.rs' },
     ],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
@@ -1601,6 +1603,17 @@ const concepts = [
         ],
         correct: 'a',
         explain: 'Shared ownership plus direct mutation equals aliasing violations. `Rc::get_mut` exists but succeeds only when uniquely owned — the exception proving the rule.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`Cow::from(&vec)` borrows; `abs_all` finds nothing to mutate. What is `input` afterwards?',
+        options: [
+          { id: 'a', text: '`Cow::Owned` — wrapping always clones eagerly' },
+          { id: 'b', text: '`Cow::Borrowed` — no mutation means no clone ever happens' },
+          { id: 'c', text: 'Neither — `Cow` drops back to a plain reference' },
+        ],
+        correct: 'b',
+        explain: 'Clone-on-Write clones lazily: `to_mut()` is the only trigger. With all values already absolute, `abs_all` never calls it, so the `Cow` stays borrowed — exactly what `reference_no_mutation` in `cow1` asserts.',
         },
       ],
     },
