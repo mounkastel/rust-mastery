@@ -614,9 +614,7 @@
       </div>
 
       <div class="rmc-panel">
-        <h3>Mastery criteria</h3>
-        <ul class="rmc-criteria-list">${concept.masteryCriteria.map((m) => `<li>${esc(m)}</li>`).join('')}</ul>
-        <h3 style="margin-top:14px">Common mistakes</h3>
+        <h3>Common mistakes</h3>
         <ul class="rmc-mistakes-list">${concept.commonMistakes.map((m) => `<li>${esc(m)}</li>`).join('')}</ul>
       </div>
 

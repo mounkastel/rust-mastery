@@ -3,7 +3,8 @@
 const BOOK = 'book-html/';
 // NOTE: "Run" buttons inside RBE pages need network (play.rust-lang.org); reading works offline.
 const RBE = 'rbe-html/';
-// Vendored rustlings exercises (rustlings/exercises/) — plain .rs files, readable offline.
+// Local rustlings checkout (~/rustlings) — exercises are plain .rs files, readable offline.
+// NOTE: paths are relative to ~/rust/, so serve/open the app from there.
 // Exercise `name` equals the file stem; checkbox progress is keyed by it.
 const RL = 'rustlings/exercises/';
 
@@ -27,7 +28,6 @@ const concepts = [
       { name: 'intro2', url: RL + '00_intro/intro2.rs', tier: 'CORE' },
     ],
     difficulty: 1, estMinutes: 20,
-    masteryCriteria: ['Can compile and run a .rs file with rustc', 'Understands println! is a macro, not a function'],
     commonMistakes: ['Forgetting the trailing `!` on println!', 'Confusing rustc (compiler) with cargo (build tool)'],
     checkpoint: {
       type: 'multiple_choice',
@@ -52,7 +52,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'No dedicated Rustlings exercise — every later exercise is itself run through `rustlings run`, which wraps Cargo, so this is practiced implicitly from here on.',
     difficulty: 1, estMinutes: 15,
-    masteryCriteria: ['Knows `cargo new`, `cargo build`, `cargo run`, `cargo check`', 'Understands Cargo.toml vs Cargo.lock'],
     commonMistakes: ['Editing Cargo.lock by hand', 'Not realizing `cargo check` is much faster than `cargo build` for iterating'],
     checkpoint: {
       type: 'multiple_choice',
@@ -75,7 +74,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — Rustlings has no equivalent "build one small game" exercise here; it starts drilling the individual concepts (01_variables) immediately afterward instead.',
     difficulty: 2, estMinutes: 30,
-    masteryCriteria: ['Can read through the finished guessing-game code and identify what each new piece of syntax roughly does, even without full understanding yet'],
     commonMistakes: ['Trying to memorize every detail here — the chapter is intentionally a preview; depth comes later'],
     checkpoint: {
       type: 'multiple_choice',
@@ -111,7 +109,6 @@ const concepts = [
       { name: 'variables6', url: RL + '01_variables/variables6.rs', tier: 'OPTIONAL' },
     ],
     difficulty: 1, estMinutes: 30,
-    masteryCriteria: ['Can explain immutable-by-default and why', 'Can distinguish `let mut x = ...` from shadowing with a new `let x = ...`', 'Knows constants require an explicit type and are always immutable'],
     commonMistakes: ['Treating shadowing and `mut` as the same thing', 'Forgetting constants need a type annotation'],
     checkpoint: {
       type: 'predict_output',
@@ -135,7 +132,6 @@ const concepts = [
       { name: 'primitive_types6', url: RL + '04_primitive_types/primitive_types6.rs', tier: 'REINFORCEMENT' },
     ],
     difficulty: 2, estMinutes: 35,
-    masteryCriteria: ['Can pick an appropriate integer/float type', 'Can destructure a tuple', 'Knows arrays have fixed size at compile time and store elements inline (on the stack, or inline within enclosing heap types)'],
     commonMistakes: ['Assuming arrays can grow (that’s what Vec is for)', 'Integer overflow behavior confusion between debug and release builds'],
     checkpoint: {
       type: 'multiple_choice',
@@ -165,7 +161,6 @@ const concepts = [
       { name: 'functions5', url: RL + '02_functions/functions5.rs', tier: 'CORE' },
     ],
     difficulty: 2, estMinutes: 30,
-    masteryCriteria: ['Can explain why a semicolon changes an expression into a statement', 'Can write a function with an explicit `-> Type` return'],
     commonMistakes: ['Adding a stray `;` after the final expression meant to be returned', 'Forgetting parameter type annotations (required, unlike closures)'],
     checkpoint: {
       type: 'find_bug',
@@ -191,7 +186,6 @@ const concepts = [
       { name: 'quiz1', url: RL + 'quizzes/quiz1.rs', tier: 'REINFORCEMENT' },
     ],
     difficulty: 2, estMinutes: 30,
-    masteryCriteria: ['Can write `let x = if cond { a } else { b };`', 'Knows `loop` can return a value via `break value`'],
     commonMistakes: ['Mismatched branch types in an if-expression', 'Using `while` to iterate a collection instead of the more idiomatic `for`'],
     checkpoint: {
       type: 'multiple_choice',
@@ -225,7 +219,6 @@ const concepts = [
       { name: 'move_semantics4', url: RL + '06_move_semantics/move_semantics4.rs', tier: 'CORE' },
     ],
     difficulty: 3, estMinutes: 40,
-    masteryCriteria: ['Can state the three ownership rules from memory', 'Can predict a "use of moved value" error before compiling', 'Knows why `Copy` types (like i32) don’t move'],
     commonMistakes: ['Assuming assignment always copies (only true for Copy types)', 'Calling `.clone()` reflexively to silence errors without understanding why a move happened'],
     checkpoint: {
       type: 'find_bug',
@@ -245,7 +238,6 @@ const concepts = [
       { name: 'move_semantics5', url: RL + '06_move_semantics/move_semantics5.rs', tier: 'CORE' },
     ],
     difficulty: 3, estMinutes: 35,
-    masteryCriteria: ['Can explain the aliasing rule in one sentence', 'Can fix a "cannot borrow as mutable more than once" error'],
     commonMistakes: ['Trying to hold a mutable and immutable borrow at the same time', 'Confusing "the reference is invalid" with "the value was moved"'],
     checkpoint: {
       type: 'multiple_choice',
@@ -269,7 +261,6 @@ const concepts = [
     rbeNote: 'PARTIAL — RBE has no page dedicated purely to the slice type; array/slice indexing appears only briefly inside the Primitives chapter.',
     rustlings: [{ name: 'primitive_types4', url: RL + '04_primitive_types/primitive_types4.rs', tier: 'CORE' }],
     difficulty: 3, estMinutes: 30,
-    masteryCriteria: ['Can write a function taking `&str` instead of `&String` (more general)', 'Can slice an array with `&arr[1..3]`'],
     commonMistakes: ['Off-by-one errors on slice ranges (end index is exclusive)', 'Taking `&String` as a parameter type where `&str` would be more flexible'],
     checkpoint: {
       type: 'predict_output',
@@ -296,7 +287,6 @@ const concepts = [
       { name: 'structs2', url: RL + '07_structs/structs2.rs', tier: 'CORE' },
     ],
     difficulty: 2, estMinutes: 30,
-    masteryCriteria: ['Can define classic, tuple, and unit structs', 'Knows struct update syntax `..other`'],
     commonMistakes: ['Forgetting that struct update syntax moves non-Copy fields out of `other`'],
     checkpoint: {
       type: 'multiple_choice',
@@ -320,7 +310,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'structs3', url: RL + '07_structs/structs3.rs', tier: 'CORE' }],
     difficulty: 2, estMinutes: 25,
-    masteryCriteria: ['Can write a method taking `&self` vs one taking `&mut self`', 'Can write an associated "constructor" function `Self::new(...)`'],
     commonMistakes: ['Taking `self` by value when `&self` was intended, causing an unwanted move'],
     checkpoint: {
       type: 'multiple_choice',
@@ -352,7 +341,6 @@ const concepts = [
       { name: 'enums2', url: RL + '08_enums/enums2.rs', tier: 'CORE' },
     ],
     difficulty: 3, estMinutes: 30,
-    masteryCriteria: ['Can define an enum with struct-like, tuple-like, and unit variants mixed', 'Can explain why Rust has no null and uses Option<T> instead'],
     commonMistakes: ['Trying to access enum variant data without matching on it first'],
     checkpoint: {
       type: 'multiple_choice',
@@ -382,7 +370,6 @@ const concepts = [
       { name: 'options2', url: RL + '12_options/options2.rs', tier: 'CORE' },
     ],
     difficulty: 2, estMinutes: 25,
-    masteryCriteria: ['Can construct Some(v) vs None and inspect with .is_some()', 'Knows how to provide a safe fallback using .unwrap_or(default)'],
     commonMistakes: ['Calling .unwrap() where match or a combinator would handle None gracefully', 'Treating Option<T> like a nullable pointer instead of an enum to destructure'],
     checkpoint: {
       type: 'predict_output',
@@ -400,7 +387,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs', tier: 'CORE' }],
     difficulty: 3, estMinutes: 25,
-    masteryCriteria: ['Can write an exhaustive match over a custom enum', 'Understands why the compiler rejects non-exhaustive matches'],
     commonMistakes: ['Forgetting a `_` arm and being surprised by a compile error rather than a runtime crash'],
     checkpoint: {
       type: 'explain',
@@ -418,7 +404,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'options2', url: RL + '12_options/options2.rs', tier: 'REINFORCEMENT' }],
     difficulty: 2, estMinutes: 20,
-    masteryCriteria: ['Knows when `if let` is more concise than `match`, and when it loses exhaustiveness checking'],
     commonMistakes: ['Overusing if let where a full match would communicate intent more clearly'],
     checkpoint: {
       type: 'multiple_choice',
@@ -448,7 +433,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — purely conceptual/organizational; Rustlings has no exercise that tests package-vs-crate vocabulary directly.',
     difficulty: 2, estMinutes: 15,
-    masteryCriteria: ['Can state the difference between a package and a crate in one sentence'],
     commonMistakes: ['Using "crate" and "package" interchangeably'],
     checkpoint: {
       type: 'multiple_choice',
@@ -475,7 +459,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'modules1', url: RL + '10_modules/modules1.rs', tier: 'CORE' }],
     difficulty: 3, estMinutes: 30,
-    masteryCriteria: ['Can navigate a module tree with absolute/relative paths', 'Knows child modules can see private items of ancestors, but not vice versa'],
     commonMistakes: ['Forgetting `pub` on an item and being surprised it’s inaccessible outside its module'],
     checkpoint: {
       type: 'multiple_choice',
@@ -504,7 +487,6 @@ const concepts = [
       { name: 'modules3', url: RL + '10_modules/modules3.rs', tier: 'CORE' },
     ],
     difficulty: 2, estMinutes: 25,
-    masteryCriteria: ['Can write a `use` statement with nested paths', 'Understands `pub use` re-exports an item under a new public path'],
     commonMistakes: ['Not realizing `mod foo;` (with a semicolon) tells Rust to look for the code in a separate file'],
     checkpoint: {
       type: 'multiple_choice',
@@ -536,7 +518,6 @@ const concepts = [
       { name: 'vecs2', url: RL + '05_vecs/vecs2.rs', tier: 'CORE' },
     ],
     difficulty: 2, estMinutes: 25,
-    masteryCriteria: ['Can build a Vec with `vec![]` and with `Vec::new()` + push', 'Knows indexing can panic; `.get()` returns Option instead'],
     commonMistakes: ['Indexing out of bounds instead of using `.get(i)` when the index isn’t guaranteed valid'],
     checkpoint: {
       type: 'multiple_choice',
@@ -561,7 +542,6 @@ const concepts = [
       { name: 'strings4', url: RL + '09_strings/strings4.rs', tier: 'REINFORCEMENT' },
     ],
     difficulty: 3, estMinutes: 35,
-    masteryCriteria: ['Can convert between &str and String (`.to_string()`, `String::from`)', 'Can explain why UTF-8 makes `s[0]` ambiguous/disallowed'],
     commonMistakes: ['Trying `s[0]` to get the first character', 'Assuming `.len()` on a String returns character count rather than byte count'],
     checkpoint: {
       type: 'explain',
@@ -584,7 +564,6 @@ const concepts = [
       { name: 'quiz2', url: RL + 'quizzes/quiz2.rs', tier: 'REINFORCEMENT' },
     ],
     difficulty: 2, estMinutes: 25,
-    masteryCriteria: ['Can use `entry(key).or_insert(default)` to insert-or-update in one line'],
     commonMistakes: ['Inserting unconditionally with `.insert()` when `.entry().or_insert()` was the right tool'],
     checkpoint: {
       type: 'predict_output',
@@ -608,7 +587,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'No dedicated Rustlings exercise — `panic!` is drilled implicitly via `#[should_panic]` tests in the testing exercises.',
     difficulty: 2, estMinutes: 20,
-    masteryCriteria: ['Can articulate the panic vs. Result decision rule'],
     commonMistakes: ['Reaching for panic!/unwrap() for errors that are actually expected and recoverable'],
     checkpoint: {
       type: 'multiple_choice',
@@ -646,7 +624,6 @@ const concepts = [
       { name: 'errors6', url: RL + '13_error_handling/errors6.rs', tier: 'OPTIONAL' },
     ],
     difficulty: 3, estMinutes: 40,
-    masteryCriteria: ['Can write a function returning Result<T, E> and propagate with `?`', 'Knows `?` also works in `fn main() -> Result<(), E>`'],
     commonMistakes: ['Using `.unwrap()` in library code instead of propagating with `?`'],
     checkpoint: {
       type: 'find_bug',
@@ -672,7 +649,6 @@ const concepts = [
       { name: 'generics2', url: RL + '14_generics/generics2.rs', tier: 'CORE' },
     ],
     difficulty: 3, estMinutes: 30,
-    masteryCriteria: ['Can write a generic function `fn largest<T: PartialOrd>(list: &[T]) -> &T`', 'Understands generics are monomorphized at compile time'],
     commonMistakes: ['Forgetting a trait bound needed to use an operator/method on a generic type'],
     checkpoint: {
       type: 'multiple_choice',
@@ -702,7 +678,6 @@ const concepts = [
       { name: 'traits5', url: RL + '15_traits/traits5.rs', tier: 'REINFORCEMENT' },
     ],
     difficulty: 3, estMinutes: 40,
-    masteryCriteria: ['Can define a trait with a default method', 'Can write `fn f(x: impl Trait)`'],
     commonMistakes: ['Trying to implement a foreign trait for a foreign type (violates the orphan rule)'],
     checkpoint: {
       type: 'multiple_choice',
@@ -730,7 +705,6 @@ const concepts = [
       { name: 'lifetimes3', url: RL + '16_lifetimes/lifetimes3.rs', tier: 'CORE' },
     ],
     difficulty: 4, estMinutes: 45,
-    masteryCriteria: ['Can explain that lifetime annotations describe, not change, how long references live', 'Can add a lifetime parameter to a struct holding a reference'],
     commonMistakes: ['Believing the lifetime annotation makes a value live longer'],
     checkpoint: {
       type: 'find_bug',
@@ -759,7 +733,6 @@ const concepts = [
       { name: 'tests3', url: RL + '17_tests/tests3.rs', tier: 'CORE' },
     ],
     difficulty: 2, estMinutes: 25,
-    masteryCriteria: ['Can write a #[test] function using assert_eq!', 'Can write a test expected to panic with #[should_panic]'],
     commonMistakes: ['Forgetting the #[cfg(test)] module wrapper convention'],
     checkpoint: {
       type: 'multiple_choice',
@@ -780,7 +753,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — no Rustlings exercise for the tests/ layout; practice by adding a tests/ directory with an integration test to your own minigrep crate.',
     difficulty: 2, estMinutes: 15,
-    masteryCriteria: ['Knows integration tests in tests/ can only call the crate’s public API'],
     commonMistakes: ['Putting integration tests inside src/ instead of a top-level tests/ directory'],
     checkpoint: {
       type: 'multiple_choice',
@@ -825,7 +797,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'No separate drills by design — building minigrep itself is the practice for this block.',
     difficulty: 3, estMinutes: 60,
-    masteryCriteria: ['Can separate CLI concerns between main.rs and lib.rs', 'Returns Result<(), Box<dyn Error>> from a run function'],
     commonMistakes: ['Skipping the refactor into lib.rs'],
     checkpoint: {
       type: 'explain',
@@ -854,7 +825,6 @@ const concepts = [
       { id: 'fnonce-once', text: 'Write fn apply<F: FnOnce() -> i32>(f: F) -> i32, call it with a closure that moves a String in, then try calling that closure twice.' },
     ],
     difficulty: 3, estMinutes: 30,
-    masteryCriteria: ['Can write a closure capturing by reference and by move', 'Understands FnOnce, FnMut, and Fn'],
     commonMistakes: ['Being surprised a closure needs `move` to cross a thread boundary'],
     checkpoint: {
       type: 'predict_output',
@@ -883,7 +853,6 @@ const concepts = [
       { name: 'quiz3', url: RL + 'quizzes/quiz3.rs', tier: 'REINFORCEMENT' },
     ],
     difficulty: 3, estMinutes: 40,
-    masteryCriteria: ['Can chain .iter().map(...).filter(...).collect()', 'Can explain why iterators are lazy'],
     commonMistakes: ['Forgetting `.collect()` and wondering why adaptors did not execute'],
     checkpoint: {
       type: 'multiple_choice',
@@ -916,7 +885,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — tooling concepts are not drilled by Rustlings; practice by running `cargo build --release` on your minigrep and comparing binary size and speed.',
     difficulty: 2, estMinutes: 40,
-    masteryCriteria: ['Knows the difference between dev and release profiles', 'Understands what a Cargo workspace is for'],
     commonMistakes: ['Benchmarking code in a debug build instead of release'],
     checkpoint: {
       type: 'multiple_choice',
@@ -944,7 +912,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'box1', url: RL + '19_smart_pointers/box1.rs', tier: 'CORE' }],
     difficulty: 3, estMinutes: 25,
-    masteryCriteria: ['Can explain why `enum List { Cons(i32, Box<List>), Nil }` compiles while without Box it fails'],
     commonMistakes: ['Trying to define a recursive type without heap indirection'],
     checkpoint: {
       type: 'explain',
@@ -966,7 +933,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — no Rustlings exercise for Deref/Drop; DIY: implement Deref for a tuple struct holding a Vec, and add println! to a Drop impl to observe cleanup order.',
     difficulty: 3, estMinutes: 25,
-    masteryCriteria: ['Can explain deref coercion', 'Knows Drop::drop runs automatically at end of scope'],
     commonMistakes: ['Trying to call value.drop() manually instead of std::mem::drop(value)'],
     checkpoint: {
       type: 'multiple_choice',
@@ -993,7 +959,6 @@ const concepts = [
       { name: 'arc1', url: RL + '19_smart_pointers/arc1.rs', tier: 'CORE' },
     ],
     difficulty: 3, estMinutes: 25,
-    masteryCriteria: ['Can explain Rc::clone increments a reference count rather than deep-copying', 'Knows Rc<T> is not thread-safe'],
     commonMistakes: ['Attempting to send Rc<T> across threads instead of Arc<T>'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1020,7 +985,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — neither this checkout nor upstream rustlings has a RefCell/interior-mutability exercise (upstream smart_pointers4 covers Cow instead). Practice by converting the book’s Rc<List> example to Rc<RefCell<List>> yourself.',
     difficulty: 4, estMinutes: 35,
-    masteryCriteria: ['Can explain interior mutability', 'Knows simultaneous multiple borrow_mut calls cause a runtime panic'],
     commonMistakes: ['Assuming RefCell disables borrow rules rather than enforcing them at runtime'],
     checkpoint: {
       type: 'explain',
@@ -1046,7 +1010,6 @@ const concepts = [
       { name: 'threads2', url: RL + '20_threads/threads2.rs', tier: 'CORE' },
     ],
     difficulty: 3, estMinutes: 30,
-    masteryCriteria: ['Can spawn and .join() a thread', 'Can explain why `move` closures are required'],
     commonMistakes: ['Forgetting to call .join(), allowing main to exit prematurely'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1069,7 +1032,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'threads3', url: RL + '20_threads/threads3.rs', tier: 'CORE' }],
     difficulty: 3, estMinutes: 25,
-    masteryCriteria: ['Can establish an mpsc channel and send/receive data', 'Knows tx.clone() enables multiple producers'],
     commonMistakes: ['Waiting on a receiver when producers are kept alive inadvertently'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1096,7 +1058,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'threads2', url: RL + '20_threads/threads2.rs', tier: 'REINFORCEMENT' }],
     difficulty: 4, estMinutes: 35,
-    masteryCriteria: ['Can wrap shared state in Arc<Mutex<T>> and lock it across threads', 'Understands the role of Send/Sync'],
     commonMistakes: ['Using Rc<Mutex<T>> across threads instead of Arc<Mutex<T>>'],
     checkpoint: {
       type: 'find_bug',
@@ -1122,7 +1083,6 @@ const concepts = [
     ],
     rustlingsNote: 'Vendored from upstream — this checkout predates async exercises. Reading works locally; running needs tokio (a newer rustlings with async support).',
     difficulty: 4, estMinutes: 35,
-    masteryCriteria: ['Can explain that async functions evaluate lazily when polled by a runtime executor'],
     commonMistakes: ['Calling an async function without awaiting it or driving it with an executor'],
     checkpoint: {
       type: 'predict_output',
@@ -1146,7 +1106,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — combining futures needs an executor/tokio setup outside this checkout; practice by re-reading 17.2–17.4 and diagramming join vs spawn for your own tasks.',
     difficulty: 4, estMinutes: 40,
-    masteryCriteria: ['Can contrast OS thread scheduling with cooperative async task polling'],
     commonMistakes: ['Assuming async inherently spins up new OS threads'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1174,7 +1133,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — design-level material, not drills; practice by refactoring one of your structs to hide fields behind validating pub methods.',
     difficulty: 2, estMinutes: 15,
-    masteryCriteria: ['Can describe trait composition as Rust’s alternative to class inheritance'],
     commonMistakes: ['Attempting to design deep class-like hierarchy trees in Rust'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1205,7 +1163,6 @@ const concepts = [
       { id: 'object-safety', text: 'Add fn name(&self) -> Self to the trait, read the object-safety error on dyn Draw, then fix it (e.g. return String).' },
     ],
     difficulty: 4, estMinutes: 30,
-    masteryCriteria: ['Can articulate the difference between monomorphized static dispatch and vtable dynamic dispatch'],
     commonMistakes: ['Violating object-safety constraints (e.g. traits returning Self or having generic methods)'],
     checkpoint: {
       type: 'find_bug',
@@ -1228,7 +1185,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs', tier: 'REINFORCEMENT' }],
     difficulty: 2, estMinutes: 20,
-    masteryCriteria: ['Identifies pattern destructuring in let bindings and parameters', 'Can rewrite an if-let-with-early-return shape as let-else'],
     commonMistakes: ['Viewing `let (a, b) = ...` as simple assignment rather than pattern matching'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1254,7 +1210,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'options3', url: RL + '12_options/options3.rs', tier: 'REINFORCEMENT' }],
     difficulty: 3, estMinutes: 25,
-    masteryCriteria: ['Can write match guards', 'Understands why plain let requires irrefutable patterns'],
     commonMistakes: ['Attempting to bind refutable patterns in plain `let` statements'],
     checkpoint: {
       type: 'find_bug',
@@ -1279,7 +1234,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'GAP — unsafe cannot be drilled safely here; re-do the checkpoint above and work through the book’s raw-pointer listings instead.',
     difficulty: 4, estMinutes: 30,
-    masteryCriteria: ['Can list the specific unsafe operations (raw dereferencing, unsafe fn calls, etc.)'],
     commonMistakes: ['Believing `unsafe` disables type checking or the borrow checker wholesale'],
     checkpoint: {
       type: 'find_bug',
@@ -1301,7 +1255,6 @@ const concepts = [
     rbeNote: 'RBE duplicates this TRPL chapter, so its links were deliberately removed — the remaining RBE cookbook pages are attached to their topics.',
     rustlings: [{ name: 'traits5', url: RL + '15_traits/traits5.rs', tier: 'REINFORCEMENT' }],
     difficulty: 4, estMinutes: 35,
-    masteryCriteria: ['Explains why Iterator uses associated Item types', 'Applies newtype to work around orphan rules'],
     commonMistakes: ['Violating orphan rules when implementing foreign traits on external types'],
     checkpoint: {
       type: 'explain',
@@ -1330,7 +1283,6 @@ const concepts = [
       { name: 'macros4', url: RL + '21_macros/macros4.rs', tier: 'CORE' },
     ],
     difficulty: 4, estMinutes: 30,
-    masteryCriteria: ['Can construct a simple macro_rules! macro matching tokens'],
     commonMistakes: ['Treating macros like runtime functions instead of AST token expansions'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1360,7 +1312,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'No separate drills by design — the working server itself is the practice for this block.',
     difficulty: 4, estMinutes: 120,
-    masteryCriteria: ['Understands worker pools using Arc<Mutex<Receiver<Job>>>', 'Implements graceful worker shutdown'],
     commonMistakes: ['Underestimating the synthesis of Arc, Mutex, and Box<dyn FnOnce()>'],
     checkpoint: {
       type: 'explain',
@@ -1383,7 +1334,6 @@ const concepts = [
       { name: 'clippy3', url: RL + '22_clippy/clippy3.rs', tier: 'REINFORCEMENT' },
     ],
     difficulty: 2, estMinutes: 20,
-    masteryCriteria: ['Can run cargo clippy and apply recommendations'],
     commonMistakes: ['Ignoring clippy warnings that signal performance or correctness bugs'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1416,7 +1366,6 @@ const concepts = [
       { name: 'as_ref_mut', url: RL + '23_conversions/as_ref_mut.rs', tier: 'REINFORCEMENT' },
     ],
     difficulty: 3, estMinutes: 35,
-    masteryCriteria: ['Understands blanket Into<U> implementation provided by From<T>', 'Uses TryFrom for fallible conversions'],
     commonMistakes: ['Using `as` for lossy conversions without bounds checks'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1446,7 +1395,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'No exercises by design — these pages are lookup references (keywords, operators, editions), not skills to drill.',
     difficulty: 1, estMinutes: 25,
-    masteryCriteria: ['Can find whether a word is a reserved keyword (App. A)', 'Can look up operator precedence (App. B)', 'Can explain what a Rust edition is (App. E)'],
     commonMistakes: ['Trying to use a reserved keyword like `type` or `match` as a variable name'],
     checkpoint: {
       type: 'multiple_choice',
@@ -1476,7 +1424,6 @@ const concepts = [
     rustlings: [],
     rustlingsNote: 'No rustlings drills cover attributes — verify by compiling the RBE examples above in a scratch crate.',
     difficulty: 2, estMinutes: 20,
-    masteryCriteria: ['Can gate an item with #[cfg(...)] for platform or feature conditions', 'Can scope #[allow(...)] to a single item instead of the whole crate'],
     commonMistakes: ['Using the cfg! macro (a runtime check) when #[cfg] (compile-time gating) was meant', 'Blanket #[allow(dead_code)] instead of removing dead code'],
     checkpoint: {
       type: 'multiple_choice',

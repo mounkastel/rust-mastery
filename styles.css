@@ -535,9 +535,9 @@ body {
 .rmc-gap-note { color: var(--bad-deep); background: var(--bad-soft); border: 1px solid rgba(185, 28, 28, 0.18); border-left: 3px solid var(--bad); }
 .rmc-uncertain-note { color: var(--text-2); background: var(--surface-callout); border: 1px solid var(--border); border-left: 3px solid var(--accent); }
 
-.rmc-mistakes-list, .rmc-criteria-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.7; color: var(--text); }
-.rmc-mistakes-list li::marker, .rmc-criteria-list li::marker { color: var(--text-4); }
-.rmc-criteria-list li, .rmc-mistakes-list li { margin-bottom: 2px; }
+.rmc-mistakes-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.7; color: var(--text); }
+.rmc-mistakes-list li::marker { color: var(--text-4); }
+.rmc-mistakes-list li { margin-bottom: 2px; }
 
 .rmc-mastery-scale { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .rmc button.rmc-mastery-dot {
