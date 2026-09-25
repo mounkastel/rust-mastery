@@ -27,15 +27,35 @@ const concepts = [
     ],
     difficulty: 1, estMinutes: 20,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Why does `println!` have a `!` after its name?',
-      options: [
-        { id: 'a', text: 'It is a macro, not a regular function' },
-        { id: 'b', text: 'It is required for all I/O in Rust' },
-        { id: 'c', text: 'It marks the function as unsafe' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Why does `println!` have a `!` after its name?',
+        options: [
+          { id: 'a', text: 'It is a macro, not a regular function' },
+          { id: 'b', text: 'It is required for all I/O in Rust' },
+          { id: 'c', text: 'It marks the function as unsafe' },
+        ],
+        correct: 'a',
+        explain: 'The `!` marks macro invocations. Macros like println! expand at compile time and can accept a variable number of format arguments, which an ordinary function cannot.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'You run `rustc main.rs` (no Cargo involved). What appears in the current directory?',
+        options: [
+          { id: 'a', text: '`a.out`, like gcc' },
+          { id: 'b', text: 'An executable named `main`' },
+          { id: 'c', text: 'Nothing — rustc requires a Cargo project' },
+        ],
+        correct: 'b',
+        explain: '`rustc main.rs` compiles straight to ./main (main.exe on Windows). `a.out` is gcc’s default; Cargo is convenient but never required.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let apples = 5;\n    println!("I have {apples} apples, that is {apples} total");\n}',
+        explain: 'Inline format args (Rust 2021+) capture `apples` directly. Output: "I have 5 apples, that is 5 total".',
+        },
       ],
-      correct: 'a',
-      explain: 'The `!` marks macro invocations. Macros like println! expand at compile time and can accept a variable number of format arguments, which an ordinary function cannot.',
     },
   },
   {
@@ -48,11 +68,37 @@ const concepts = [
     rustlings: [],
     difficulty: 1, estMinutes: 15,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Which command type-checks your project without producing a runnable binary, fastest?',
-      options: [{ id: 'a', text: 'cargo build' }, { id: 'b', text: 'cargo check' }, { id: 'c', text: 'cargo run' }],
-      correct: 'b',
-      explain: '`cargo check` skips code generation and just checks types/borrows, which is much faster while iterating.',
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Which command type-checks your project without producing a runnable binary, fastest?',
+        options: [{ id: 'a', text: 'cargo build' }, { id: 'b', text: 'cargo check' }, { id: 'c', text: 'cargo run' }],
+        correct: 'b',
+        explain: '`cargo check` skips code generation and just checks types/borrows, which is much faster while iterating.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`cargo new game --bin` then `cargo build`. Where is the runnable binary?',
+        options: [
+          { id: 'a', text: 'In the project root: `game/game`' },
+          { id: 'b', text: 'In `game/target/debug/game`' },
+          { id: 'c', text: 'In `game/src/game`' },
+        ],
+        correct: 'b',
+        explain: 'Cargo puts build artifacts under target/<profile>/ — src/ holds only sources, never binaries.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'A teammate clones your repo. Which file pins the exact dependency versions they will build with?',
+        options: [
+          { id: 'a', text: 'Cargo.toml' },
+          { id: 'b', text: 'Cargo.lock' },
+          { id: 'c', text: '.cargo/config.toml' },
+        ],
+        correct: 'b',
+        explain: 'Cargo.toml declares requirements (often ranges); Cargo.lock records the exact resolved versions. Commit the lockfile for binaries.',
+        },
+      ],
     },
   },
 
@@ -67,15 +113,35 @@ const concepts = [
     rustlings: [],
     difficulty: 2, estMinutes: 30,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'In the guessing game walkthrough, what was the primary purpose of the `match` expression?',
-      options: [
-        { id: 'a', text: 'To branch cleanly on all possible outcomes (Result Ok/Err, or Ordering Less/Greater/Equal)' },
-        { id: 'b', text: 'To generate random numbers' },
-        { id: 'c', text: 'To import external crates' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'In the guessing game walkthrough, what was the primary purpose of the `match` expression?',
+        options: [
+          { id: 'a', text: 'To branch cleanly on all possible outcomes (Result Ok/Err, or Ordering Less/Greater/Equal)' },
+          { id: 'b', text: 'To generate random numbers' },
+          { id: 'c', text: 'To import external crates' },
+        ],
+        correct: 'a',
+        explain: '`match` enables exhaustive pattern matching across all possible variants (like Ok/Err or Less/Greater/Equal). Chapters 3 through 6 will formally break down variables, types, and match syntax step-by-step.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`rand` is in Cargo.toml, yet the code still needs `use rand::Rng;`. Why?',
+        options: [
+          { id: 'a', text: 'Cargo.toml only fetches and builds the crate; `use` brings the trait into scope' },
+          { id: 'b', text: '`use` downloads the crate from crates.io' },
+          { id: 'c', text: 'It is boilerplate and can be deleted' },
+        ],
+        correct: 'a',
+        explain: 'Dependencies and scope are separate steps: Cargo.toml makes the crate available, `use` makes its items nameable. Without the trait in scope, `.gen_range()` would not resolve.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'let guess = String::new();\nio::stdin().read_line(&mut guess).expect("failed");\n\nThe compiler rejects this. Which line must change, and how?',
+        explain: '`guess` is immutable, so `&mut guess` is illegal (E0596: cannot borrow as mutable). Fix: `let mut guess = String::new();`.',
+        },
       ],
-      correct: 'a',
-      explain: '`match` enables exhaustive pattern matching across all possible variants (like Ok/Err or Less/Greater/Equal). Chapters 3 through 6 will formally break down variables, types, and match syntax step-by-step.',
     },
   },
 
@@ -100,9 +166,29 @@ const concepts = [
     ],
     difficulty: 1, estMinutes: 30,
     checkpoint: {
-      type: 'predict_output',
-      prompt: 'What does this print?\n\nlet x = 5;\nlet x = x + 1;\n{\n    let x = x * 2;\n    println!("inner: {x}");\n}\nprintln!("outer: {x}");',
-      explain: 'Shadowing creates a new binding each time. Inner block: (5+1)*2=12 → "inner: 12". After the block ends, the outer shadow (6) is back in scope → "outer: 6".',
+      questions: [
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nlet x = 5;\nlet x = x + 1;\n{\n    let x = x * 2;\n    println!("inner: {x}");\n}\nprintln!("outer: {x}");',
+        explain: 'Shadowing creates a new binding each time. Inner block: (5+1)*2=12 → "inner: 12". After the block ends, the outer shadow (6) is back in scope → "outer: 6".',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'let x = 5;\nx = 6;\n\nThis fails, yet `let x = 5; let x = 6;` compiles. What is the error, and why the difference?',
+        explain: 'Reassignment to an immutable binding → E0384 (cannot assign twice to immutable variable). The second version shadows: it declares a brand-new binding that merely reuses the name.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Which of these compiles?',
+        options: [
+          { id: 'a', text: '`let x = 5; let x = "hi";`' },
+          { id: 'b', text: '`let mut x = 5; x = "hi";`' },
+          { id: 'c', text: 'Both' },
+        ],
+        correct: 'a',
+        explain: 'Shadowing creates a new binding, so the type may change. `mut` only permits same-type reassignment.',
+        },
+      ],
     },
   },
   {
@@ -121,15 +207,35 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 35,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Which is true of a Rust array `[i32; 5]`?',
-      options: [
-        { id: 'a', text: 'Its length can change at runtime' },
-        { id: 'b', text: 'Its length is fixed and part of its type' },
-        { id: 'c', text: 'It is heap-allocated like Vec' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Which is true of a Rust array `[i32; 5]`?',
+        options: [
+          { id: 'a', text: 'Its length can change at runtime' },
+          { id: 'b', text: 'Its length is fixed and part of its type' },
+          { id: 'c', text: 'It is heap-allocated like Vec' },
+        ],
+        correct: 'b',
+        explain: 'Array length is fixed at compile time and encoded in the type itself, unlike Vec<T> which is growable and heap-allocated.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let t = (1, 2.5, \'a\');\n    let (x, _, z) = t;\n    println!("{x} {z}");\n}',
+        explain: 'Destructuring binds x=1 and z=\'a\'; `_` discards the 2.5. Output: "1 a".',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'In `let x = 5;` with no annotation, what is the type of `x`?',
+        options: [
+          { id: 'a', text: '`i32` — the default integer type' },
+          { id: 'b', text: '`usize` — it follows the platform' },
+          { id: 'c', text: 'Unknown until `x` is used somewhere' },
+        ],
+        correct: 'a',
+        explain: 'Integer literals default to `i32`. The compiler only demands an annotation when inference cannot settle the type.',
+        },
       ],
-      correct: 'b',
-      explain: 'Array length is fixed at compile time and encoded in the type itself, unlike Vec<T> which is growable and heap-allocated.',
     },
   },
   {
@@ -148,9 +254,29 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 30,
     checkpoint: {
-      type: 'find_bug',
-      prompt: 'fn square(num: i32) -> i32 {\n    num * num;\n}\n\nWhy won’t this compile, and what’s the one-character fix?',
-      explain: 'The trailing `;` turns `num * num` into a statement returning `()`, which doesn’t match the declared `-> i32`. Remove the semicolon so it’s a tail expression.',
+      questions: [
+        {
+        type: 'find_bug',
+        prompt: 'fn square(num: i32) -> i32 {\n    num * num;\n}\n\nWhy won’t this compile, and what’s the one-character fix?',
+        explain: 'The trailing `;` turns `num * num` into a statement returning `()`, which doesn’t match the declared `-> i32`. Remove the semicolon so it’s a tail expression.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let y = {\n        let x = 3;\n        x + 1\n    };\n    println!("{y}");\n}',
+        explain: 'A block is an expression evaluating to its tail expression (no semicolon). y = 4.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'When is `!` (the never type) the honest return type?',
+        options: [
+          { id: 'a', text: 'A function that panics or loops forever' },
+          { id: 'b', text: 'Any function that returns nothing' },
+          { id: 'c', text: 'A function returning `Result`' },
+        ],
+        correct: 'a',
+        explain: '`()` means "returns normally with no value"; `!` means "never returns at all" (panic, infinite loop, exit).',
+        },
+      ],
     },
   },
   {
@@ -171,15 +297,35 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 30,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Why does `if number { ... }` fail to compile in Rust (unlike C or JavaScript)?',
-      options: [
-        { id: 'a', text: 'Rust has no if-statements' },
-        { id: 'b', text: 'Rust never implicitly converts non-bool types to bool' },
-        { id: 'c', text: 'Integers cannot be compared' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Why does `if number { ... }` fail to compile in Rust (unlike C or JavaScript)?',
+        options: [
+          { id: 'a', text: 'Rust has no if-statements' },
+          { id: 'b', text: 'Rust never implicitly converts non-bool types to bool' },
+          { id: 'c', text: 'Integers cannot be compared' },
+        ],
+        correct: 'b',
+        explain: 'Rust requires the condition to be an actual `bool` — there is no implicit truthiness conversion the way there is in C or JS.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let mut n = 0;\n    let r = loop {\n        n += 1;\n        if n == 3 {\n            break n * 10;\n        }\n    };\n    println!("{r}");\n}',
+        explain: '`break value` exits the loop yielding that value: 3*10 = 30.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Which loop is guaranteed to execute its body at least once?',
+        options: [
+          { id: 'a', text: '`loop`' },
+          { id: 'b', text: '`while cond`' },
+          { id: 'c', text: '`for x in iter`' },
+        ],
+        correct: 'a',
+        explain: '`loop` has no entry condition — it runs until `break`. `while` and `for` may both run zero times.',
+        },
       ],
-      correct: 'b',
-      explain: 'Rust requires the condition to be an actual `bool` — there is no implicit truthiness conversion the way there is in C or JS.',
     },
   },
 
@@ -202,9 +348,29 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 40,
     checkpoint: {
-      type: 'find_bug',
-      prompt: 'let s1 = String::from("hi");\nlet s2 = s1;\nprintln!("{s1}");\n\nWhat error appears, and why does it NOT happen with `let x = 5; let y = x; println!("{x}");`?',
-      explain: 'String is not Copy, so `let s2 = s1` moves ownership — s1 is no longer valid. `i32` is Copy, so `let y = x` duplicates the value on the stack and both remain valid.',
+      questions: [
+        {
+        type: 'find_bug',
+        prompt: 'let s1 = String::from("hi");\nlet s2 = s1;\nprintln!("{s1}");\n\nWhat error appears, and why does it NOT happen with `let x = 5; let y = x; println!("{x}");`?',
+        explain: 'String is not Copy, so `let s2 = s1` moves ownership — s1 is no longer valid. `i32` is Copy, so `let y = x` duplicates the value on the stack and both remain valid.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn main() {\n    let s = String::from("hi");\n    takes(s);\n    println!("{s}");\n}\nfn takes(_s: String) {}\n\nWhat error does this produce, and what is the idiomatic fix?',
+        explain: 'E0382: use of moved value — passing `s` by value moves ownership into `takes`. Fix: borrow instead: `takes(&s)` with `fn takes(_s: &str)`.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Which of these types are `Copy`?',
+        options: [
+          { id: 'a', text: '`i32`, `bool`, `char`' },
+          { id: 'b', text: '`String`, `Vec<T>`' },
+          { id: 'c', text: 'Every type stored on the stack' },
+        ],
+        correct: 'a',
+        explain: 'Only certain small types implement Copy. Heap-owning types never do — and not every stack type qualifies either (`[String; 2]` is not Copy).',
+        },
+      ],
     },
   },
   {
@@ -219,15 +385,29 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 35,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Which combination of borrows is allowed at the same time on the same value?',
-      options: [
-        { id: 'a', text: 'Two mutable references' },
-        { id: 'b', text: 'One mutable and one immutable reference' },
-        { id: 'c', text: 'Any number of immutable references' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Which combination of borrows is allowed at the same time on the same value?',
+        options: [
+          { id: 'a', text: 'Two mutable references' },
+          { id: 'b', text: 'One mutable and one immutable reference' },
+          { id: 'c', text: 'Any number of immutable references' },
+        ],
+        correct: 'c',
+        explain: 'Rust allows either any number of immutable (&T) borrows, or exactly one mutable (&mut T) borrow — never both kinds simultaneously.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn main() {\n    let mut s = String::from("hi");\n    let r1 = &s;\n    let r2 = &mut s;\n    println!("{r1}");\n}\n\nWhy is this rejected?',
+        explain: 'E0502: cannot borrow `s` as mutable while the immutable borrow `r1` is still live — its last use is the final println!, so the two borrows overlap. Either kind, never both at once.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let mut s = String::from("hi");\n    {\n        let r = &mut s;\n        r.push(\'!\');\n    }\n    println!("{s}");\n}',
+        explain: 'The mutable borrow ends when `r` goes out of scope, so the later borrow for println! is legal. Output: "hi!".',
+        },
       ],
-      correct: 'c',
-      explain: 'Rust allows either any number of immutable (&T) borrows, or exactly one mutable (&mut T) borrow — never both kinds simultaneously.',
     },
   },
   {
@@ -240,9 +420,29 @@ const concepts = [
     rustlings: [{ name: 'primitive_types4', url: RL + '04_primitive_types/primitive_types4.rs' }],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
-      type: 'predict_output',
-      prompt: 'let a = [1, 2, 3, 4, 5];\nlet s = &a[1..3];\nprintln!("{:?}", s);',
-      explain: 'Range `1..3` is half-open: indices 1 and 2, excluding 3. Output: [2, 3].',
+      questions: [
+        {
+        type: 'predict_output',
+        prompt: 'let a = [1, 2, 3, 4, 5];\nlet s = &a[1..3];\nprintln!("{:?}", s);',
+        explain: 'Range `1..3` is half-open: indices 1 and 2, excluding 3. Output: [2, 3].',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'let a = [1, 2, 3];\nlet s: &[i32] = a;\n\nWhat is wrong, and what is the fix?',
+        explain: 'Type mismatch (E0308): `a` is an array `[i32; 3]`, not a slice reference. Fix: `let s: &[i32] = &a;` — arrays coerce to slices behind a reference.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Book functions take `&str` rather than `&String`. Why?',
+        options: [
+          { id: 'a', text: 'It accepts owned Strings, slices, and literals via deref coercion' },
+          { id: 'b', text: 'It avoids heap allocation' },
+          { id: 'c', text: 'The borrow checker requires it' },
+        ],
+        correct: 'a',
+        explain: '`&String` derefs to `&str`, so a `&str` parameter accepts strictly more inputs. `&String` in a signature is needlessly narrow.',
+        },
+      ],
     },
   },
 
@@ -264,15 +464,35 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 30,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What kind of struct is `struct Point(i32, i32);`?',
-      options: [
-        { id: 'a', text: 'Classic (named-field) struct' },
-        { id: 'b', text: 'Tuple struct' },
-        { id: 'c', text: 'Unit-like struct' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What kind of struct is `struct Point(i32, i32);`?',
+        options: [
+          { id: 'a', text: 'Classic (named-field) struct' },
+          { id: 'b', text: 'Tuple struct' },
+          { id: 'c', text: 'Unit-like struct' },
+        ],
+        correct: 'b',
+        explain: 'Fields are accessed positionally (`p.0`, `p.1`) rather than by name — this is a tuple struct.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'struct User { name: String, age: u32 }\nfn main() {\n    let u1 = User { name: String::from("a"), age: 1 };\n    let _u2 = User { age: 2, ..u1 };\n    println!("{}", u1.name);\n}\n\nWhat fails here, and why?',
+        explain: 'Partial move (E0382): struct-update syntax `..u1` moves the remaining fields, so `u1.name` (a String, not Copy) now belongs to `_u2` and reading `u1.name` afterwards borrows a moved value.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'When can you write `User { name, age }` instead of `User { name: name, age: age }`?',
+        options: [
+          { id: 'a', text: 'When local variables have exactly the same names as the fields' },
+          { id: 'b', text: 'Always — the compiler figures it out' },
+          { id: 'c', text: 'Only for fields marked `pub`' },
+        ],
+        correct: 'a',
+        explain: 'Field init shorthand requires a variable in scope with the identical name. It is purely syntactic sugar, not inference.',
+        },
       ],
-      correct: 'b',
-      explain: 'Fields are accessed positionally (`p.0`, `p.1`) rather than by name — this is a tuple struct.',
     },
   },
   {
@@ -285,15 +505,35 @@ const concepts = [
     rustlings: [{ name: 'structs3', url: RL + '07_structs/structs3.rs' }],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Which signature lets a method read fields without consuming or mutating the struct?',
-      options: [
-        { id: 'a', text: 'fn area(self) -> u32' },
-        { id: 'b', text: 'fn area(&self) -> u32' },
-        { id: 'c', text: 'fn area(&mut self) -> u32' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Which signature lets a method read fields without consuming or mutating the struct?',
+        options: [
+          { id: 'a', text: 'fn area(self) -> u32' },
+          { id: 'b', text: 'fn area(&self) -> u32' },
+          { id: 'c', text: 'fn area(&mut self) -> u32' },
+        ],
+        correct: 'b',
+        explain: '`&self` borrows the instance immutably — the common case for read-only methods.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'struct R { w: u32 }\nimpl R {\n    fn w(self) -> u32 { self.w }\n}\nfn main() {\n    let r = R { w: 3 };\n    let a = r.w();\n    println!("{} {}", a, r.w);\n}\n\nWhy is the second `r.w` rejected?',
+        explain: 'E0382: `w(self)` takes ownership, so the first call moves `r` and the second use is of a moved value. Contrast with `&self` methods, which only borrow. Fix: `fn w(&self)`.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What is `Self` (capital S) inside an `impl` block?',
+        options: [
+          { id: 'a', text: 'An alias for the type being implemented' },
+          { id: 'b', text: 'The current instance, like `self`' },
+          { id: 'c', text: 'The parent module' },
+        ],
+        correct: 'a',
+        explain: '`Self` refers to the implementing type itself — handy in constructors like `fn new() -> Self`. Lowercase `self` is the receiver.',
+        },
       ],
-      correct: 'b',
-      explain: '`&self` borrows the instance immutably — the common case for read-only methods.',
     },
   },
 
@@ -314,15 +554,35 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What does `Option<T>` model?',
-      options: [
-        { id: 'a', text: 'An error that may occur' },
-        { id: 'b', text: 'A value that may or may not be present' },
-        { id: 'c', text: 'A value protected by a mutex' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `Option<T>` model?',
+        options: [
+          { id: 'a', text: 'An error that may occur' },
+          { id: 'b', text: 'A value that may or may not be present' },
+          { id: 'c', text: 'A value protected by a mutex' },
+        ],
+        correct: 'b',
+        explain: 'Option<T> is Some(T) or None — Rust’s type-safe replacement for nullable references.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nenum M { On(String), Off }\nfn main() {\n    let m = M::On(String::from("hi"));\n    match m {\n        M::On(s) => println!("on {s}"),\n        M::Off => println!("off"),\n    }\n}',
+        explain: 'The `On` arm binds the inner String to `s`. Output: "on hi". Variants can carry data of different types.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why does `Option<T>` prevent null-pointer bugs instead of just renaming them?',
+        options: [
+          { id: 'a', text: 'The compiler forces every use site to handle both cases — there is no implicit unwrap' },
+          { id: 'b', text: 'Checking `None` is faster than checking null' },
+          { id: 'c', text: 'It uses less memory than a nullable pointer' },
+        ],
+        correct: 'a',
+        explain: 'Safety comes from exhaustiveness: you cannot reach the inner value without confronting `None`. No silent default, no forgotten check.',
+        },
       ],
-      correct: 'b',
-      explain: 'Option<T> is Some(T) or None — Rust’s type-safe replacement for nullable references.',
     },
   },
   {
@@ -341,9 +601,29 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
-      type: 'predict_output',
-      prompt: 'let a: Option<i32> = Some(10);\nlet b: Option<i32> = None;\nprintln!("{} {}", a.unwrap_or(0), b.unwrap_or(0));',
-      explain: 'unwrap_or returns the value inside Some, or the provided fallback default if None. Output: 10 0.',
+      questions: [
+        {
+        type: 'predict_output',
+        prompt: 'let a: Option<i32> = Some(10);\nlet b: Option<i32> = None;\nprintln!("{} {}", a.unwrap_or(0), b.unwrap_or(0));',
+        explain: 'unwrap_or returns the value inside Some, or the provided fallback default if None. Output: 10 0.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn plus_one(x: Option<i32>) -> Option<i32> {\n    match x {\n        Some(i) => Some(i + 1),\n    }\n}\n\nWhat does the compiler demand here?',
+        explain: 'Exhaustiveness (E0004): the `None` case is unhandled. Add `None => None,` — the compiler refuses to let a case fall through silently.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `match` give you that `if let` + `else` does not?',
+        options: [
+          { id: 'a', text: 'Compiler-checked exhaustiveness' },
+          { id: 'b', text: 'The ability to bind values from patterns' },
+          { id: 'c', text: 'Matching on integers' },
+        ],
+        correct: 'a',
+        explain: '`if let` also binds values and matches integers, but only `match` proves to the compiler that no case was forgotten.',
+        },
+      ],
     },
   },
   {
@@ -356,9 +636,29 @@ const concepts = [
     rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs' }],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
-      type: 'explain',
-      prompt: 'Why does Rust force `match` arms to be exhaustive, unlike switch in C or JS?',
-      explain: 'Exhaustiveness is checked at compile time so that adding a new enum variant later forces every match site that cares to be updated — this eliminates a whole class of "forgot to handle the new case" bugs.',
+      questions: [
+        {
+        type: 'explain',
+        prompt: 'Why does Rust force `match` arms to be exhaustive, unlike switch in C or JS?',
+        explain: 'Exhaustiveness is checked at compile time so that adding a new enum variant later forces every match site that cares to be updated — this eliminates a whole class of "forgot to handle the new case" bugs.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let n = 7;\n    match n {\n        x if x < 5 => println!("small"),\n        x if x % 2 == 1 => println!("odd {x}"),\n        _ => println!("other"),\n    }\n}',
+        explain: 'Arms try in order with their guards: 7 is not < 5, is odd → binds x=7. Output: "odd 7".',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Which pattern may appear in a plain `let` (not `if let`, not `match`)?',
+        options: [
+          { id: 'a', text: '`(x, y)` destructuring a tuple' },
+          { id: 'b', text: '`Some(x)` on an Option' },
+          { id: 'c', text: 'The literal `3` on an integer' },
+        ],
+        correct: 'a',
+        explain: 'Plain `let` accepts only irrefutable patterns — ones that cannot fail. `Some(x)` and literals can fail, so they need `match`/`if let`.',
+        },
+      ],
     },
   },
   {
@@ -371,15 +671,35 @@ const concepts = [
     rustlings: [{ name: 'options2', url: RL + '12_options/options2.rs' }],
     difficulty: 2, estMinutes: 20,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: '`if let Some(x) = maybe_val { ... }` is sugar for which match?',
-      options: [
-        { id: 'a', text: 'match maybe_val { Some(x) => {...}, _ => {} }' },
-        { id: 'b', text: 'match maybe_val { Some(x) => {...} }' },
-        { id: 'c', text: 'while maybe_val.is_some() {...}' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: '`if let Some(x) = maybe_val { ... }` is sugar for which match?',
+        options: [
+          { id: 'a', text: 'match maybe_val { Some(x) => {...}, _ => {} }' },
+          { id: 'b', text: 'match maybe_val { Some(x) => {...} }' },
+          { id: 'c', text: 'while maybe_val.is_some() {...}' },
+        ],
+        correct: 'a',
+        explain: 'if let is exactly a match with one handled arm and an implicit do-nothing `_` arm.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn main() {\n    let s = Some(String::from("hi"));\n    if let Some(x) = s {\n        println!("{x}");\n    }\n    println!("{:?}", s);\n}\n\nWhy does the last line fail?',
+        explain: 'Partial move (E0382): matching `Some(x)` by value moves the String out of `s`, so `s` is partially moved and cannot be used afterwards. Borrow instead: `if let Some(x) = &s`.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`let Some(x) = opt else { return; };` — what must the `else` block do?',
+        options: [
+          { id: 'a', text: 'Diverge: return, break, continue, or panic — it may never fall through' },
+          { id: 'b', text: 'Assign a default value to `x`' },
+          { id: 'c', text: 'Anything; `x` becomes `None` on the sad path' },
+        ],
+        correct: 'a',
+        explain: '`let-else` only compiles if the else branch diverges, because execution continues with `x` bound — there must be no path where `x` is unbound.',
+        },
       ],
-      correct: 'a',
-      explain: 'if let is exactly a match with one handled arm and an implicit do-nothing `_` arm.',
     },
   },
 
@@ -397,15 +717,41 @@ const concepts = [
     rustlings: [],
     difficulty: 2, estMinutes: 15,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'A package can contain how many library crates?',
-      options: [
-        { id: 'a', text: 'Unlimited' },
-        { id: 'b', text: 'At most one' },
-        { id: 'c', text: 'Exactly one, mandatory' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'A package can contain how many library crates?',
+        options: [
+          { id: 'a', text: 'Unlimited' },
+          { id: 'b', text: 'At most one' },
+          { id: 'c', text: 'Exactly one, mandatory' },
+        ],
+        correct: 'b',
+        explain: 'A package must have at least one crate, may have multiple binary crates, but at most one library crate.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'A package contains both `src/main.rs` and `src/lib.rs`. What does that mean?',
+        options: [
+          { id: 'a', text: 'Two separate packages sharing a directory' },
+          { id: 'b', text: 'One package with a binary crate and a library crate' },
+          { id: 'c', text: 'Invalid layout — a package cannot hold both' },
+        ],
+        correct: 'b',
+        explain: 'Standard layout: `main.rs` is the binary root, `lib.rs` the library root of the same package. They can even share module files.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does the first `cargo build` do about `rand = "0.8"` in Cargo.toml?',
+        options: [
+          { id: 'a', text: 'Downloads, compiles, and locks the exact resolved version' },
+          { id: 'b', text: 'Only verifies the crate exists' },
+          { id: 'c', text: 'Vendors the source into `src/`' },
+        ],
+        correct: 'a',
+        explain: 'First build resolves the requirement to a concrete version, compiles it, and records it in Cargo.lock. Sources stay in the registry cache, never in src/.',
+        },
       ],
-      correct: 'b',
-      explain: 'A package must have at least one crate, may have multiple binary crates, but at most one library crate.',
     },
   },
   {
@@ -421,14 +767,35 @@ const concepts = [
     rustlings: [{ name: 'modules1', url: RL + '10_modules/modules1.rs' }],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'By default, is an item declared inside `mod foo { fn bar() {} }` visible outside `foo`?',
-      options: [
-        { id: 'a', text: 'Yes, everything is public by default' },
-        { id: 'b', text: 'No — everything is private unless marked pub' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'By default, is an item declared inside `mod foo { fn bar() {} }` visible outside `foo`?',
+        options: [
+          { id: 'a', text: 'Yes, everything is public by default' },
+          { id: 'b', text: 'No — everything is private unless marked pub' },
+          { id: 'c', text: 'Functions are private, but types and constants are public' },
+        ],
+        correct: 'b',
+        explain: 'Rust’s default is private; you opt into visibility with `pub`, the opposite default from many other languages.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'mod kitchen {\n    fn cook() {}\n}\nfn main() {\n    kitchen::cook();\n}\n\nWhat is the error, and what is the minimal fix?',
+        explain: 'Privacy error (E0603): `cook` is private to `kitchen` by default, so the path does not resolve. Minimal fix: `pub fn cook()`.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `pub(crate)` on an item mean?',
+        options: [
+          { id: 'a', text: 'Visible anywhere inside this crate, but not to downstream crates' },
+          { id: 'b', text: 'Exactly the same as `pub`' },
+          { id: 'c', text: 'Visible only inside the defining module' },
+        ],
+        correct: 'a',
+        explain: '`pub(crate)` is the middle ground: crate-wide sharing without committing to a public API. Plain `pub` also exposes it externally.',
+        },
       ],
-      correct: 'b',
-      explain: 'Rust’s default is private; you opt into visibility with `pub`, the opposite default from many other languages.',
     },
   },
   {
@@ -447,15 +814,35 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What does `mod foo;` (no body, just a semicolon) tell the compiler?',
-      options: [
-        { id: 'a', text: 'Declare an empty module named foo' },
-        { id: 'b', text: 'Load foo’s contents from foo.rs or foo/mod.rs' },
-        { id: 'c', text: 'Import foo from an external crate' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `mod foo;` (no body, just a semicolon) tell the compiler?',
+        options: [
+          { id: 'a', text: 'Declare an empty module named foo' },
+          { id: 'b', text: 'Load foo’s contents from foo.rs or foo/mod.rs' },
+          { id: 'c', text: 'Import foo from an external crate' },
+        ],
+        correct: 'b',
+        explain: 'The semicolon form tells Rust the module body lives in another file with a matching name.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'How do you import both `std::io` and `std::io::Write` in one statement?',
+        options: [
+          { id: 'a', text: '`use std::io::{self, Write};`' },
+          { id: 'b', text: '`use std::io, std::io::Write;`' },
+          { id: 'c', text: '`use std::io::*;`' },
+        ],
+        correct: 'a',
+        explain: '`self` in a nested list refers to the parent path itself. Glob (c) also compiles but imports everything — the book prefers explicit nested lists.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'use std::fmt::Result;\nuse std::io::Result;\nfn main() {}\n\nWhy does this fail, and how do real codebases handle it?',
+        explain: 'Name collision (E0252): two different `Result` types in one namespace. Fix with an alias: `use std::io::Result as IoResult;` — exactly why `as` exists.',
+        },
       ],
-      correct: 'b',
-      explain: 'The semicolon form tells Rust the module body lives in another file with a matching name.',
     },
   },
 
@@ -476,11 +863,31 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Which method returns `Option<&T>` instead of panicking on an out-of-bounds index?',
-      options: [{ id: 'a', text: 'v[i]' }, { id: 'b', text: 'v.get(i)' }, { id: 'c', text: 'v.at(i)' }],
-      correct: 'b',
-      explain: '`v.get(i)` returns None for an invalid index rather than panicking, unlike the `[]` operator.',
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Which method returns `Option<&T>` instead of panicking on an out-of-bounds index?',
+        options: [{ id: 'a', text: 'v[i]' }, { id: 'b', text: 'v.get(i)' }, { id: 'c', text: 'v.at(i)' }],
+        correct: 'b',
+        explain: '`v.get(i)` returns None for an invalid index rather than panicking, unlike the `[]` operator.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let mut v = vec![1, 2, 3];\n    for x in &mut v {\n        *x *= 2;\n    }\n    println!("{:?}", v);\n}',
+        explain: 'Iterating `&mut v` yields mutable references; dereferencing writes through them in place. Output: [2, 4, 6].',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'After `let mut v = Vec::new(); v.push(1);`, what can you rely on?',
+        options: [
+          { id: 'a', text: '`v.len() == 1` and capacity is at least 1 (exact capacity unspecified)' },
+          { id: 'b', text: 'Capacity is exactly 1' },
+          { id: 'c', text: '`v.len()` is still 0 until the vector is shrunk' },
+        ],
+        correct: 'a',
+        explain: 'Only `len()` is contractual here. Capacity grows by allocator strategy — never assert exact values.',
+        },
+      ],
     },
   },
   {
@@ -498,9 +905,23 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 35,
     checkpoint: {
-      type: 'explain',
-      prompt: 'Why does Rust not let you index a String with `s[0]` to get the first character?',
-      explain: 'Rust Strings are UTF-8 encoded, and a single character can occupy 1–4 bytes, so a byte index doesn’t reliably correspond to a character boundary.',
+      questions: [
+        {
+        type: 'explain',
+        prompt: 'Why does Rust not let you index a String with `s[0]` to get the first character?',
+        explain: 'Rust Strings are UTF-8 encoded, and a single character can occupy 1–4 bytes, so a byte index doesn’t reliably correspond to a character boundary.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let s = "é";\n    println!("{} {}", s.len(), s.chars().count());\n}',
+        explain: 'é is one char but two bytes in UTF-8: `len()` counts bytes (2), `chars().count()` counts scalar values (1). This is exactly why byte indexing is forbidden.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn main() {\n    let s1 = String::from("a");\n    let s2 = "b";\n    let _s3 = s1 + s2;\n    println!("{s1}");\n}\n\nWhat fails here?',
+        explain: 'E0382: `+` (the `Add` impl for String) takes `s1` by value, moving it. The final println! borrows a moved value. Bind or clone first if `s1` is still needed.',
+        },
+      ],
     },
   },
   {
@@ -518,9 +939,29 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
-      type: 'predict_output',
-      prompt: 'let mut m = std::collections::HashMap::new();\n*m.entry("a").or_insert(0) += 1;\n*m.entry("a").or_insert(0) += 1;\nprintln!("{}", m["a"]);',
-      explain: 'Each call increments the counter for "a" via the entry API; after two calls the value is 2.',
+      questions: [
+        {
+        type: 'predict_output',
+        prompt: 'let mut m = std::collections::HashMap::new();\n*m.entry("a").or_insert(0) += 1;\n*m.entry("a").or_insert(0) += 1;\nprintln!("{}", m["a"]);',
+        explain: 'Each call increments the counter for "a" via the entry API; after two calls the value is 2.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why does `HashMap::new()` sometimes need a type annotation while `vec![1]` does not?',
+        options: [
+          { id: 'a', text: 'No values flow into an empty map yet, so key/value types cannot be inferred' },
+          { id: 'b', text: 'HashMap is always dynamically typed' },
+          { id: 'c', text: 'Annotations are required on all collections' },
+        ],
+        correct: 'a',
+        explain: 'Inference needs evidence: `vec![1]` shows the element type, but an empty map reveals nothing until something is inserted or the annotation pins it down.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'use std::collections::HashMap;\nfn main() {\n    let mut m = HashMap::new();\n    let k = String::from("a");\n    m.insert(&k, 1);\n    drop(k);\n    println!("{}", m.len());\n}\n\nWhat fails here?',
+        explain: 'E0505: the map holds a borrow of `k`, so `drop(k)` (a move) is illegal while the borrow is live. Owned keys (`m.insert(k, 1)`) avoid entangling lifetimes.',
+        },
+      ],
     },
   },
 
@@ -538,15 +979,35 @@ const concepts = [
     rustlings: [],
     difficulty: 2, estMinutes: 20,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Which situation is the better fit for `panic!` rather than returning a Result?',
-      options: [
-        { id: 'a', text: 'A file the user asked to open does not exist' },
-        { id: 'b', text: 'An internal invariant your code guarantees is violated — a genuine bug' },
-        { id: 'c', text: 'Parsing user-supplied text as a number' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Which situation is the better fit for `panic!` rather than returning a Result?',
+        options: [
+          { id: 'a', text: 'A file the user asked to open does not exist' },
+          { id: 'b', text: 'An internal invariant your code guarantees is violated — a genuine bug' },
+          { id: 'c', text: 'Parsing user-supplied text as a number' },
+        ],
+        correct: 'b',
+        explain: 'panic! is for bugs / broken invariants where continuing is unsafe or meaningless; expected failures should use Result.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'How do you assert not just that a test panics, but that it panics with a specific message?',
+        options: [
+          { id: 'a', text: '`#[should_panic(expected = "msg")]`' },
+          { id: 'b', text: '`#[should_panic("msg")]`' },
+          { id: 'c', text: 'Impossible — only the fact of panicking is observable' },
+        ],
+        correct: 'a',
+        explain: '`expected` does substring matching against the panic payload. (b) is not valid attribute syntax.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What happens when this runs?\n\nfn main() {\n    let v = vec![1];\n    println!("{}", v[5]);\n}',
+        explain: 'Runtime panic (not a compile error): bounds are checked at runtime. Message: "index out of bounds: the len is 1 but the index is 5". This is precisely the case `v.get(5)` would have returned `None` for.',
+        },
       ],
-      correct: 'b',
-      explain: 'panic! is for bugs / broken invariants where continuing is unsafe or meaningless; expected failures should use Result.',
     },
   },
   {
@@ -574,9 +1035,29 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 40,
     checkpoint: {
-      type: 'find_bug',
-      prompt: 'fn parse_it(s: &str) -> i32 {\n    s.parse::<i32>()?\n}\n\nWhy won’t this compile?',
-      explain: '`?` requires the enclosing function to return a Result (or Option); this function’s return type is plain i32, so `?` has nowhere to propagate the Err case to.',
+      questions: [
+        {
+        type: 'find_bug',
+        prompt: 'fn parse_it(s: &str) -> i32 {\n    s.parse::<i32>()?\n}\n\nWhy won’t this compile?',
+        explain: '`?` requires the enclosing function to return a Result (or Option); this function’s return type is plain i32, so `?` has nowhere to propagate the Err case to.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let r: Result<i32, &str> = Ok(5);\n    let out = r.map(|x| x * 2).unwrap_or(0);\n    println!("{out}");\n}',
+        explain: '`map` transforms the `Ok` payload (Err would pass through untouched); `unwrap_or` extracts with a fallback. Output: 10.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why is `Result<T, E>` better than returning `-1` or `null` on failure?',
+        options: [
+          { id: 'a', text: 'The compiler forces callers to confront the `Err` case; sentinels can be silently ignored' },
+          { id: 'b', text: 'It is faster at runtime' },
+          { id: 'c', text: 'It uses less memory' },
+        ],
+        correct: 'a',
+        explain: 'Sentinel values are a convention the compiler cannot enforce — `if (x != -1)` is forgettable. `Result` makes ignoring failure a compile-time conversation.',
+        },
+      ],
     },
   },
 
@@ -597,15 +1078,35 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What is monomorphization?',
-      options: [
-        { id: 'a', text: 'Runtime dispatch through a vtable' },
-        { id: 'b', text: 'The compiler generating a separate concrete version of generic code for each type used' },
-        { id: 'c', text: 'Converting all types to a single universal type' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What is monomorphization?',
+        options: [
+          { id: 'a', text: 'Runtime dispatch through a vtable' },
+          { id: 'b', text: 'The compiler generating a separate concrete version of generic code for each type used' },
+          { id: 'c', text: 'Converting all types to a single universal type' },
+        ],
+        correct: 'b',
+        explain: 'Rust generates specialized machine code per concrete instantiation at compile time, giving generics zero runtime overhead.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn largest<T>(list: &[T]) -> &T {\n    let mut big = &list[0];\n    for item in list {\n        if item > big {\n            big = item;\n        }\n    }\n    big\n}\nfn main() {\n    println!("{}", largest(&vec![1, 2]));\n}\n\nWhat is missing, and why does the compiler insist?',
+        explain: 'E0369: `>` cannot be applied to an unconstrained `T`. Generics promise to work for ANY T, so every operation needs a declared bound: `fn largest<T: PartialOrd>(...)`. Monomorphization happens only after bounds check.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `collect::<Vec<_>>()` disambiguate?',
+        options: [
+          { id: 'a', text: 'Which container to collect into — otherwise the target type is ambiguous' },
+          { id: 'b', text: 'How fast the iterator runs' },
+          { id: 'c', text: 'Whether errors are propagated' },
+        ],
+        correct: 'a',
+        explain: 'Turbofish pins down a type the compiler cannot infer. `collect()` can build dozens of containers, so an unconstrained result is a genuine ambiguity error.',
+        },
       ],
-      correct: 'b',
-      explain: 'Rust generates specialized machine code per concrete instantiation at compile time, giving generics zero runtime overhead.',
     },
   },
   {
@@ -624,15 +1125,35 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 40,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What does `fn notify(item: &impl Summary)` mean?',
-      options: [
-        { id: 'a', text: 'item is any type that implements the Summary trait' },
-        { id: 'b', text: 'item must literally be of type Summary' },
-        { id: 'c', text: 'Summary is optional' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `fn notify(item: &impl Summary)` mean?',
+        options: [
+          { id: 'a', text: 'item is any type that implements the Summary trait' },
+          { id: 'b', text: 'item must literally be of type Summary' },
+          { id: 'c', text: 'Summary is optional' },
+        ],
+        correct: 'a',
+        explain: '`impl Trait` in argument position is sugar for a generic bound — the caller can pass any concrete type implementing Summary.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'use std::fmt::Display;\nstruct A;\nimpl Display for Vec<A> {}\nfn main() {}\n\nWhy is this rejected, and what is the standard workaround?',
+        explain: 'Orphan rule (E0117): neither the trait (`Display`) nor the type (`Vec<_>`) is local, so the impl could collide with someone else’s. Workaround: the newtype pattern — wrap `Vec<A>` in a local struct and implement `Display` on that.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'A trait declares `fn summarize(&self) -> String` WITH a body. What must implementors do?',
+        options: [
+          { id: 'a', text: 'Nothing — they inherit the default unless they override it' },
+          { id: 'b', text: 'They must provide their own version' },
+          { id: 'c', text: 'They must repeat the body with a `default` keyword' },
+        ],
+        correct: 'a',
+        explain: 'A body in the trait declaration IS the default implementation. Override only when the default is wrong for your type.',
+        },
       ],
-      correct: 'a',
-      explain: '`impl Trait` in argument position is sugar for a generic bound — the caller can pass any concrete type implementing Summary.',
     },
   },
   {
@@ -649,9 +1170,29 @@ const concepts = [
     ],
     difficulty: 4, estMinutes: 45,
     checkpoint: {
-      type: 'find_bug',
-      prompt: 'Assume `longest` returns one of its inputs:\n\nfn main() {\n    let s1 = String::from("hello");\n    let r;\n    {\n        let s2 = String::from("world");\n        r = longest(&s1, &s2);\n    }\n    println!("{r}");\n}\n\nWhy won’t this compile?',
-      explain: 'A returned reference can live at most as long as the shortest-lived input it was derived from — here s2. But s2 is dropped at the end of the inner block, so using `r` afterwards would dangle. The borrow checker rejects it (E0597): annotations constrain relationships, they never extend lifetimes.',
+      questions: [
+        {
+        type: 'find_bug',
+        prompt: 'Assume `longest` returns one of its inputs:\n\nfn main() {\n    let s1 = String::from("hello");\n    let r;\n    {\n        let s2 = String::from("world");\n        r = longest(&s1, &s2);\n    }\n    println!("{r}");\n}\n\nWhy won’t this compile?',
+        explain: 'A returned reference can live at most as long as the shortest-lived input it was derived from — here s2. But s2 is dropped at the end of the inner block, so using `r` afterwards would dangle. The borrow checker rejects it (E0597): annotations constrain relationships, they never extend lifetimes.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn longest(x: &str, y: &str) -> &str {\n    if x.len() > y.len() { x } else { y }\n}\nfn main() {}\n\nWhat is missing?',
+        explain: 'E0106: the return type needs a lifetime — the compiler cannot tell whether the output borrows from `x` or `y`. Fix: `fn longest<\'a>(x: &\'a str, y: &\'a str) -> &\'a str`. Annotations declare the relationship; they never extend anything.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `\'a` in `fn f<\'a>(x: &\'a str)` actually guarantee?',
+        options: [
+          { id: 'a', text: 'A constraint linking borrows: the reference is valid wherever `\'a` is alive — for both caller and body' },
+          { id: 'b', text: 'That the value lives exactly `\'a` long' },
+          { id: 'c', text: 'That the function extends the value’s lifetime to `\'a`' },
+        ],
+        correct: 'a',
+        explain: 'Lifetimes constrain, never extend. The annotation says "for some region both caller and callee agree on, this borrow is good there" — the region itself is always determined by real scopes.',
+        },
+      ],
     },
   },
 
@@ -676,11 +1217,37 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 25,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Which attribute marks a function as a unit test the harness should run?',
-      options: [{ id: 'a', text: '#[run]' }, { id: 'b', text: '#[test]' }, { id: 'c', text: '#[unit_test]' }],
-      correct: 'b',
-      explain: '`#[test]` is the attribute `cargo test` looks for.',
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Which attribute marks a function as a unit test the harness should run?',
+        options: [{ id: 'a', text: '#[run]' }, { id: 'b', text: '#[test]' }, { id: 'c', text: '#[unit_test]' }],
+        correct: 'b',
+        explain: '`#[test]` is the attribute `cargo test` looks for.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'A bare `assert!(rect.can_hold(&other))` fails. What does the output show?',
+        options: [
+          { id: 'a', text: 'The source expression text plus file and line' },
+          { id: 'b', text: 'The debug values of `rect` and `other`' },
+          { id: 'c', text: 'Nothing — bare assert! is silent' },
+        ],
+        correct: 'a',
+        explain: 'Plain `assert!` prints only the expression and location. Value inspection needs `assert_eq!`/`assert_ne!`, which is exactly why the book prefers them.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Where do unit tests conventionally live?',
+        options: [
+          { id: 'a', text: 'In the same file, inside `#[cfg(test)] mod tests`' },
+          { id: 'b', text: 'In the top-level `tests/` directory' },
+          { id: 'c', text: 'In `benches/`' },
+        ],
+        correct: 'a',
+        explain: '`tests/` is for integration tests (separate crates). Unit tests sit beside the code they test, compiled out of normal builds by `cfg(test)`.',
+        },
+      ],
     },
   },
   {
@@ -693,14 +1260,41 @@ const concepts = [
     rustlings: [],
     difficulty: 2, estMinutes: 15,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Integration tests in the tests/ directory can access:',
-      options: [
-        { id: 'a', text: 'Any private item in the crate' },
-        { id: 'b', text: 'Only the crate’s public API, as an external user would' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Integration tests in the tests/ directory can access:',
+        options: [
+          { id: 'a', text: 'Any private item in the crate' },
+          { id: 'b', text: 'Only the crate’s public API, as an external user would' },
+          { id: 'c', text: 'Private items, as long as they are marked `pub(crate)`' },
+        ],
+        correct: 'b',
+        explain: 'Each file in tests/ is compiled as its own separate crate that depends on your library, so it only sees what’s public.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `#[cfg(test)]` on `mod tests` actually do?',
+        options: [
+          { id: 'a', text: 'Compiles the module only under `cargo test`, excluding it from normal builds' },
+          { id: 'b', text: 'Marks every test inside as ignored' },
+          { id: 'c', text: 'Nothing — it is pure convention' },
+        ],
+        correct: 'a',
+        explain: '`cfg(test)` is conditional compilation keyed on the test profile: release/debug binaries never contain the module at all.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Two integration test files need one shared helper. Where does it go?',
+        options: [
+          { id: 'a', text: '`tests/common/mod.rs`, pulled in with `mod common;` in each file' },
+          { id: 'b', text: '`src/helpers.rs`' },
+          { id: 'c', text: 'Duplicated at the top of each test file' },
+        ],
+        correct: 'a',
+        explain: 'Files directly under `tests/` each become their own crate; only subdirectories like `common/` are exempt, so shared helpers live there as a module.',
+        },
       ],
-      correct: 'b',
-      explain: 'Each file in tests/ is compiled as its own separate crate that depends on your library, so it only sees what’s public.',
     },
   },
 
@@ -735,9 +1329,35 @@ const concepts = [
     rustlings: [],
     difficulty: 3, estMinutes: 60,
     checkpoint: {
-      type: 'explain',
-      prompt: 'Project Acceptance Checklist — verify your minigrep build in your terminal:\n\n1. [ ] Extracted CLI parsing & file-reading out of main.rs into src/lib.rs.\n2. [ ] Handled errors with Result<(), Box<dyn Error>> rather than unwrap/panic.\n3. [ ] Implemented case-sensitive and case-insensitive search via environment variable.\n4. [ ] Automated test suite in src/lib.rs passes cleanly (`cargo test`).\n\nHave you verified all 4 criteria in your local working project?',
-      explain: 'Congratulations! Minigrep proves you can coordinate Result error propagation, argument parsing, file I/O, and test-driven development into a clean, modular CLI tool.',
+      questions: [
+        {
+        type: 'explain',
+        prompt: 'Project Acceptance Checklist — verify your minigrep build in your terminal:\n\n1. [ ] Extracted CLI parsing & file-reading out of main.rs into src/lib.rs.\n2. [ ] Handled errors with Result<(), Box<dyn Error>> rather than unwrap/panic.\n3. [ ] Implemented case-sensitive and case-insensitive search via environment variable.\n4. [ ] Automated test suite in src/lib.rs passes cleanly (`cargo test`).\n\nHave you verified all 4 criteria in your local working project?',
+        explain: 'Congratulations! Minigrep proves you can coordinate Result error propagation, argument parsing, file I/O, and test-driven development into a clean, modular CLI tool.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why does minigrep’s `run()` return `Result<(), Box<dyn Error>>` instead of `()`?',
+        options: [
+          { id: 'a', text: 'So `?` can propagate any error type up to `main`, which prints it and exits nonzero' },
+          { id: 'b', text: 'To make the binary run faster' },
+          { id: 'c', text: 'The borrow checker requires it' },
+        ],
+        correct: 'a',
+        explain: 'One error type for the whole program is impractical; `Box<dyn Error>` erases the concrete type while `?` keeps propagation uniform. `main` returning `Result` turns Err into a message plus a nonzero exit.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`eprintln!` vs `println!` — when must errors go to stderr?',
+        options: [
+          { id: 'a', text: 'Always for errors, so `program > out.txt` still shows them on screen' },
+          { id: 'b', text: 'Never — both streams are identical' },
+          { id: 'c', text: 'Only inside unit tests' },
+        ],
+        correct: 'a',
+        explain: 'Chapter 12.6’s whole point: stdout is for program output (redirectable), stderr for diagnostics. Mixing them corrupts redirected output.',
+        },
+      ],
     },
   },
 
@@ -760,9 +1380,29 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
-      type: 'predict_output',
-      prompt: 'let x = 4;\nlet equal_to_x = |z| z == x;\nprintln!("{}", equal_to_x(4));',
-      explain: 'The closure borrows x from its environment immutably. equal_to_x(4) compares 4 == 4 → true.',
+      questions: [
+        {
+        type: 'predict_output',
+        prompt: 'let x = 4;\nlet equal_to_x = |z| z == x;\nprintln!("{}", equal_to_x(4));',
+        explain: 'The closure borrows x from its environment immutably. equal_to_x(4) compares 4 == 4 → true.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn main() {\n    let s = String::from("hi");\n    let f = || {\n        println!("{s}");\n        drop(s);\n    };\n    f();\n    f();\n}\n\nWhy does the second call fail?',
+        explain: 'E0382: `drop(s)` forces the closure to capture `s` by move, so the closure is `FnOnce` — the first call consumes `f` itself, and the second call uses a moved value.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'A closure moves a String out of its environment (e.g. returns it). Which bound must a generic consumer require at minimum?',
+        options: [
+          { id: 'a', text: '`FnOnce`' },
+          { id: 'b', text: '`Fn`' },
+          { id: 'c', text: '`FnMut`' },
+        ],
+        correct: 'a',
+        explain: '`FnOnce` = callable at least once (may move captures out). `FnMut`/`Fn` promise repeatable calls, which a moving closure cannot honor.',
+        },
+      ],
     },
   },
   {
@@ -786,14 +1426,35 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 40,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'let v = vec![1, 2, 3];\nlet doubled = v.iter().map(|x| x * 2);\n\nHas any multiplication happened yet at this line?',
-      options: [
-        { id: 'a', text: 'Yes, doubled is now [2, 4, 6]' },
-        { id: 'b', text: 'No — map is lazy; nothing runs until doubled is consumed' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'let v = vec![1, 2, 3];\nlet doubled = v.iter().map(|x| x * 2);\n\nHas any multiplication happened yet at this line?',
+        options: [
+          { id: 'a', text: 'Yes, doubled is now [2, 4, 6]' },
+          { id: 'b', text: 'No — map is lazy; nothing runs until doubled is consumed' },
+          { id: 'c', text: 'Yes, but only for the first element' },
+        ],
+        correct: 'b',
+        explain: 'Iterator adaptors build up a lazy pipeline; closures only run when something actively consumes the iterator.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let v = vec![1, 2, 3];\n    let total: i32 = v.iter().map(|x| x * 2).sum();\n    println!("{total}");\n}',
+        explain: '`sum()` is the consuming adaptor that finally drives the lazy pipeline: (1+2+3)*2 = 12. Without it, nothing would execute at all.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why does `let it = v.iter();` borrow `v` for as long as `it` is alive?',
+        options: [
+          { id: 'a', text: 'The iterator holds a reference into the collection to yield items from it' },
+          { id: 'b', text: 'Iterators copy the whole collection' },
+          { id: 'c', text: 'It is a compiler workaround with no meaning' },
+        ],
+        correct: 'a',
+        explain: 'An iterator over `&T` borrows its source — that is why mutating or dropping the collection while iterating is rejected. Ownership and laziness compose.',
+        },
       ],
-      correct: 'b',
-      explain: 'Iterator adaptors build up a lazy pipeline; closures only run when something actively consumes the iterator.',
     },
   },
 
@@ -815,14 +1476,41 @@ const concepts = [
     rustlings: [],
     difficulty: 2, estMinutes: 40,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Which profile does `cargo build --release` use, and why does it matter for benchmarking?',
-      options: [
-        { id: 'a', text: 'dev profile — same speed as debug' },
-        { id: 'b', text: 'release profile — enables optimizations, much faster runtime' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Which profile does `cargo build --release` use, and why does it matter for benchmarking?',
+        options: [
+          { id: 'a', text: 'dev profile — same speed as debug' },
+          { id: 'b', text: 'release profile — enables optimizations, much faster runtime' },
+          { id: 'c', text: 'test profile — optimized for test binaries' },
+        ],
+        correct: 'b',
+        explain: 'The release profile enables optimizations; debug builds are unoptimized and can run significantly slower.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'In a Cargo workspace, where does the single shared Cargo.lock live?',
+        options: [
+          { id: 'a', text: 'In the workspace root' },
+          { id: 'b', text: 'In each member package separately' },
+          { id: 'c', text: 'In `~/.cargo`' },
+        ],
+        correct: 'a',
+        explain: 'One workspace, one lockfile at the root: all members resolve dependencies together, which is the entire point of the workspace.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`cargo install ripgrep` — where does the binary go, and what does it need?',
+        options: [
+          { id: 'a', text: 'Into `~/.cargo/bin`, built from the registry — no source checkout needed' },
+          { id: 'b', text: 'Into the current directory' },
+          { id: 'c', text: 'Always into `/usr/local/bin`' },
+        ],
+        correct: 'a',
+        explain: '`cargo install` fetches, builds, and drops the binary into `~/.cargo/bin` (put it on PATH). Contrast with `cargo build`, which works on local sources.',
+        },
       ],
-      correct: 'b',
-      explain: 'The release profile enables optimizations; debug builds are unoptimized and can run significantly slower.',
     },
   },
 
@@ -840,9 +1528,29 @@ const concepts = [
     rustlings: [{ name: 'box1', url: RL + '19_smart_pointers/box1.rs' }],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
-      type: 'explain',
-      prompt: 'Why does a directly self-referential enum like `enum List { Cons(i32, List), Nil }` fail to compile without Box?',
-      explain: 'Rust needs to compute type size at compile time. A directly recursive type would have infinite size. Box<List> is a fixed-size pointer on the stack pointing to heap memory.',
+      questions: [
+        {
+        type: 'explain',
+        prompt: 'Why does a directly self-referential enum like `enum List { Cons(i32, List), Nil }` fail to compile without Box?',
+        explain: 'Rust needs to compute type size at compile time. A directly recursive type would have infinite size. Box<List> is a fixed-size pointer on the stack pointing to heap memory.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nenum List {\n    Cons(i32, Box<List>),\n    Nil,\n}\nfn main() {\n    let l = List::Cons(1, Box::new(List::Nil));\n    if let List::Cons(x, _) = l {\n        println!("{x}");\n    }\n}',
+        explain: 'Pattern matching sees through the Box: `x` binds the head 1. Output: "1". The Box only fixed the type’s size, nothing about usage changes.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why is `Box<T>` itself always `Sized`, even when `T` is not?',
+        options: [
+          { id: 'a', text: 'It is a pointer with a known size (`usize`), regardless of the pointee' },
+          { id: 'b', text: 'Box forces `T: Sized`' },
+          { id: 'c', text: 'The compiler special-cases every Box type' },
+        ],
+        correct: 'a',
+        explain: 'Indirection is the whole trick: the stack holds a fixed-size address while the arbitrarily-sized data lives on the heap.',
+        },
+      ],
     },
   },
   {
@@ -858,15 +1566,35 @@ const concepts = [
     rustlings: [],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What triggers a value’s Drop::drop to run?',
-      options: [
-        { id: 'a', text: 'Calling value.drop() directly' },
-        { id: 'b', text: 'The value going out of scope' },
-        { id: 'c', text: 'The garbage collector running' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What triggers a value’s Drop::drop to run?',
+        options: [
+          { id: 'a', text: 'Calling value.drop() directly' },
+          { id: 'b', text: 'The value going out of scope' },
+          { id: 'c', text: 'The garbage collector running' },
+        ],
+        correct: 'b',
+        explain: 'Rust runs Drop deterministically when a value exits scope. Directly calling .drop() is disallowed by the compiler.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'fn main() {\n    let s = String::from("hi");\n    s.drop();\n    println!("{s}");\n}\n\nWhy is the `s.drop()` line rejected?',
+        explain: 'E0599: there IS no `.drop()` method — destruction is not something you call. Either let the value go out of scope, or force it early with `std::mem::drop(s)`.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`&String` passed where `&str` is expected just works. Why?',
+        options: [
+          { id: 'a', text: 'Deref coercion: `String: Deref<Target = str>`, applied automatically at coercion sites' },
+          { id: 'b', text: '`String` and `&str` are the same type' },
+          { id: 'c', text: 'The compiler inserts a clone' },
+        ],
+        correct: 'a',
+        explain: 'Deref coercion rewrites `&String` → `&str` (and `&Vec<T>` → `&[T]`) wherever a reference of the target type is expected. No clone, no cost.',
+        },
       ],
-      correct: 'b',
-      explain: 'Rust runs Drop deterministically when a value exits scope. Directly calling .drop() is disallowed by the compiler.',
     },
   },
   {
@@ -882,14 +1610,35 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What does `Rc::clone(&a)` actually copy?',
-      options: [
-        { id: 'a', text: 'The underlying heap data' },
-        { id: 'b', text: 'Nothing — it just increments the reference count and returns a new pointer handle' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `Rc::clone(&a)` actually copy?',
+        options: [
+          { id: 'a', text: 'The underlying heap data' },
+          { id: 'b', text: 'Nothing — it just increments the reference count and returns a new pointer handle' },
+          { id: 'c', text: 'The heap data, but lazily on first write (copy-on-write)' },
+        ],
+        correct: 'b',
+        explain: 'Rc::clone is an inexpensive pointer duplicate with a reference count increment; data on the heap is not cloned.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nuse std::rc::Rc;\nfn main() {\n    let a = Rc::new(5);\n    let _b = Rc::clone(&a);\n    println!("{}", Rc::strong_count(&a));\n}',
+        explain: 'Each `Rc::clone` bumps the strong count: `a` plus `_b` makes 2. Cloning the pointer never touches the heap data.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why can’t you get `&mut` to `Rc`-shared data directly?',
+        options: [
+          { id: 'a', text: 'Mutation through one owner would silently invalidate what other owners see — use `RefCell`/`Mutex` for checked sharing' },
+          { id: 'b', text: 'Rc data lives in hardware read-only memory' },
+          { id: 'c', text: 'You always can — `Rc::get_mut` never fails' },
+        ],
+        correct: 'a',
+        explain: 'Shared ownership plus direct mutation equals aliasing violations. `Rc::get_mut` exists but succeeds only when uniquely owned — the exception proving the rule.',
+        },
       ],
-      correct: 'b',
-      explain: 'Rc::clone is an inexpensive pointer duplicate with a reference count increment; data on the heap is not cloned.',
     },
   },
   {
@@ -905,9 +1654,29 @@ const concepts = [
     rustlings: [],
     difficulty: 4, estMinutes: 35,
     checkpoint: {
-      type: 'explain',
-      prompt: 'What happens if you call `.borrow_mut()` twice simultaneously on the same RefCell<T>?',
-      explain: 'RefCell enforces the aliasing rule at runtime — a second overlapping mutable borrow panics rather than failing compile-time checks.',
+      questions: [
+        {
+        type: 'explain',
+        prompt: 'What happens if you call `.borrow_mut()` twice simultaneously on the same RefCell<T>?',
+        explain: 'RefCell enforces the aliasing rule at runtime — a second overlapping mutable borrow panics rather than failing compile-time checks.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nuse std::cell::RefCell;\nfn main() {\n    let x = RefCell::new(5);\n    *x.borrow_mut() += 1;\n    println!("{}", x.borrow());\n}',
+        explain: 'Single-threaded runtime checks pass here: the mutable borrow ends before `borrow()` runs. Output: 6. Overlap them and it panics instead.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`RefCell<T>` vs `Mutex<T>` — when is `RefCell` the right choice?',
+        options: [
+          { id: 'a', text: 'Single-threaded interior mutability with zero synchronization overhead' },
+          { id: 'b', text: 'Sharing data across threads' },
+          { id: 'c', text: 'Always — `Mutex` is legacy' },
+        ],
+        correct: 'a',
+        explain: '`RefCell` is explicitly `!Sync`: the same runtime-checked pattern, but without any lock. Across threads you need `Mutex` (or atomics).',
+        },
+      ],
     },
   },
 
@@ -928,14 +1697,35 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 30,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Why does thread::spawn typically require a `move` closure?',
-      options: [
-        { id: 'a', text: 'It is required syntax with no deeper meaning' },
-        { id: 'b', text: 'The spawned thread may outlive the caller stack frame, so it requires owned data' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Why does thread::spawn typically require a `move` closure?',
+        options: [
+          { id: 'a', text: 'It is required syntax with no deeper meaning' },
+          { id: 'b', text: 'The spawned thread may outlive the caller stack frame, so it requires owned data' },
+          { id: 'c', text: 'To make the closure run faster on multiple cores' },
+        ],
+        correct: 'b',
+        explain: 'The compiler cannot guarantee that borrowed stack references remain valid for the lifespan of the spawned thread.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'use std::thread;\nfn main() {\n    let v = vec![1, 2, 3];\n    let h = thread::spawn(|| {\n        println!("{:?}", v);\n    });\n    h.join().unwrap();\n}\n\nEven with `join` right there, why is this rejected?',
+        explain: 'E0373: `spawn` demands a `\'static` closure, and borrowing `v` cannot satisfy it — the type system cannot see your `join`. Fix: `move` the data in (`move ||`, cloning or `Arc` as needed).',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'If `main` returns without joining a spawned thread, what happens to it?',
+        options: [
+          { id: 'a', text: 'It is forcibly stopped when `main` exits' },
+          { id: 'b', text: 'It keeps running after `main` exits' },
+          { id: 'c', text: 'It blocks `main` from exiting' },
+        ],
+        correct: 'a',
+        explain: 'Threads are not joined implicitly: process exit kills them mid-flight, silently dropping work. Always `join` handles you care about.',
+        },
       ],
-      correct: 'b',
-      explain: 'The compiler cannot guarantee that borrowed stack references remain valid for the lifespan of the spawned thread.',
     },
   },
   {
@@ -948,15 +1738,35 @@ const concepts = [
     rustlings: [{ name: 'threads3', url: RL + '20_threads/threads3.rs' }],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: '"mpsc" stands for:',
-      options: [
-        { id: 'a', text: 'multiple producer, single consumer' },
-        { id: 'b', text: 'multi-process synchronous channel' },
-        { id: 'c', text: 'mutex-protected shared cache' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: '"mpsc" stands for:',
+        options: [
+          { id: 'a', text: 'multiple producer, single consumer' },
+          { id: 'b', text: 'multi-process synchronous channel' },
+          { id: 'c', text: 'mutex-protected shared cache' },
+        ],
+        correct: 'a',
+        explain: 'std::sync::mpsc provides channels with multiple transmitter handles and a single receiver handle.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nuse std::sync::mpsc;\nfn main() {\n    let (tx, rx) = mpsc::channel();\n    tx.send(10).unwrap();\n    tx.send(20).unwrap();\n    drop(tx);\n    let mut total = 0;\n    for x in rx {\n        total += x;\n    }\n    println!("{total}");\n}',
+        explain: 'Iterating the receiver yields messages until ALL senders are gone — hence the deliberate `drop(tx)`. 10 + 20 = 30. Forget the drop and the loop hangs forever.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '“Do not communicate by sharing memory; share memory by communicating.” What does it mean in practice?',
+        options: [
+          { id: 'a', text: 'Transfer ownership through the channel — the channel owns in-flight data, no joint mutable state' },
+          { id: 'b', text: 'Shared memory is always slower' },
+          { id: 'c', text: '`Mutex` is deprecated' },
+        ],
+        correct: 'a',
+        explain: 'Sending `T` through a channel MOVES it: exactly one owner at every moment. The slogan is ownership applied to concurrency.',
+        },
       ],
-      correct: 'a',
-      explain: 'std::sync::mpsc provides channels with multiple transmitter handles and a single receiver handle.',
     },
   },
   {
@@ -972,9 +1782,29 @@ const concepts = [
     rustlings: [{ name: 'threads2', url: RL + '20_threads/threads2.rs' }],
     difficulty: 4, estMinutes: 35,
     checkpoint: {
-      type: 'find_bug',
-      prompt: 'use std::{rc::Rc, sync::Mutex, thread};\n\nlet counter = Rc::new(Mutex::new(0));\nlet mut handles = vec![];\nfor _ in 0..4 {\n    let c = Rc::clone(&counter);\n    handles.push(thread::spawn(move || {\n        *c.lock().unwrap() += 1;\n    }));\n}\n\nWhy won’t this compile, and what single type swap fixes it?',
-      explain: 'Rc<T> is not Send — its reference count uses non-atomic operations, so the compiler forbids moving it into a thread (E0277). Swap Rc for Arc: Arc<Mutex<i32>> counts atomically and is both Send and Sync.',
+      questions: [
+        {
+        type: 'find_bug',
+        prompt: 'use std::{rc::Rc, sync::Mutex, thread};\n\nlet counter = Rc::new(Mutex::new(0));\nlet mut handles = vec![];\nfor _ in 0..4 {\n    let c = Rc::clone(&counter);\n    handles.push(thread::spawn(move || {\n        *c.lock().unwrap() += 1;\n    }));\n}\n\nWhy won’t this compile, and what single type swap fixes it?',
+        explain: 'Rc<T> is not Send — its reference count uses non-atomic operations, so the compiler forbids moving it into a thread (E0277). Swap Rc for Arc: Arc<Mutex<i32>> counts atomically and is both Send and Sync.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nuse std::sync::Mutex;\nfn main() {\n    let m = Mutex::new(5);\n    *m.lock().unwrap() += 1;\n    println!("{}", m.into_inner().unwrap());\n}',
+        explain: '`lock()` yields a guard dereferencing to the inner value; `into_inner` consumes the mutex to reclaim it. Output: 6. (The `unwrap`s cover poisoning — a panicked-while-locked thread.)',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`Mutex<T>` vs `RefCell<T>` — what is the fundamental difference?',
+        options: [
+          { id: 'a', text: '`Mutex` is `Sync`: thread-safe interior mutability via locking; `RefCell` is single-threaded runtime checks' },
+          { id: 'b', text: '`Mutex` is faster' },
+          { id: 'c', text: 'There is none' },
+        ],
+        correct: 'a',
+        explain: 'Same idea (checked shared mutation), different domains: `RefCell` panics on misuse in one thread, `Mutex` blocks across threads. Pick by `Sync`, not habit.',
+        },
+      ],
     },
   },
 
@@ -994,9 +1824,35 @@ const concepts = [
     ],
     difficulty: 4, estMinutes: 35,
     checkpoint: {
-      type: 'predict_output',
-      prompt: 'let f = async {\n    println!("running");\n    42\n};\nprintln!("created");\n\nWhat prints, and what exactly is `f` at this point?',
-      explain: 'Only "created" prints. The async block body never runs until the future is polled — `f` is just an inert state machine waiting for .await or an executor. "running" appears only after something drives it to completion.',
+      questions: [
+        {
+        type: 'predict_output',
+        prompt: 'let f = async {\n    println!("running");\n    42\n};\nprintln!("created");\n\nWhat prints, and what exactly is `f` at this point?',
+        explain: 'Only "created" prints. The async block body never runs until the future is polled — `f` is just an inert state machine waiting for .await or an executor. "running" appears only after something drives it to completion.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'An `async fn fetch() -> Data` — what is its ACTUAL return type before anyone awaits it?',
+        options: [
+          { id: 'a', text: '`impl Future<Output = Data>` — an inert state machine' },
+          { id: 'b', text: '`Data`' },
+          { id: 'c', text: '`Result<Data>`' },
+        ],
+        correct: 'a',
+        explain: '`async fn` desugars to a regular function returning a future. No executor polling it means no body runs — the Q1 laziness demo is this fact in action.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`.await` on an already-complete future — what happens?',
+        options: [
+          { id: 'a', text: 'It resolves immediately without yielding control' },
+          { id: 'b', text: 'It always yields to the executor first' },
+          { id: 'c', text: 'It panics' },
+        ],
+        correct: 'a',
+        explain: '`.await` is not a thread switch: a ready future completes inline. Yielding happens only when the future is genuinely pending.',
+        },
+      ],
     },
   },
   {
@@ -1015,14 +1871,41 @@ const concepts = [
     rustlings: [],
     difficulty: 4, estMinutes: 40,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Does `async`/`.await` inherently guarantee code executes on a separate OS thread?',
-      options: [
-        { id: 'a', text: 'Yes, always' },
-        { id: 'b', text: 'No — thread allocation is determined by the underlying executor runtime' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Does `async`/`.await` inherently guarantee code executes on a separate OS thread?',
+        options: [
+          { id: 'a', text: 'Yes, always' },
+          { id: 'b', text: 'No — thread allocation is determined by the underlying executor runtime' },
+          { id: 'c', text: 'Yes, but only when using tokio' },
+        ],
+        correct: 'b',
+        explain: 'Async is cooperative multitasking; whether tasks run across thread pools or on a single thread depends on the runtime configuration.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Two tasks `.await`ing the same sleep sequentially vs `tokio::join!` on both — what differs?',
+        options: [
+          { id: 'a', text: '`join!` polls both concurrently, interleaving progress; sequential await runs the first to completion before starting the second' },
+          { id: 'b', text: 'Nothing — they are equivalent spellings' },
+          { id: 'c', text: '`join!` spawns OS threads' },
+        ],
+        correct: 'a',
+        explain: 'Concurrency in async means interleaved polling on (possibly) one thread, and only combinators like `join!` create the interleaving. Sequential awaits never overlap.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `Send` have to do with async code?',
+        options: [
+          { id: 'a', text: 'Futures moved across threads (e.g. spawned on a multi-thread executor) must be `Send` — holding `Rc` across `.await` breaks it' },
+          { id: 'b', text: 'Nothing at all' },
+          { id: 'c', text: 'Every future is automatically `Send`' },
+        ],
+        correct: 'a',
+        explain: 'The classic compile wall: an `Rc` held across an await point makes the whole future `!Send`, and `spawn` refuses it. Same ownership rules, new context.',
+        },
       ],
-      correct: 'b',
-      explain: 'Async is cooperative multitasking; whether tasks run across thread pools or on a single thread depends on the runtime configuration.',
     },
   },
 
@@ -1040,14 +1923,41 @@ const concepts = [
     rustlings: [],
     difficulty: 2, estMinutes: 15,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Does Rust support classical struct-to-struct inheritance?',
-      options: [
-        { id: 'a', text: 'Yes, via the `impl` keyword' },
-        { id: 'b', text: 'No — Rust uses traits and composition instead' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Does Rust support classical struct-to-struct inheritance?',
+        options: [
+          { id: 'a', text: 'Yes, via the `impl` keyword' },
+          { id: 'b', text: 'No — Rust uses traits and composition instead' },
+          { id: 'c', text: 'Yes, through default trait methods' },
+        ],
+        correct: 'b',
+        explain: 'Rust omits type inheritance; shared behaviors are structured via traits and shared state via composition.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Rust “objects” (trait objects) vs OOP objects — what is deliberately missing?',
+        options: [
+          { id: 'a', text: 'Inheritance of state and behavior' },
+          { id: 'b', text: 'Encapsulation' },
+          { id: 'c', text: 'Polymorphism' },
+        ],
+        correct: 'a',
+        explain: 'Rust has encapsulation (modules) and polymorphism (generics + trait objects) but no implementation inheritance — reuse comes from traits and composition.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'When is `dyn Trait` preferable to generics (`impl Trait`)?',
+        options: [
+          { id: 'a', text: 'Heterogeneous collections, or curbing binary bloat from monomorphization — at the price of dynamic dispatch' },
+          { id: 'b', text: 'Always — generics are legacy' },
+          { id: 'c', text: 'Never' },
+        ],
+        correct: 'a',
+        explain: 'Generics stamp a copy per type (fast, fat); trait objects share one code path through a vtable (compact, indirect). Different bills to pay.',
+        },
       ],
-      correct: 'b',
-      explain: 'Rust omits type inheritance; shared behaviors are structured via traits and shared state via composition.',
     },
   },
   {
@@ -1067,9 +1977,29 @@ const concepts = [
     ],
     difficulty: 4, estMinutes: 30,
     checkpoint: {
-      type: 'find_bug',
-      prompt: 'trait Animal {\n    fn speak(&self);\n    fn breed(&self) -> Self;\n}\n\nfn chorus(animals: &[Box<dyn Animal>]) {\n    for a in animals {\n        a.speak();\n    }\n}\n\nWhy won’t this compile?',
-      explain: 'A method returning Self makes Animal not object-safe (E0038): a vtable cannot dispatch a method whose return type differs per implementor, so Box<dyn Animal> can never exist. Fix the signature (e.g. return String) or drop the method.',
+      questions: [
+        {
+        type: 'find_bug',
+        prompt: 'trait Animal {\n    fn speak(&self);\n    fn breed(&self) -> Self;\n}\n\nfn chorus(animals: &[Box<dyn Animal>]) {\n    for a in animals {\n        a.speak();\n    }\n}\n\nWhy won’t this compile?',
+        explain: 'A method returning Self makes Animal not object-safe — modern rustc says “not dyn compatible” (E0038): a vtable cannot dispatch a method whose return type differs per implementor, so Box<dyn Animal> can never exist. Fix the signature (e.g. return String) or drop the method.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nuse std::fmt::Display;\nfn main() {\n    let v: Vec<Box<dyn Display>> = vec![Box::new(5), Box::new("hi")];\n    for x in &v {\n        println!("{x}");\n    }\n}',
+        explain: 'One vector holding an `i32` AND a `&str` — impossible with generics, routine with trait objects: each fat pointer carries its own vtable. Output:\n5\nhi',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why must `dyn Trait` virtually always sit behind a pointer (`Box`, `&`, …)?',
+        options: [
+          { id: 'a', text: 'Trait objects are unsized — the compiler needs a fat pointer (data address + vtable)' },
+          { id: 'b', text: 'For speed' },
+          { id: 'c', text: 'Pure syntax requirement' },
+        ],
+        correct: 'a',
+        explain: 'Different implementors have different sizes, so `dyn Trait` has no compile-time size. The pointer supplies the missing half: address plus vtable.',
+        },
+      ],
     },
   },
 
@@ -1087,14 +2017,35 @@ const concepts = [
     rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs' }],
     difficulty: 2, estMinutes: 20,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'Is `let (x, y) = (1, 2);` an example of pattern matching in Rust?',
-      options: [
-        { id: 'a', text: 'Yes — it destructures the tuple using an irrefutable pattern' },
-        { id: 'b', text: 'No — only `match` expressions use patterns' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'Is `let (x, y) = (1, 2);` an example of pattern matching in Rust?',
+        options: [
+          { id: 'a', text: 'Yes — it destructures the tuple using an irrefutable pattern' },
+          { id: 'b', text: 'No — only `match` expressions use patterns' },
+          { id: 'c', text: 'Yes, but only inside `unsafe` blocks' },
+        ],
+        correct: 'a',
+        explain: '`let` statements evaluate irrefutable patterns to bind destructured variables.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let mut v = vec![1, 2, 3];\n    let mut out = vec![];\n    while let Some(x) = v.pop() {\n        out.push(x);\n    }\n    println!("{out:?}");\n}',
+        explain: '`pop` removes from the END, so the loop drains 3, 2, 1 in that order. Output: [3, 2, 1]. `while let` keeps matching until the pattern fails (`None` on empty).',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Function parameters can be patterns too. What does `fn f((x, y): (i32, i32))` do?',
+        options: [
+          { id: 'a', text: 'Destructures the tuple argument directly into `x` and `y`' },
+          { id: 'b', text: 'It is a syntax error' },
+          { id: 'c', text: 'It declares a nested function' },
+        ],
+        correct: 'a',
+        explain: 'Parameter position accepts any irrefutable pattern — tuples, structs, even `&` patterns. Refutable ones are still rejected there.',
+        },
       ],
-      correct: 'a',
-      explain: '`let` statements evaluate irrefutable patterns to bind destructured variables.',
     },
   },
   {
@@ -1110,9 +2061,29 @@ const concepts = [
     rustlings: [{ name: 'options3', url: RL + '12_options/options3.rs' }],
     difficulty: 3, estMinutes: 25,
     checkpoint: {
-      type: 'find_bug',
-      prompt: 'let Some(x) = some_option;\n\nWhy does this fail to compile as a plain `let` statement?',
-      explain: '`let` requires an irrefutable pattern. `Some(x)` can fail to match if `some_option` is `None`. Use `if let` or `let-else` instead.',
+      questions: [
+        {
+        type: 'find_bug',
+        prompt: 'let Some(x) = some_option;\n\nWhy does this fail to compile as a plain `let` statement?',
+        explain: '`let` requires an irrefutable pattern. `Some(x)` can fail to match if `some_option` is `None`. Use `if let` or `let-else` instead.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let n = 5;\n    match n {\n        x @ 1..=5 => println!("in {x}"),\n        _ => println!("out"),\n    }\n}',
+        explain: '`@` binds the matched value WHILE testing the sub-pattern: 5 is in range, so `x` = 5. Output: "in 5". Without `@` you could test but not keep the value.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `..` mean in `Struct { x, .. }` and in `(first, ..)`?',
+        options: [
+          { id: 'a', text: 'Ignore the remaining fields or elements' },
+          { id: 'b', text: 'Match exactly one arbitrary value' },
+          { id: 'c', text: 'It is only the range operator, invalid here' },
+        ],
+        correct: 'a',
+        explain: '`..` (rest pattern) waves off whatever you do not name — the key to non-exhaustive destructuring. Ranges reuse the same glyph in a different position.',
+        },
+      ],
     },
   },
 
@@ -1132,9 +2103,29 @@ const concepts = [
     rustlings: [],
     difficulty: 4, estMinutes: 30,
     checkpoint: {
-      type: 'find_bug',
-      prompt: 'let x = 5;\nlet r = &x as *const i32;\nprintln!("{}", *r);\n\nWhy won’t this compile, and what is the minimal fix?',
-      explain: 'Creating a raw pointer with `as` is safe, but dereferencing it is one of the five unsafe-only operations (E0133). Minimal fix: wrap only the dereference — println!("{}", unsafe { *r }). Everything else, including the borrow checker, keeps working as usual.',
+      questions: [
+        {
+        type: 'find_bug',
+        prompt: 'let x = 5;\nlet r = &x as *const i32;\nprintln!("{}", *r);\n\nWhy won’t this compile, and what is the minimal fix?',
+        explain: 'Creating a raw pointer with `as` is safe, but dereferencing it is one of the five unsafe-only operations (E0133). Minimal fix: wrap only the dereference — println!("{}", unsafe { *r }). Everything else, including the borrow checker, keeps working as usual.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Which raw-pointer operations are legal in SAFE Rust?',
+        options: [
+          { id: 'a', text: 'Creating them, copying them, comparing them' },
+          { id: 'b', text: 'Dereferencing them' },
+          { id: 'c', text: 'Freeing their memory with `drop`' },
+        ],
+        correct: 'a',
+        explain: 'Forming and shuffling addresses is harmless; only DEREFERENCING (and a few siblings) can actually violate memory safety, so only those need `unsafe`.',
+        },
+        {
+        type: 'find_bug',
+        prompt: 'static mut N: i32 = 0;\nfn main() {\n    N += 1;\n    println!("{N}");\n}\n\nBoth marked lines fail. Why, and what is the fix?',
+        explain: 'E0133 twice: touching a `static mut` — writing AND reading — is unsafe-only, because global mutable state is shared across threads by nature. Wrap each access: `unsafe { N += 1; }`, `println!("{}", unsafe { N });`.',
+        },
+      ],
     },
   },
   {
@@ -1151,9 +2142,35 @@ const concepts = [
     rustlings: [{ name: 'traits5', url: RL + '15_traits/traits5.rs' }],
     difficulty: 4, estMinutes: 35,
     checkpoint: {
-      type: 'explain',
-      prompt: 'Why can’t you write `impl std::fmt::Display for Vec<String>` directly in your crate?',
-      explain: 'The orphan rule requires either the trait or the type to be defined locally in your crate. Wrapping `Vec<String>` in a local struct (newtype) resolves this.',
+      questions: [
+        {
+        type: 'explain',
+        prompt: 'Why can’t you write `impl std::fmt::Display for Vec<String>` directly in your crate?',
+        explain: 'The orphan rule requires either the trait or the type to be defined locally in your crate. Wrapping `Vec<String>` in a local struct (newtype) resolves this.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`trait Person: Name` — what does the `: Name` part demand?',
+        options: [
+          { id: 'a', text: 'Every implementor of `Person` must also implement `Name` (supertrait bound)' },
+          { id: 'b', text: '`Person` automatically inherits all of `Name`’s method bodies' },
+          { id: 'c', text: 'Nothing — it is documentation' },
+        ],
+        correct: 'a',
+        explain: 'Supertraits express "you must be a Name before you can be a Person", letting `Person` methods rely on `Name` behavior. No automatic method copying happens.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why wrap `Vec<String>` in `struct Winners(Vec<String>)` instead of using it directly?',
+        options: [
+          { id: 'a', text: 'To attach trait impls despite the orphan rule, and to give the abstraction a name and type safety' },
+          { id: 'b', text: 'For runtime performance' },
+          { id: 'c', text: 'There is no reason' },
+        ],
+        correct: 'a',
+        explain: 'The newtype pattern is the orphan-rule escape hatch plus free documentation: a `Winners` is not just any vector, and the compiler enforces the distinction.',
+        },
+      ],
     },
   },
   {
@@ -1178,14 +2195,35 @@ const concepts = [
     ],
     difficulty: 4, estMinutes: 30,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What do declarative macros (`macro_rules!`) operate on?',
-      options: [
-        { id: 'a', text: 'Runtime values' },
-        { id: 'b', text: 'Patterns of source tokens expanded at compile time' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What do declarative macros (`macro_rules!`) operate on?',
+        options: [
+          { id: 'a', text: 'Runtime values' },
+          { id: 'b', text: 'Patterns of source tokens expanded at compile time' },
+          { id: 'c', text: 'CPU instructions' },
+        ],
+        correct: 'b',
+        explain: 'Macros match against code token trees and expand to generated code at compile time.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Declarative vs procedural macros — what is the real divide?',
+        options: [
+          { id: 'a', text: '`macro_rules!` matches token patterns; procedural macros are Rust functions over token streams (derive, attribute, function-like)' },
+          { id: 'b', text: 'Declarative macros run faster' },
+          { id: 'c', text: 'Procedural macros are deprecated' },
+        ],
+        correct: 'a',
+        explain: 'Same compile-time job, different machinery: pattern-matching versus arbitrary code transforming token streams. Derive macros are the everyday face of the second kind.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print, and why should it worry you?\n\nmacro_rules! twice {\n    ($x:expr) => { $x + $x };\n}\nfn main() {\n    let mut n = 0;\n    let r = twice!({ n += 1; n });\n    println!("{r} {n}");\n}',
+        explain: 'Output: "3 2". The block runs TWICE (yielding 1, then 2; 1+2=3) — macros substitute tokens with zero memoization. An argument with side effects executes once per mention: the reason careful macros bind temporaries.',
+        },
       ],
-      correct: 'b',
-      explain: 'Macros match against code token trees and expand to generated code at compile time.',
     },
   },
 
@@ -1205,9 +2243,35 @@ const concepts = [
     rustlings: [],
     difficulty: 4, estMinutes: 120,
     checkpoint: {
-      type: 'explain',
-      prompt: 'Capstone Acceptance Checklist — verify your Multithreaded Web Server:\n\n1. [ ] Listens for incoming TCP streams on 127.0.0.1:7878 via std::net::TcpListener.\n2. [ ] Implemented ThreadPool struct managing a fixed number of worker threads.\n3. [ ] Dispatches jobs across threads using an mpsc channel with Arc<Mutex<Receiver<Job>>>.\n4. [ ] Implemented graceful shutdown via Drop for ThreadPool, joining all workers.\n5. [ ] Server responds to concurrent browser requests without blocking other connections.\n\nAre all 5 requirements functioning in your local build?',
-      explain: 'Outstanding achievement! Building this thread-pooled server synthesizes ownership, closures (Box<dyn FnOnce()>), concurrency primitives (Arc, Mutex, mpsc), and graceful cleanup (Drop, JoinHandle). You have mastered the core Rust curriculum!',
+      questions: [
+        {
+        type: 'explain',
+        prompt: 'Capstone Acceptance Checklist — verify your Multithreaded Web Server:\n\n1. [ ] Listens for incoming TCP streams on 127.0.0.1:7878 via std::net::TcpListener.\n2. [ ] Implemented ThreadPool struct managing a fixed number of worker threads.\n3. [ ] Dispatches jobs across threads using an mpsc channel with Arc<Mutex<Receiver<Job>>>.\n4. [ ] Implemented graceful shutdown via Drop for ThreadPool, joining all workers.\n5. [ ] Server responds to concurrent browser requests without blocking other connections.\n\nAre all 5 requirements functioning in your local build?',
+        explain: 'Outstanding achievement! Building this thread-pooled server synthesizes ownership, closures (Box<dyn FnOnce()>), concurrency primitives (Arc, Mutex, mpsc), and graceful cleanup (Drop, JoinHandle). You have mastered the core Rust curriculum!',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Why `Arc<Mutex<Receiver<Job>>>` for the job queue, not `Rc<RefCell<...>>`?',
+        options: [
+          { id: 'a', text: 'Workers are OS threads — shared state must be `Send + Sync`; `Rc`/`RefCell` are neither' },
+          { id: 'b', text: '`Arc` is faster' },
+          { id: 'c', text: 'There is no reason' },
+        ],
+        correct: 'a',
+        explain: 'The whole course converges here: `Rc` failed threads back in shared-state, `RefCell` fails `Sync` — only atomically-counted, lock-guarded sharing crosses thread boundaries.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What does the `ThreadPool`’s `Drop` impl accomplish?',
+        options: [
+          { id: 'a', text: 'Graceful shutdown: signals workers to exit and joins them so no work is truncated' },
+          { id: 'b', text: 'Frees the TCP port' },
+          { id: 'c', text: 'Nothing — `Drop` here is a formality' },
+        ],
+        correct: 'a',
+        explain: 'Without it, `main` returning would slaughter in-flight workers mid-request (the threads-lesson warning, weaponized). `Drop` turns shutdown into a protocol.',
+        },
+      ],
     },
   },
 
@@ -1226,14 +2290,41 @@ const concepts = [
     ],
     difficulty: 2, estMinutes: 20,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What does `cargo clippy` add on top of `cargo check`?',
-      options: [
-        { id: 'a', text: 'Nothing, it is an exact alias' },
-        { id: 'b', text: 'A comprehensive collection of idiomatic and stylistic lints beyond compiler warnings' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `cargo clippy` add on top of `cargo check`?',
+        options: [
+          { id: 'a', text: 'Nothing, it is an exact alias' },
+          { id: 'b', text: 'A comprehensive collection of idiomatic and stylistic lints beyond compiler warnings' },
+          { id: 'c', text: 'A faster compiler backend' },
+        ],
+        correct: 'b',
+        explain: 'Clippy performs hundreds of additional static analysis checks for idiomatic Rust code.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`cargo fmt --check` in CI — what does it enforce?',
+        options: [
+          { id: 'a', text: 'Uniform formatting: the build fails on any formatting diff' },
+          { id: 'b', text: 'Zero compiler warnings' },
+          { id: 'c', text: 'Test coverage thresholds' },
+        ],
+        correct: 'a',
+        explain: '`--check` never rewrites; it exits nonzero on diffs, turning style into a merge gate. Warnings and coverage are other tools’ jobs.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'rustfmt vs clippy — who does what?',
+        options: [
+          { id: 'a', text: 'rustfmt formats only; clippy lints for correctness and idioms' },
+          { id: 'b', text: 'They do the same thing' },
+          { id: 'c', text: 'clippy formats, rustfmt lints' },
+        ],
+        correct: 'a',
+        explain: 'Two axes: rustfmt owns whitespace-level consistency, clippy owns did-you-mean-it analysis (needless clones, len-zero checks, and hundreds more).',
+        },
       ],
-      correct: 'b',
-      explain: 'Clippy performs hundreds of additional static analysis checks for idiomatic Rust code.',
     },
   },
   {
@@ -1257,14 +2348,35 @@ const concepts = [
     ],
     difficulty: 3, estMinutes: 35,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'If you implement `impl From<Celsius> for Fahrenheit`, what do you get automatically?',
-      options: [
-        { id: 'a', text: 'Nothing extra' },
-        { id: 'b', text: 'An automatic Into<Fahrenheit> implementation for Celsius' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'If you implement `impl From<Celsius> for Fahrenheit`, what do you get automatically?',
+        options: [
+          { id: 'a', text: 'Nothing extra' },
+          { id: 'b', text: 'An automatic Into<Fahrenheit> implementation for Celsius' },
+          { id: 'c', text: 'An automatic `TryFrom` implementation as well' },
+        ],
+        correct: 'b',
+        explain: 'The standard library provides a blanket `impl<T, U> Into<U> for T where U: From<T>`.',
+        },
+        {
+        type: 'predict_output',
+        prompt: 'What does this print?\n\nfn main() {\n    let n: i32 = "42".parse().unwrap();\n    println!("{}", n + 1);\n}',
+        explain: 'The annotation drives inference: `parse` resolves to `FromStr for i32`. Output: 43. Remove the annotation and inference fails — there is nothing left to pin the target type.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`as` casts vs `From` — when is `as` dangerous?',
+        options: [
+          { id: 'a', text: 'Lossy conversions (e.g. `300u16 as u8` wraps silently) with no error signal' },
+          { id: 'b', text: 'Never — `as` is always safe' },
+          { id: 'c', text: 'Only when converting floats' },
+        ],
+        correct: 'a',
+        explain: '`as` never fails loudly: out-of-range values wrap (or saturate for floats). `TryFrom` exists precisely for fallible conversions.',
+        },
       ],
-      correct: 'b',
-      explain: 'The standard library provides a blanket `impl<T, U> Into<U> for T where U: From<T>`.',
     },
   },
   {
@@ -1284,15 +2396,41 @@ const concepts = [
     rustlings: [],
     difficulty: 1, estMinutes: 25,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'You want to name a variable `match`, but the compiler rejects it. Where do you confirm why?',
-      options: [
-        { id: 'a', text: 'Appendix A — Keywords: `match` is reserved for pattern matching' },
-        { id: 'b', text: 'Appendix B — Operators: `match` is an operator' },
-        { id: 'c', text: 'Nowhere — any word can be a variable name' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'You want to name a variable `match`, but the compiler rejects it. Where do you confirm why?',
+        options: [
+          { id: 'a', text: 'Appendix A — Keywords: `match` is reserved for pattern matching' },
+          { id: 'b', text: 'Appendix B — Operators: `match` is an operator' },
+          { id: 'c', text: 'Nowhere — any word can be a variable name' },
+        ],
+        correct: 'a',
+        explain: 'Appendix A lists Rust’s reserved keywords. `match` is a keyword, so it cannot be used as an identifier.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'Where do you check whether `gen` may be used as an identifier in your edition?',
+        options: [
+          { id: 'a', text: 'Appendix A — keywords, including edition-gated strict and weak keywords' },
+          { id: 'b', text: 'Appendix B — operators' },
+          { id: 'c', text: 'Nowhere official — only Stack Overflow' },
+        ],
+        correct: 'a',
+        explain: 'Keywords come in flavors (strict, reserved, weak) and some are edition-gated — Appendix A tracks exactly which words are taken where.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: 'What is a Rust “edition”?',
+        options: [
+          { id: 'a', text: 'An opt-in set of (mostly syntax-level) rules per crate; crates of different editions interoperate freely' },
+          { id: 'b', text: 'A compiler release that breaks all old code' },
+          { id: 'c', text: 'A printing of the book' },
+        ],
+        correct: 'a',
+        explain: 'Editions let the language evolve without forking the ecosystem: 2015/2018/2021/2024 crates link together in one binary.',
+        },
       ],
-      correct: 'a',
-      explain: 'Appendix A lists Rust’s reserved keywords. `match` is a keyword, so it cannot be used as an identifier.',
     },
   },
   {
@@ -1311,15 +2449,35 @@ const concepts = [
     rustlings: [],
     difficulty: 2, estMinutes: 20,
     checkpoint: {
-      type: 'multiple_choice',
-      prompt: 'What does `#[cfg(target_os = "linux")]` above a function do?',
-      options: [
-        { id: 'a', text: 'Compiles the function only when targeting Linux' },
-        { id: 'b', text: 'Checks at runtime whether the OS is Linux' },
-        { id: 'c', text: 'Disables all compiler warnings for that function' },
+      questions: [
+        {
+        type: 'multiple_choice',
+        prompt: 'What does `#[cfg(target_os = "linux")]` above a function do?',
+        options: [
+          { id: 'a', text: 'Compiles the function only when targeting Linux' },
+          { id: 'b', text: 'Checks at runtime whether the OS is Linux' },
+          { id: 'c', text: 'Disables all compiler warnings for that function' },
+        ],
+        correct: 'a',
+        explain: '#[cfg(...)] is conditional compilation: the item only exists in builds matching the predicate. Runtime checks use the cfg! macro instead.',
+        },
+        {
+        type: 'multiple_choice',
+        prompt: '`cfg!` macro vs `#[cfg]` attribute — what is the difference?',
+        options: [
+          { id: 'a', text: '`cfg!` yields a bool at compile time but BOTH branches still compile; `#[cfg]` removes code entirely' },
+          { id: 'b', text: 'There is none' },
+          { id: 'c', text: '`cfg!` evaluates at runtime' },
+        ],
+        correct: 'a',
+        explain: '`if cfg!(unix)` compiles the dead branch too (it must typecheck); `#[cfg(unix)]` erases it before compilation. Different tools: runtime-flexible check vs zero-cost gating.',
+        },
+        {
+        type: 'find_bug',
+        prompt: '#[allow(dead_code)]\nfn unused() {}\nfn main() {\n    #[allow(dead_code)]\n    let x = 5;\n    println!("hi");\n}\n\nThe author expected silence. What warning survives, and why?',
+        explain: '“unused variable: `x`” survives: lints are specific — `dead_code` covers never-used items, but an unused local fires the separate `unused_variables` lint, which `dead_code` does not touch. Fix: `let _x` or `#[allow(unused_variables)]`.',
+        },
       ],
-      correct: 'a',
-      explain: '#[cfg(...)] is conditional compilation: the item only exists in builds matching the predicate. Runtime checks use the cfg! macro instead.',
     },
   },
 ];

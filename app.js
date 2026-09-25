@@ -381,49 +381,95 @@
   }
 
   function CheckpointMarkup(concept) {
-    const cp = concept.checkpoint;
-    if (!cp) return '';
+    const qs = concept.checkpoint && concept.checkpoint.questions;
+    if (!qs || !qs.length) return '';
     const cUi = ui.checkpoint[concept.id] || {};
-
-    if (cp.type === 'multiple_choice') {
-      const answered = cUi.selected != null;
-      const passed = cUi.selected === cp.correct;
-      return `<div>
-        <p class="rmc-checkpoint-prompt">${esc(cp.prompt)}</p>
-        ${cp.options.map((opt) => {
-          let cls = 'rmc-option-btn';
-          if (answered && opt.id === cp.correct) cls += ' correct';
-          else if (answered && opt.id === cUi.selected) cls += ' incorrect';
-          return `<button type="button" class="${cls}" ${answered ? 'disabled' : ''} data-action="answer-mc" data-concept="${esc(concept.id)}" data-option="${esc(opt.id)}">${esc(opt.text)}</button>`;
-        }).join('')}
-        ${answered ? `<div class="rmc-checkpoint-result ${passed ? 'pass' : 'fail'}"><strong>${passed ? 'Correct.' : 'Not quite.'}</strong> ${esc(cp.explain)}</div>
-          <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Retake checkpoint</button>` : ''}
-      </div>`;
-    }
-
-    if (!cUi.revealed) {
-      return `<div>
-        <p class="rmc-checkpoint-prompt">${esc(cp.prompt)}</p>
-        <button type="button" class="rmc-btn-ghost" data-action="reveal-checkpoint" data-concept="${esc(concept.id)}">Reveal answer &amp; self-check</button>
-      </div>`;
-    }
-
-    if (cUi.outcome !== undefined && cUi.outcome !== null) {
-      const passed = cUi.outcome === true;
-      return `<div>
-      <p class="rmc-checkpoint-prompt">${esc(cp.prompt)}</p>
-      <div class="rmc-checkpoint-result ${passed ? 'pass' : 'fail'}" style="margin-bottom:10px">${esc(cp.explain)}</div>
-      <div class="rmc-checkpoint-result ${passed ? 'pass' : 'fail'}"><strong>${passed ? 'Marked as passed.' : 'Marked as needs review.'}</strong> ${passed ? 'Nice work — this block is now marked completed.' : 'This block is marked "needs review". Use the remediation links below.'}</div>
-      <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Retake checkpoint</button>
-    </div>`;
-    }
+    const answers = cUi.answers || {};
+    const judged = qs.filter((q, i) => {
+      const s = quizQuestionState(q, answers[i]);
+      return s === 'correct' || s === 'wrong';
+    }).length;
 
     return `<div>
-      <p class="rmc-checkpoint-prompt">${esc(cp.prompt)}</p>
-      <div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${esc(cp.explain)}</div>
-      <p style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Be honest: did you get this right before revealing the answer?</p>
-      <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${esc(concept.id)}" data-passed="true">Yes — mark passed</button>
-      <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${esc(concept.id)}" data-passed="false">No — needs review</button>
+      <p class="rmc-quiz-progress">Answered ${judged} of ${qs.length} — all must be correct to pass.</p>
+      ${qs.map((q, i) => quizQuestionMarkup(concept, q, i, answers[i])).join('')}
+      <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Restart quiz</button>
+    </div>`;
+  }
+
+  function quizAnswers(id) {
+    const cUi = ui.checkpoint[id] || {};
+    return cUi.answers || {};
+  }
+
+  // open | revealed (self Q, shown but unjudged) | correct | wrong
+  function quizQuestionState(q, a) {
+    if (!q) return 'open';
+    if (q.type === 'multiple_choice') {
+      if (!a || a.selected == null) return 'open';
+      return a.selected === q.correct ? 'correct' : 'wrong';
+    }
+    if (!a || !a.revealed) return 'open';
+    if (a.passed === true) return 'correct';
+    if (a.passed === false) return 'wrong';
+    return 'revealed';
+  }
+
+  function quizDone(qs, answers) {
+    return qs.every((q, i) => {
+      const s = quizQuestionState(q, answers[i]);
+      return s === 'correct' || s === 'wrong';
+    });
+  }
+
+  function quizPassed(qs, answers) {
+    return qs.every((q, i) => quizQuestionState(q, answers[i]) === 'correct');
+  }
+
+  // Returns true when the quiz just finished (already re-rendered via setState).
+  function maybeFinishQuiz(id) {
+    const concept = derived().byId[id];
+    const qs = concept && concept.checkpoint && concept.checkpoint.questions;
+    if (!qs || !qs.length) return false;
+    const answers = quizAnswers(id);
+    if (!quizDone(qs, answers)) return false;
+    const existing = ui.checkpoint[id];
+    if (existing && existing.outcome !== undefined && existing.outcome !== null) return false;
+    handleCheckpointResult(id, quizPassed(qs, answers));
+    return true;
+  }
+
+  function quizQuestionMarkup(concept, q, qi, a) {
+    const state = quizQuestionState(q, a);
+    const head = `<p class="rmc-checkpoint-prompt"><strong>Q${qi + 1}.</strong> ${esc(q.prompt)}</p>`;
+    if (q.type === 'multiple_choice') {
+      const judged = state === 'correct' || state === 'wrong';
+      return `<div style="margin-bottom:14px">${head}
+        ${q.options.map((opt) => {
+          let cls = 'rmc-option-btn';
+          if (judged && opt.id === q.correct) cls += ' correct';
+          else if (judged && opt.id === (a && a.selected)) cls += ' incorrect';
+          return `<button type="button" class="${cls}" ${judged ? 'disabled' : ''} data-action="answer-mc" data-concept="${esc(concept.id)}" data-q="${qi}" data-option="${esc(opt.id)}">${esc(opt.text)}</button>`;
+        }).join('')}
+        ${judged ? `<div class="rmc-checkpoint-result ${state === 'correct' ? 'pass' : 'fail'}"><strong>${state === 'correct' ? 'Correct.' : 'Not quite.'}</strong> ${esc(q.explain)}</div>` : ''}
+      </div>`;
+    }
+    // Self-assessed (predict_output / find_bug / explain): reveal, then honest Yes/No.
+    if (state === 'open') {
+      return `<div style="margin-bottom:14px">${head}
+        <button type="button" class="rmc-btn-ghost" data-action="reveal-checkpoint" data-concept="${esc(concept.id)}" data-q="${qi}">Reveal answer &amp; self-check</button>
+      </div>`;
+    }
+    if (state === 'revealed') {
+      return `<div style="margin-bottom:14px">${head}
+        <div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${esc(q.explain)}</div>
+        <p style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Be honest: did you get this right before revealing the answer?</p>
+        <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${esc(concept.id)}" data-q="${qi}" data-passed="true">Yes — mark passed</button>
+        <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${esc(concept.id)}" data-q="${qi}" data-passed="false">No — needs review</button>
+      </div>`;
+    }
+    return `<div style="margin-bottom:14px">${head}
+      <div class="rmc-checkpoint-result ${state === 'correct' ? 'pass' : 'fail'}"><strong>${state === 'correct' ? 'Marked as passed.' : 'Marked as needs review.'}</strong> ${esc(q.explain)}</div>
     </div>`;
   }
 
@@ -585,7 +631,7 @@
       </div>`}
 
       <div class="rmc-panel rmc-checkpoint-panel">
-        <h3>Check — ${concept.checkpoint && concept.checkpoint.type === 'multiple_choice' ? 'Checkpoint' : 'Self-Assessed Verification'}</h3>
+        <h3>Check — quiz · ${concept.checkpoint && concept.checkpoint.questions ? concept.checkpoint.questions.length : 3} questions · pass all to complete</h3>
         ${!cUi.show && checkpointOutcome === null ? `<button type="button" class="rmc-btn-primary" data-action="show-checkpoint" data-concept="${esc(concept.id)}">Take checkpoint</button>` : ''}
         ${!cUi.show && checkpointOutcome !== null ? `<div>
             <div class="rmc-checkpoint-result ${checkpointOutcome ? 'pass' : 'fail'}">
@@ -656,19 +702,21 @@
     const shown = limit ? queue.slice(0, limit) : queue;
     if (!shown.length) return '<div class="rmc-empty">Nothing due for review right now. Cards reappear here on their spaced schedule once due.</div>';
 
-    return `<div>${shown.map((c) => `
+    return `<div>${shown.map((c) => {
+      const q1 = c.checkpoint && c.checkpoint.questions && c.checkpoint.questions[0];
+      return `
       <div class="rmc-review-card">
         <p class="rmc-review-meta">Recall fundamental · ${esc(c.concept)}</p>
-        <p class="rmc-recall-q">${esc(c.checkpoint?.prompt || c.objective)}</p>
+        <p class="rmc-recall-q">${esc((q1 && q1.prompt) || c.objective)}</p>
         <details style="margin: 8px 0 12px">
           <summary style="cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:500">Show explanation &amp; answer</summary>
-          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${esc(c.checkpoint?.explain || 'Review this concept in the course module.')}</div>
+          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${esc((q1 && q1.explain) || 'Review this concept in the course module.')}</div>
         </details>
         <div style="display:flex;gap:8px">
           <button type="button" class="rmc-btn-primary" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="true">Got it</button>
           <button type="button" class="rmc-btn-ghost" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="false">Fuzzy — revisit</button>
         </div>
-      </div>`).join('')}</div>`;
+      </div>`;}).join('')}</div>`;
   }
 
   function mainContent(statusMap, byId) {
@@ -795,38 +843,57 @@
     if (action === 'retake-checkpoint') {
       const id = el.dataset.concept;
       if (!isValidConceptId(id)) return;
-      ui.checkpoint[id] = { show: true, selected: null, revealed: false, outcome: null };
+      ui.checkpoint[id] = { show: true, answers: {}, outcome: null };
       render();
     }
 
     if (action === 'reveal-checkpoint') {
       const id = el.dataset.concept;
+      const qi = Number(el.dataset.q || 0);
       if (!isValidConceptId(id)) return;
-      ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true, revealed: true };
+      const concept = derived().byId[id];
+      const qs = concept && concept.checkpoint && concept.checkpoint.questions;
+      if (!qs || !qs[qi] || qs[qi].type === 'multiple_choice') return;
+      const answers = { ...quizAnswers(id) };
+      if (answers[qi] && answers[qi].revealed) return;
+      answers[qi] = { ...(answers[qi] || {}), revealed: true };
+      ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true, answers };
       render();
     }
 
     if (action === 'answer-mc') {
       const id = el.dataset.concept;
       const option = el.dataset.option;
+      const qi = Number(el.dataset.q || 0);
       if (!isValidConceptId(id) || typeof option !== 'string') return;
       const concept = derived().byId[id];
-      if (!concept || !concept.checkpoint || concept.checkpoint.type !== 'multiple_choice') return;
-      const validOptions = (concept.checkpoint.options || []).map((o) => o.id);
+      const qs = concept && concept.checkpoint && concept.checkpoint.questions;
+      const q = qs && qs[qi];
+      if (!q || q.type !== 'multiple_choice') return;
+      const validOptions = (q.options || []).map((o) => o.id);
       if (!validOptions.includes(option)) return;
       // Ignore re-answers: buttons are disabled post-answer, but guard double-clicks.
-      const existing = ui.checkpoint[id];
-      if (existing && existing.selected != null) return;
-      ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true, selected: option };
-      handleCheckpointResult(id, option === concept.checkpoint.correct);
+      const answers = { ...quizAnswers(id) };
+      if (answers[qi] && answers[qi].selected != null) return;
+      answers[qi] = { selected: option };
+      ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true, answers };
+      if (!maybeFinishQuiz(id)) render();
     }
 
     if (action === 'self-check') {
       const id = el.dataset.concept;
+      const qi = Number(el.dataset.q || 0);
       if (!isValidConceptId(id)) return;
-      const existing = ui.checkpoint[id];
-      if (existing && existing.outcome !== undefined && existing.outcome !== null) return;
-      handleCheckpointResult(id, el.dataset.passed === 'true');
+      const concept = derived().byId[id];
+      const qs = concept && concept.checkpoint && concept.checkpoint.questions;
+      const q = qs && qs[qi];
+      if (!q || q.type === 'multiple_choice') return;
+      const answers = { ...quizAnswers(id) };
+      const cur = answers[qi] || {};
+      if (!cur.revealed || cur.passed !== undefined) return;
+      answers[qi] = { revealed: true, passed: el.dataset.passed === 'true' };
+      ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true, answers };
+      if (!maybeFinishQuiz(id)) render();
     }
 
     if (action === 'review-mark') {
