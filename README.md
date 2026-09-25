@@ -1,5 +1,7 @@
 # Rust Mastery
 
+Live: https://mounkastel.github.io/rust-mastery/
+
 One sequence across three Rust resources: read, see, do, recall, advance. Works offline (except RBE "Run" buttons and the links below).
 
 Sources:
