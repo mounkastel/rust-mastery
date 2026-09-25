@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#fcfbf9">
+  <meta name="description" content="Rust Mastery — one sequence across TRPL, Rust by Example, and Rustlings: read, see, do, recall, advance.">
+  <title>Rust Mastery — TRPL × Rust by Example × Rustlings</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+  // Pre-paint theme: avoid light flash when OS/stored preference is dark.
+  try {
+    var __t = window.localStorage.getItem('rust-mastery-theme');
+    if (__t !== 'dark' && __t !== 'light') {
+      __t = (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    document.documentElement.dataset.theme = __t;
+  } catch (_) {}
+  </script>
+</head>
+<body>
+  <div id="app" class="rmc">Loading…</div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
