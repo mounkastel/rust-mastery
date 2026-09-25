@@ -397,7 +397,7 @@
     }).length;
 
     return `<div>
-      <p class="rmc-quiz-progress">Answered ${judged} of ${qs.length} — all must be correct to pass.</p>
+      <p class="rmc-quiz-progress" data-quiz-progress="${esc(concept.id)}">Answered ${judged} of ${qs.length} — all must be correct to pass.</p>
       ${qs.map((q, i) => quizQuestionMarkup(concept, q, i, answers[i])).join('')}
       <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Restart quiz</button>
     </div>`;
@@ -446,37 +446,77 @@
   }
 
   function quizQuestionMarkup(concept, q, qi, a) {
+    return `<div class="rmc-quiz-q" data-quiz-q="${esc(concept.id)}:${qi}" tabindex="-1">`
+      + quizQuestionHead(q, qi) + quizQuestionTail(concept, q, qi, a) + `</div>`;
+  }
+
+  // Shared single source for result markup (full renders and surgical paints).
+  function quizResultHTML(ok, strong, explain) {
+    return `<div class="rmc-checkpoint-result ${ok ? 'pass' : 'fail'}"><strong>${strong}</strong> ${fmtMultiline(explain)}</div>`;
+  }
+
+  function quizQuestionHead(q, qi) {
+    return `<p class="rmc-checkpoint-prompt"><strong>Q${qi + 1}.</strong> ${fmtMultiline(q.prompt)}</p>`;
+  }
+
+  function quizQuestionTail(concept, q, qi, a) {
+    const cid = esc(concept.id);
     const state = quizQuestionState(q, a);
-    const head = `<p class="rmc-checkpoint-prompt"><strong>Q${qi + 1}.</strong> ${fmtMultiline(q.prompt)}</p>`;
     if (q.type === 'multiple_choice') {
       const judged = state === 'correct' || state === 'wrong';
-      return `<div style="margin-bottom:14px">${head}
-        ${q.options.map((opt) => {
+      return `${q.options.map((opt) => {
           let cls = 'rmc-option-btn';
           if (judged && opt.id === q.correct) cls += ' correct';
           else if (judged && opt.id === (a && a.selected)) cls += ' incorrect';
-          return `<button type="button" class="${cls}" ${judged ? 'disabled' : ''} data-action="answer-mc" data-concept="${esc(concept.id)}" data-q="${qi}" data-option="${esc(opt.id)}">${esc(opt.text)}</button>`;
-        }).join('')}
-        ${judged ? `<div class="rmc-checkpoint-result ${state === 'correct' ? 'pass' : 'fail'}"><strong>${state === 'correct' ? 'Correct.' : 'Not quite.'}</strong> ${fmtMultiline(q.explain)}</div>` : ''}
-      </div>`;
+          return `<button type="button" class="${cls}" ${judged ? 'disabled' : ''} data-action="answer-mc" data-concept="${cid}" data-q="${qi}" data-option="${esc(opt.id)}">${esc(opt.text)}</button>`;
+        }).join('')}`
+        + (judged
+          ? quizResultHTML(state === 'correct', state === 'correct' ? 'Correct.' : 'Not quite.', q.explain)
+          : '');
     }
     // Self-assessed (predict_output / find_bug / explain): reveal, then honest Yes/No.
     if (state === 'open') {
-      return `<div style="margin-bottom:14px">${head}
-        <button type="button" class="rmc-btn-ghost" data-action="reveal-checkpoint" data-concept="${esc(concept.id)}" data-q="${qi}">Reveal answer &amp; self-check</button>
-      </div>`;
+      return `<button type="button" class="rmc-btn-ghost" data-action="reveal-checkpoint" data-concept="${cid}" data-q="${qi}">Reveal answer &amp; self-check</button>`;
     }
     if (state === 'revealed') {
-      return `<div style="margin-bottom:14px">${head}
-        <div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${fmtMultiline(q.explain)}</div>
+      return `<div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${fmtMultiline(q.explain)}</div>
         <p style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Be honest: did you get this right before revealing the answer?</p>
-        <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${esc(concept.id)}" data-q="${qi}" data-passed="true">Yes — mark passed</button>
-        <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${esc(concept.id)}" data-q="${qi}" data-passed="false">No — needs review</button>
-      </div>`;
+        <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="true">Yes — mark passed</button>
+        <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="false">No — needs review</button>`;
     }
-    return `<div style="margin-bottom:14px">${head}
-      <div class="rmc-checkpoint-result ${state === 'correct' ? 'pass' : 'fail'}"><strong>${state === 'correct' ? 'Marked as passed.' : 'Marked as needs review.'}</strong> ${fmtMultiline(q.explain)}</div>
-    </div>`;
+    const ok = state === 'correct';
+    return quizResultHTML(ok, ok ? 'Marked as passed.' : 'Marked as needs review.', q.explain);
+  }
+
+  function findQuizBox(id, qi) {
+    const boxes = root.querySelectorAll('[data-quiz-q]');
+    for (const box of boxes) {
+      if (box.dataset.quizQ === id + ':' + qi) return box;
+    }
+    return null;
+  }
+
+  function moveChildrenInto(box, html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    box.append(...Array.from(tmp.childNodes));
+  }
+
+  function refreshQuizProgress(id) {
+    const concept = derived().byId[id];
+    const qs = concept && concept.checkpoint && concept.checkpoint.questions;
+    if (!qs) return;
+    const answers = quizAnswers(id);
+    const judged = qs.filter((q, i) => {
+      const s = quizQuestionState(q, answers[i]);
+      return s === 'correct' || s === 'wrong';
+    }).length;
+    const bars = root.querySelectorAll('[data-quiz-progress]');
+    for (const bar of bars) {
+      if (bar.dataset.quizProgress === id) {
+        bar.textContent = `Answered ${judged} of ${qs.length} — all must be correct to pass.`;
+      }
+    }
   }
 
   function isLockedByPrereqs(conceptId) {
@@ -857,7 +897,14 @@
       if (answers[qi] && answers[qi].revealed) return;
       answers[qi] = { ...(answers[qi] || {}), revealed: true };
       ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true, answers };
-      render();
+      const box = findQuizBox(id, qi);
+      if (!box) { render(); return; }
+      const btn = box.querySelector('button[data-action="reveal-checkpoint"]');
+      if (!btn) { render(); return; }
+      moveChildrenInto(box, quizQuestionTail(concept, qs[qi], qi, answers[qi]));
+      btn.remove();
+      const yes = box.querySelector('button[data-action="self-check"][data-passed="true"]');
+      if (yes) yes.focus({ preventScroll: true });
     }
 
     if (action === 'answer-mc') {
@@ -876,7 +923,19 @@
       if (answers[qi] && answers[qi].selected != null) return;
       answers[qi] = { selected: option };
       ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true, answers };
-      if (!maybeFinishQuiz(id)) render();
+      if (maybeFinishQuiz(id)) return;
+      // Surgical paint: only this question changes, so the rest of the page
+      // (and its in-page translation) is left untouched.
+      const box = findQuizBox(id, qi);
+      if (!box) { render(); return; }
+      const correct = option === q.correct;
+      box.querySelectorAll('button[data-action="answer-mc"]').forEach((b) => {
+        b.disabled = true;
+        if (b.dataset.option === q.correct) b.classList.add('correct');
+        else if (b.dataset.option === option) b.classList.add('incorrect');
+      });
+      moveChildrenInto(box, quizResultHTML(correct, correct ? 'Correct.' : 'Not quite.', q.explain));
+      refreshQuizProgress(id);
     }
 
     if (action === 'self-check') {
@@ -892,7 +951,13 @@
       if (!cur.revealed || cur.passed !== undefined) return;
       answers[qi] = { revealed: true, passed: el.dataset.passed === 'true' };
       ui.checkpoint[id] = { ...(ui.checkpoint[id] || {}), show: true, answers };
-      if (!maybeFinishQuiz(id)) render();
+      if (maybeFinishQuiz(id)) return;
+      const box = findQuizBox(id, qi);
+      if (!box) { render(); return; }
+      box.querySelectorAll('button[data-action="self-check"]').forEach((b) => b.remove());
+      moveChildrenInto(box, quizQuestionTail(concept, q, qi, answers[qi]));
+      box.focus({ preventScroll: true });
+      refreshQuizProgress(id);
     }
 
     if (action === 'review-mark') {

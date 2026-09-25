@@ -545,6 +545,7 @@ button.rmc-brand { display: flex; align-items: center; gap: 8px; width: 100%; he
 .rmc-checkpoint-result.pass { background: var(--ok-soft); color: var(--ok); border-color: rgba(15, 123, 108, 0.2); }
 .rmc-checkpoint-result.fail { background: var(--bad-soft); color: var(--fail-ink); border-color: rgba(224, 62, 62, 0.2); }
 .rmc-quiz-progress { margin: 0 0 12px; font-size: 12.5px; color: var(--text-3); }
+.rmc-quiz-q:focus { outline: none; }
 .rmc-remediation { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; font-size: 12.5px; color: var(--text-3); border-top: 1px solid var(--border); }
 .rmc-remediation .arrow { font-family: var(--font-mono); color: var(--text-4); }
 
