@@ -535,25 +535,6 @@ body {
 .rmc-gap-note { color: var(--bad-deep); background: var(--bad-soft); border: 1px solid rgba(185, 28, 28, 0.18); border-left: 3px solid var(--bad); }
 .rmc-uncertain-note { color: var(--text-2); background: var(--surface-callout); border: 1px solid var(--border); border-left: 3px solid var(--accent); }
 
-.rmc-mastery-scale { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-.rmc button.rmc-mastery-dot {
-  display: flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px; min-width: 30px;
-  padding: 0;
-  font-family: var(--font-sans);
-  font-size: 11px; font-weight: 600;
-  line-height: 1; white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer; flex-shrink: 0;
-  color: #9b9a97;
-  background: var(--surface-raised);
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  transition: background 120ms ease, border-color 120ms ease;
-}
-.rmc button.rmc-mastery-dot:hover { background: var(--surface-hover); color: var(--text); }
-.rmc button.rmc-mastery-dot.filled { background: var(--primary-bg); border-color: var(--primary-bg); color: var(--primary-ink); }
-.rmc button.rmc-mastery-dot.filled.max { background: var(--ok); border-color: var(--ok); }
 .rmc-mastery-label { font-family: var(--font-sans); font-size: 11px; letter-spacing: -0.01em; color: var(--text-4); margin-top: 8px; }
 
 .rmc-checkpoint-panel { background: var(--surface-callout); border: 1px solid var(--border-panel); border-radius: var(--radius); }

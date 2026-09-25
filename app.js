@@ -61,7 +61,7 @@
   };
 
   function defaultState() {
-    return { progress: {}, selfRating: {}, reviewLog: {}, lastActiveConceptId: null };
+    return { progress: {}, reviewLog: {}, lastActiveConceptId: null };
   }
 
   const VALID_STATUSES = ['not-started', 'in-progress', 'completed', 'needs-review'];
@@ -119,16 +119,6 @@
     return REVIEW_INTERVALS_DAYS[REVIEW_INTERVALS_DAYS.length - 1];
   }
 
-  function sanitizeSelfRating(raw) {
-    if (!isPlainObject(raw)) return {};
-    const out = {};
-    for (const k of Object.keys(raw)) {
-      const n = Number(raw[k]);
-      if (Number.isFinite(n)) out[k] = Math.max(0, Math.min(5, Math.floor(n)));
-    }
-    return out;
-  }
-
   function sanitizeReviewLog(raw) {
     if (!isPlainObject(raw)) return {};
     const out = {};
@@ -137,11 +127,6 @@
       if (Number.isFinite(n) && n > 0) out[k] = Math.floor(n);
     }
     return out;
-  }
-
-  function getSelfRating(s, id) {
-    const n = Number(s && s.selfRating && s.selfRating[id]);
-    return Number.isFinite(n) ? Math.max(0, Math.min(5, Math.floor(n))) : 0;
   }
 
   function isValidConceptId(id) {
@@ -165,7 +150,6 @@
     }
     return {
       progress,
-      selfRating: sanitizeSelfRating(p.selfRating !== undefined ? p.selfRating : p.mastery),
       reviewLog: sanitizeReviewLog(p.reviewLog),
       lastActiveConceptId: typeof p.lastActiveConceptId === 'string' ? p.lastActiveConceptId : null,
     };
@@ -559,7 +543,6 @@
     const rustlingsCore = concept.rustlings.filter((r) => r.tier === 'CORE');
     const rustlingsOther = concept.rustlings.filter((r) => r.tier !== 'CORE');
     const practiceTasks = Array.isArray(concept.practice) ? concept.practice : [];
-    const selfRating = getSelfRating(state, concept.id);
 
     return `<div>
       <div class="rmc-block-header">
@@ -611,14 +594,6 @@
             ${rustlingsOther.length > 0 ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12.5px;color:var(--text-2)">${rustlingsOther.length} additional reinforcement/optional exercise${rustlingsOther.length > 1 ? 's' : ''}</summary><div style="margin-top:6px">${rustlingsOther.map((r) => resourceExerciseMarkup(concept, p, r)).join('')}</div></details>` : ''}
             ${practiceTasks.map((t) => practiceTaskMarkup(concept, p, t)).join('')}
             ${concept.rustlingsNote ? `<div class="rmc-uncertain-note" style="margin-top:8px">${esc(concept.rustlingsNote)}</div>` : ''}`}
-      </div>
-
-      <div class="rmc-panel">
-        <h3>Recall — self-assessed mastery</h3>
-        <div class="rmc-mastery-scale">
-          ${[0,1,2,3,4,5].map((v) => `<button type="button" class="rmc-mastery-dot${v <= selfRating && selfRating > 0 ? ' filled' : ''}${v === 5 && selfRating === 5 ? ' max' : ''}" title="${v}/5" data-action="set-mastery" data-concept="${esc(concept.id)}" data-value="${v}">${v}</button>`).join('')}
-        </div>
-        <p class="rmc-mastery-label">0 not started · 1 exposed · 2 understood · 3 practiced · 4 can explain · 5 can apply independently</p>
       </div>
 
       <div class="rmc-panel rmc-checkpoint-panel">
@@ -865,15 +840,6 @@
       const existing = ui.checkpoint[id];
       if (existing && existing.outcome !== undefined && existing.outcome !== null) return;
       handleCheckpointResult(id, el.dataset.passed === 'true');
-    }
-
-    if (action === 'set-mastery') {
-      const id = el.dataset.concept;
-      if (!isValidConceptId(id)) return;
-      const raw = Number(el.dataset.value);
-      if (!Number.isFinite(raw)) return;
-      const val = Math.max(0, Math.min(5, Math.floor(raw)));
-      setState((s) => ({ ...s, selfRating: { ...s.selfRating, [id]: val } }));
     }
 
     if (action === 'review-mark') {
