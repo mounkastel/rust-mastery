@@ -173,12 +173,27 @@
   // innerHTML replacement as a brand-new page and re-translate everything.
   // A tick changes nothing visible except a possible not-started -> in-progress
   // flip, so re-render only then (restoring focus to the ticked box).
+  // Focus helper: preventScroll is ignored by some browsers, which then
+  // scroll the nearest scrollable ancestor (.rmc-main) — record and restore
+  // its position so focusing never causes a visible jump.
+  function focusWithoutScroll(el) {
+    if (!el || typeof el.focus !== 'function') return;
+    const main = root ? root.querySelector('.rmc-main') : null;
+    const y = main ? main.scrollTop : null;
+    try {
+      el.focus({ preventScroll: true });
+    } catch (_) {
+      el.focus();
+    }
+    if (main && y !== null && main.scrollTop !== y) main.scrollTop = y;
+  }
+
   function refocusCheckbox(action, id, key, value) {
     if (!root) return;
     const boxes = root.querySelectorAll('input[data-action="' + action + '"]');
     for (const box of boxes) {
       if (box.dataset.concept === id && box.dataset[key] === value) {
-        box.focus({ preventScroll: true });
+        focusWithoutScroll(box);
         break;
       }
     }
@@ -955,10 +970,13 @@
     if (ui.selectedConceptId !== null && !isValidConceptId(ui.selectedConceptId)) ui.selectedConceptId = null;
     if (ui.view === 'block' && !ui.selectedConceptId) ui.view = 'roadmap';
     if (typeof ui.menuOpen !== 'boolean') ui.menuOpen = false;
-    // Preserve sidebar scroll across the destructive rebuild (sticky drawer
-    // loses scrollTop when innerHTML is replaced).
+    // Preserve scroll across the destructive rebuild: innerHTML replacement
+    // creates a brand-new .rmc-main (scrollTop resets to 0) just like the
+    // sidebar drawer does. Navigation paths reset explicitly via scrollTop().
     const prevSidebar = root.querySelector('#rmc-sidebar');
     const prevSidebarScroll = prevSidebar ? prevSidebar.scrollTop : 0;
+    const prevMain = root.querySelector('.rmc-main');
+    const prevMainScroll = prevMain ? prevMain.scrollTop : 0;
     // Viewport-locked shell: body never scrolls, so no overflow juggling here.
     // The mobile drawer is a fixed overlay; .rmc-main owns its own scroll.
     ensureSidebarExpanded();
@@ -973,6 +991,10 @@
     if (prevSidebarScroll) {
       const nextSidebar = root.querySelector('#rmc-sidebar');
       if (nextSidebar) nextSidebar.scrollTop = prevSidebarScroll;
+    }
+    if (prevMainScroll) {
+      const nextMain = root.querySelector('.rmc-main');
+      if (nextMain) nextMain.scrollTop = prevMainScroll;
     }
   }
 
@@ -1060,7 +1082,7 @@
   function focusFirstQuizQuestion(id) {
     if (!root) return;
     const box = root.querySelector('[data-quiz-q^="' + attrEscape(id) + ':"]');
-    if (box && typeof box.focus === 'function') box.focus({ preventScroll: true });
+    focusWithoutScroll(box);
   }
 
   function openConcept(id) {
@@ -1196,7 +1218,7 @@
       moveChildrenInto(box, quizQuestionTail(concept, qs[qi], qi, answers[qi]));
       btn.remove();
       const yes = box.querySelector('button[data-action="self-check"][data-passed="true"]');
-      if (yes) yes.focus({ preventScroll: true });
+      focusWithoutScroll(yes);
       return;
     }
 
@@ -1252,7 +1274,7 @@
       // be replaced, not appended to — otherwise the explanation renders twice
       // and the stale prompt paragraph lingers next to the verdict.
       replaceQuizTail(box, quizQuestionTail(concept, q, qi, answers[qi]));
-      box.focus({ preventScroll: true });
+      focusWithoutScroll(box);
       refreshQuizProgress(id);
       return;
     }
