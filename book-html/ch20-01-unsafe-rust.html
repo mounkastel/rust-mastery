@@ -529,7 +529,7 @@ external functions from another language we want to call. The <code>"C"</code> p
 defines which <em>application binary interface (ABI)</em> the external function uses:
 The ABI defines how to call the function at the assembly level. The <code>"C"</code> ABI
 is the most common and follows the C programming language’s ABI. Information
-about all the ABIs Rust supports is available in <a href="../reference/items/external-blocks.html#abi">the Rust Reference</a>.</p>
+about all the ABIs Rust supports is available in <a href="https://doc.rust-lang.org/reference/items/external-blocks.html#abi">the Rust Reference</a>.</p>
 <p>Every item declared within an <code>unsafe extern</code> block is implicitly unsafe.
 However, some FFI functions <em>are</em> safe to call. For example, the <code>abs</code> function
 from C’s standard library does not have any memory safety considerations, and we
@@ -682,7 +682,7 @@ A <em>union</em> is similar to a <code>struct</code>, but only one declared fiel
 particular instance at one time. Unions are primarily used to interface with
 unions in C code. Accessing union fields is unsafe because Rust can’t guarantee
 the type of the data currently being stored in the union instance. You can
-learn more about unions in <a href="../reference/items/unions.html">the Rust Reference</a>.</p>
+learn more about unions in <a href="https://doc.rust-lang.org/reference/items/unions.html">the Rust Reference</a>.</p>
 <h3 id="using-miri-to-check-unsafe-code"><a class="header" href="#using-miri-to-check-unsafe-code">Using Miri to Check Unsafe Code</a></h3>
 <p>When writing unsafe code, you might want to check that what you have written
 actually is safe and correct. One of the best ways to do that is to use Miri,

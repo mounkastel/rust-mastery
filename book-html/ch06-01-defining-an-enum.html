@@ -341,7 +341,7 @@ a struct. Enums handle this case with ease:</p>
 <span class="boring">}</span></code></pre>
 <p>We’ve shown several different ways to define data structures to store version
 four and version six IP addresses. However, as it turns out, wanting to store
-IP addresses and encode which kind they are is so common that <a href="../std/net/enum.IpAddr.html">the standard
+IP addresses and encode which kind they are is so common that <a href="https://doc.rust-lang.org/std/net/enum.IpAddr.html">the standard
 library has a definition we can use!</a><!-- ignore --> Let’s look at how
 the standard library defines <code>IpAddr</code>. It has the exact enum and variants that
 we’ve defined and used, but it embeds the address data inside the variants in
@@ -469,7 +469,7 @@ null is a value that is currently invalid or absent for some reason.</p>
 <p>The problem isn’t really with the concept but with the particular
 implementation. As such, Rust does not have nulls, but it does have an enum
 that can encode the concept of a value being present or absent. This enum is
-<code>Option&lt;T&gt;</code>, and it is <a href="../std/option/enum.Option.html">defined by the standard library</a><!-- ignore -->
+<code>Option&lt;T&gt;</code>, and it is <a href="https://doc.rust-lang.org/std/option/enum.Option.html">defined by the standard library</a><!-- ignore -->
 as follows:</p>
 <pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -570,7 +570,7 @@ code.</p>
 <p>So how do you get the <code>T</code> value out of a <code>Some</code> variant when you have a value
 of type <code>Option&lt;T&gt;</code> so that you can use that value? The <code>Option&lt;T&gt;</code> enum has a
 large number of methods that are useful in a variety of situations; you can
-check them out in <a href="../std/option/enum.Option.html">its documentation</a><!-- ignore -->. Becoming familiar
+check them out in <a href="https://doc.rust-lang.org/std/option/enum.Option.html">its documentation</a><!-- ignore -->. Becoming familiar
 with the methods on <code>Option&lt;T&gt;</code> will be extremely useful in your journey with
 Rust.</p>
 <p>In general, in order to use an <code>Option&lt;T&gt;</code> value, you want to have code that

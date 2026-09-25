@@ -410,7 +410,7 @@ changes to the reference count in a thread-safe way.</p>
 concurrent situations. The <em>a</em> stands for <em>atomic</em>, meaning it’s an <em>atomically
 reference-counted</em> type. Atomics are an additional kind of concurrency
 primitive that we won’t cover in detail here: See the standard library
-documentation for <a href="../std/sync/atomic/index.html"><code>std::sync::atomic</code></a><!-- ignore --> for more
+documentation for <a href="https://doc.rust-lang.org/std/sync/atomic/index.html"><code>std::sync::atomic</code></a><!-- ignore --> for more
 details. At this point, you just need to know that atomics work like primitive
 types but are safe to share across threads.</p>
 <p>You might then wonder why all primitive types aren’t atomic and why standard
@@ -460,7 +460,7 @@ counter. Using this strategy, you can divide a calculation into independent
 parts, split those parts across threads, and then use a <code>Mutex&lt;T&gt;</code> to have each
 thread update the final result with its part.</p>
 <p>Note that if you are doing simple numerical operations, there are types simpler
-than <code>Mutex&lt;T&gt;</code> types provided by the <a href="../std/sync/atomic/index.html"><code>std::sync::atomic</code> module of the
+than <code>Mutex&lt;T&gt;</code> types provided by the <a href="https://doc.rust-lang.org/std/sync/atomic/index.html"><code>std::sync::atomic</code> module of the
 standard library</a><!-- ignore -->. These types provide safe, concurrent,
 atomic access to primitive types. We chose to use <code>Mutex&lt;T&gt;</code> with a primitive
 type for this example so that we could concentrate on how <code>Mutex&lt;T&gt;</code> works.</p>

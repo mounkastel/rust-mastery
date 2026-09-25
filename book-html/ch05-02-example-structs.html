@@ -311,7 +311,7 @@ win for clarity.</p>
 <h3 id="adding-functionality-with-derived-traits"><a class="header" href="#adding-functionality-with-derived-traits">Adding Functionality with Derived Traits</a></h3>
 <p>It’d be useful to be able to print an instance of <code>Rectangle</code> while we’re
 debugging our program and see the values for all its fields. Listing 5-11 tries
-using the <a href="../std/macro.println.html"><code>println!</code> macro</a><!-- ignore --> as we have used in
+using the <a href="https://doc.rust-lang.org/std/macro.println.html"><code>println!</code> macro</a><!-- ignore --> as we have used in
 previous chapters. This won’t work, however.</p>
 <listing number="5-11" file-name="src/main.rs" caption="Attempting to print a `Rectangle` instance">
 <pre><code class="language-rust ignore does_not_compile">struct Rectangle {
@@ -398,7 +398,7 @@ rect1 is Rectangle {
     height: 50,
 }
 </code></pre>
-<p>Another way to print out a value using the <code>Debug</code> format is to use the <a href="../std/macro.dbg.html"><code>dbg!</code>
+<p>Another way to print out a value using the <code>Debug</code> format is to use the <a href="https://doc.rust-lang.org/std/macro.dbg.html"><code>dbg!</code>
 macro</a><!-- ignore -->, which takes ownership of an expression (as opposed
 to <code>println!</code>, which takes a reference), prints the file and line number of
 where that <code>dbg!</code> macro call occurs in your code along with the resultant value
@@ -454,7 +454,7 @@ to use with the <code>derive</code> attribute that can add useful behavior to ou
 types. Those traits and their behaviors are listed in <a href="appendix-03-derivable-traits.html">Appendix C</a><!--
 ignore -->. We’ll cover how to implement these traits with custom behavior as
 well as how to create your own traits in Chapter 10. There are also many
-attributes other than <code>derive</code>; for more information, see <a href="../reference/attributes.html">the “Attributes”
+attributes other than <code>derive</code>; for more information, see <a href="https://doc.rust-lang.org/reference/attributes.html">the “Attributes”
 section of the Rust Reference</a>.</p>
 <p>Our <code>area</code> function is very specific: It only computes the area of rectangles.
 It would be helpful to tie this behavior more closely to our <code>Rectangle</code> struct

@@ -829,8 +829,8 @@ enough system resources, <code>thread::spawn</code> will panic. That will cause 
 whole server to panic, even though the creation of some threads might
 succeed. For simplicity’s sake, this behavior is fine, but in a production
 thread pool implementation, you’d likely want to use
-<a href="../std/thread/struct.Builder.html"><code>std::thread::Builder</code></a><!-- ignore --> and its
-<a href="../std/thread/struct.Builder.html#method.spawn"><code>spawn</code></a><!-- ignore --> method that returns <code>Result</code> instead.</p>
+<a href="https://doc.rust-lang.org/std/thread/struct.Builder.html"><code>std::thread::Builder</code></a><!-- ignore --> and its
+<a href="https://doc.rust-lang.org/std/thread/struct.Builder.html#method.spawn"><code>spawn</code></a><!-- ignore --> method that returns <code>Result</code> instead.</p>
 </section>
 <p>This code will compile and will store the number of <code>Worker</code> instances we
 specified as an argument to <code>ThreadPool::new</code>. But we’re <em>still</em> not processing

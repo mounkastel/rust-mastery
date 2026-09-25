@@ -711,7 +711,7 @@ a value of <code>0</code> if <code>main</code> returns <code>Ok(())</code> and w
 they exit: Programs that exit successfully return the integer <code>0</code>, and programs
 that error return some integer other than <code>0</code>. Rust also returns integers from
 executables to be compatible with this convention.</p>
-<p>The <code>main</code> function may return any types that implement <a href="../std/process/trait.Termination.html">the
+<p>The <code>main</code> function may return any types that implement <a href="https://doc.rust-lang.org/std/process/trait.Termination.html">the
 <code>std::process::Termination</code> trait</a><!-- ignore -->, which contains
 a function <code>report</code> that returns an <code>ExitCode</code>. Consult the standard library
 documentation for more information on implementing the <code>Termination</code> trait for

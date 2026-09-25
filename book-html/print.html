@@ -995,7 +995,7 @@ library, known as <code>std</code>:</p>
 </span><span class="boring">}</span></code></pre>
 <p>By default, Rust has a set of items defined in the standard library that it
 brings into the scope of every program. This set is called the <em>prelude</em>, and
-you can see everything in it <a href="../std/prelude/index.html">in the standard library documentation</a>.</p>
+you can see everything in it <a href="https://doc.rust-lang.org/std/prelude/index.html">in the standard library documentation</a>.</p>
 <p>If a type you want to use isn’t in the prelude, you have to bring that type
 into scope explicitly with a <code>use</code> statement. Using the <code>std::io</code> library
 provides you with a number of useful features, including the ability to accept
@@ -1076,7 +1076,7 @@ introduce a mutable variable named <code>guess</code>. The equal sign (<code>=</
 want to bind something to the variable now. On the right of the equal sign is
 the value that <code>guess</code> is bound to, which is the result of calling
 <code>String::new</code>, a function that returns a new instance of a <code>String</code>.
-<a href="../std/string/struct.String.html"><code>String</code></a><!-- ignore --> is a string type provided by the standard
+<a href="https://doc.rust-lang.org/std/string/struct.String.html"><code>String</code></a><!-- ignore --> is a string type provided by the standard
 library that is a growable, UTF-8 encoded bit of text.</p>
 <p>The <code>::</code> syntax in the <code>::new</code> line indicates that <code>new</code> is an associated
 function of the <code>String</code> type. An <em>associated function</em> is a function that’s
@@ -1108,9 +1108,9 @@ input:</p>
 <p>If we hadn’t imported the <code>io</code> module with <code>use std::io;</code> at the beginning of
 the program, we could still use the function by writing this function call as
 <code>std::io::stdin</code>. The <code>stdin</code> function returns an instance of
-<a href="../std/io/struct.Stdin.html"><code>std::io::Stdin</code></a><!-- ignore -->, which is a type that represents a
+<a href="https://doc.rust-lang.org/std/io/struct.Stdin.html"><code>std::io::Stdin</code></a><!-- ignore -->, which is a type that represents a
 handle to the standard input for your terminal.</p>
-<p>Next, the line <code>.read_line(&amp;mut guess)</code> calls the <a href="../std/io/struct.Stdin.html#method.read_line"><code>read_line</code></a><!--
+<p>Next, the line <code>.read_line(&amp;mut guess)</code> calls the <a href="https://doc.rust-lang.org/std/io/struct.Stdin.html#method.read_line"><code>read_line</code></a><!--
 ignore --> method on the standard input handle to get input from the user.
 We’re also passing <code>&amp;mut guess</code> as the argument to <code>read_line</code> to tell it what
 string to store the user input in. The full job of <code>read_line</code> is to take
@@ -1155,7 +1155,7 @@ often wise to introduce a newline and other whitespace to help break up long
 lines when you call a method with the <code>.method_name()</code> syntax. Now let’s
 discuss what this line does.</p>
 <p>As mentioned earlier, <code>read_line</code> puts whatever the user enters into the string
-we pass to it, but it also returns a <code>Result</code> value. <a href="../std/result/enum.Result.html"><code>Result</code></a><!--
+we pass to it, but it also returns a <code>Result</code> value. <a href="https://doc.rust-lang.org/std/result/enum.Result.html"><code>Result</code></a><!--
 ignore --> is an <a href="#enums-and-pattern-matching"><em>enumeration</em></a><!-- ignore -->, often called an <em>enum</em>,
 which is a type that can be in one of multiple possible states. We call each
 possible state a <em>variant</em>.</p>
@@ -1166,7 +1166,7 @@ operation was successful, and it contains the successfully generated value.
 The <code>Err</code> variant means the operation failed, and it contains information
 about how or why the operation failed.</p>
 <p>Values of the <code>Result</code> type, like values of any type, have methods defined on
-them. An instance of <code>Result</code> has an <a href="../std/result/enum.Result.html#method.expect"><code>expect</code> method</a><!-- ignore -->
+them. An instance of <code>Result</code> has an <a href="https://doc.rust-lang.org/std/result/enum.Result.html#method.expect"><code>expect</code> method</a><!-- ignore -->
 that you can call. If this instance of <code>Result</code> is an <code>Err</code> value, <code>expect</code>
 will cause the program to crash and display the message that you passed as an
 argument to <code>expect</code>. If the <code>read_line</code> method returns an <code>Err</code>, it would
@@ -1653,7 +1653,7 @@ presses <kbd>enter</kbd>, <code>guess</code> looks like this: <code>5\n</code>. 
 “newline.” (On Windows, pressing <kbd>enter</kbd> results in a carriage return
 and a newline, <code>\r\n</code>.) The <code>trim</code> method eliminates <code>\n</code> or <code>\r\n</code>, resulting
 in just <code>5</code>.</p>
-<p>The <a href="../std/primitive.str.html#method.parse"><code>parse</code> method on strings</a><!-- ignore --> converts a string to
+<p>The <a href="https://doc.rust-lang.org/std/primitive.str.html#method.parse"><code>parse</code> method on strings</a><!-- ignore --> converts a string to
 another type. Here, we use it to convert from a string to a number. We need to
 tell Rust the exact number type we want by using <code>let guess: u32</code>. The colon
 (<code>:</code>) after <code>guess</code> tells Rust we’ll annotate the variable’s type. Rust has a
@@ -2111,7 +2111,7 @@ program). Rust’s naming convention for constants is to use all uppercase with
 underscores between words. The compiler is able to evaluate a limited set of
 operations at compile time, which lets us choose to write out this value in a
 way that’s easier to understand and verify, rather than setting this constant
-to the value 10,800. See the <a href="../reference/const_eval.html">Rust Reference’s section on constant
+to the value 10,800. See the <a href="https://doc.rust-lang.org/reference/const_eval.html">Rust Reference’s section on constant
 evaluation</a> for more information on what operations can be used
 when declaring constants.</p>
 <p>Constants are valid for the entire time a program runs, within the scope in
@@ -5089,7 +5089,7 @@ win for clarity.</p>
 <h3 id="adding-functionality-with-derived-traits"><a class="header" href="#adding-functionality-with-derived-traits">Adding Functionality with Derived Traits</a></h3>
 <p>It’d be useful to be able to print an instance of <code>Rectangle</code> while we’re
 debugging our program and see the values for all its fields. Listing 5-11 tries
-using the <a href="../std/macro.println.html"><code>println!</code> macro</a><!-- ignore --> as we have used in
+using the <a href="https://doc.rust-lang.org/std/macro.println.html"><code>println!</code> macro</a><!-- ignore --> as we have used in
 previous chapters. This won’t work, however.</p>
 <listing number="5-11" file-name="src/main.rs" caption="Attempting to print a `Rectangle` instance">
 <pre><code class="language-rust ignore does_not_compile">struct Rectangle {
@@ -5176,7 +5176,7 @@ rect1 is Rectangle {
     height: 50,
 }
 </code></pre>
-<p>Another way to print out a value using the <code>Debug</code> format is to use the <a href="../std/macro.dbg.html"><code>dbg!</code>
+<p>Another way to print out a value using the <code>Debug</code> format is to use the <a href="https://doc.rust-lang.org/std/macro.dbg.html"><code>dbg!</code>
 macro</a><!-- ignore -->, which takes ownership of an expression (as opposed
 to <code>println!</code>, which takes a reference), prints the file and line number of
 where that <code>dbg!</code> macro call occurs in your code along with the resultant value
@@ -5232,7 +5232,7 @@ to use with the <code>derive</code> attribute that can add useful behavior to ou
 types. Those traits and their behaviors are listed in <a href="#c---derivable-traits">Appendix C</a><!--
 ignore -->. We’ll cover how to implement these traits with custom behavior as
 well as how to create your own traits in Chapter 10. There are also many
-attributes other than <code>derive</code>; for more information, see <a href="../reference/attributes.html">the “Attributes”
+attributes other than <code>derive</code>; for more information, see <a href="https://doc.rust-lang.org/reference/attributes.html">the “Attributes”
 section of the Rust Reference</a>.</p>
 <p>Our <code>area</code> function is very specific: It only computes the area of rectangles.
 It would be helpful to tie this behavior more closely to our <code>Rectangle</code> struct
@@ -5748,7 +5748,7 @@ a struct. Enums handle this case with ease:</p>
 <span class="boring">}</span></code></pre>
 <p>We’ve shown several different ways to define data structures to store version
 four and version six IP addresses. However, as it turns out, wanting to store
-IP addresses and encode which kind they are is so common that <a href="../std/net/enum.IpAddr.html">the standard
+IP addresses and encode which kind they are is so common that <a href="https://doc.rust-lang.org/std/net/enum.IpAddr.html">the standard
 library has a definition we can use!</a><!-- ignore --> Let’s look at how
 the standard library defines <code>IpAddr</code>. It has the exact enum and variants that
 we’ve defined and used, but it embeds the address data inside the variants in
@@ -5876,7 +5876,7 @@ null is a value that is currently invalid or absent for some reason.</p>
 <p>The problem isn’t really with the concept but with the particular
 implementation. As such, Rust does not have nulls, but it does have an enum
 that can encode the concept of a value being present or absent. This enum is
-<code>Option&lt;T&gt;</code>, and it is <a href="../std/option/enum.Option.html">defined by the standard library</a><!-- ignore -->
+<code>Option&lt;T&gt;</code>, and it is <a href="https://doc.rust-lang.org/std/option/enum.Option.html">defined by the standard library</a><!-- ignore -->
 as follows:</p>
 <pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -5977,7 +5977,7 @@ code.</p>
 <p>So how do you get the <code>T</code> value out of a <code>Some</code> variant when you have a value
 of type <code>Option&lt;T&gt;</code> so that you can use that value? The <code>Option&lt;T&gt;</code> enum has a
 large number of methods that are useful in a variety of situations; you can
-check them out in <a href="../std/option/enum.Option.html">its documentation</a><!-- ignore -->. Becoming familiar
+check them out in <a href="https://doc.rust-lang.org/std/option/enum.Option.html">its documentation</a><!-- ignore -->. Becoming familiar
 with the methods on <code>Option&lt;T&gt;</code> will be extremely useful in your journey with
 Rust.</p>
 <p>In general, in order to use an <code>Option&lt;T&gt;</code> value, you want to have code that
@@ -7651,7 +7651,7 @@ as a definition of yours in the same scope, for example.</p>
 <p>The glob operator is often used when testing to bring everything under test into
 the <code>tests</code> module; we’ll talk about that in <a href="#how-to-write-tests">“How to Write
 Tests”</a><!-- ignore --> in Chapter 11. The glob operator is also
-sometimes used as part of the prelude pattern: See <a href="../std/prelude/index.html#other-preludes">the standard library
+sometimes used as part of the prelude pattern: See <a href="https://doc.rust-lang.org/std/prelude/index.html#other-preludes">the standard library
 documentation</a><!-- ignore --> for more
 information on that pattern.</p>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -7775,7 +7775,7 @@ previously, but in this chapter, we’ll talk about it in depth.</li>
 particular implementation of the more general data structure called a <em>map</em>.</li>
 </ul>
 <p>To learn about the other kinds of collections provided by the standard library,
-see <a href="../std/collections/index.html">the documentation</a>.</p>
+see <a href="https://doc.rust-lang.org/std/collections/index.html">the documentation</a>.</p>
 <p>We’ll discuss how to create and update vectors, strings, and hash maps, as well
 as what makes each special.</p>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -7933,7 +7933,7 @@ is currently stored. In that case, the reference to the first element would be
 pointing to deallocated memory. The borrowing rules prevent programs from
 ending up in that situation.</p>
 <section class="note" aria-role="note">
-<p>Note: For more on the implementation details of the <code>Vec&lt;T&gt;</code> type, see <a href="../nomicon/vec/vec.html">“The
+<p>Note: For more on the implementation details of the <code>Vec&lt;T&gt;</code> type, see <a href="https://doc.rust-lang.org/nomicon/vec/vec.html">“The
 Rustonomicon”</a>.</p>
 </section>
 <h3 id="iterating-over-the-values-in-a-vector"><a class="header" href="#iterating-over-the-values-in-a-vector">Iterating Over the Values in a Vector</a></h3>
@@ -8008,7 +8008,7 @@ at compile time that every possible case is handled, as discussed in Chapter 6.<
 store in a vector, the enum technique won’t work. Instead, you can use a trait
 object, which we’ll cover in Chapter 18.</p>
 <p>Now that we’ve discussed some of the most common ways to use vectors, be sure
-to review <a href="../std/vec/struct.Vec.html">the API documentation</a><!-- ignore --> for all of the many
+to review <a href="https://doc.rust-lang.org/std/vec/struct.Vec.html">the API documentation</a><!-- ignore --> for all of the many
 useful methods defined on <code>Vec&lt;T&gt;</code> by the standard library. For example, in
 addition to <code>push</code>, a <code>pop</code> method removes and returns the last element.</p>
 <h3 id="dropping-a-vector-drops-its-elements"><a class="header" href="#dropping-a-vector-drops-its-elements">Dropping a Vector Drops Its Elements</a></h3>
@@ -9383,7 +9383,7 @@ a value of <code>0</code> if <code>main</code> returns <code>Ok(())</code> and w
 they exit: Programs that exit successfully return the integer <code>0</code>, and programs
 that error return some integer other than <code>0</code>. Rust also returns integers from
 executables to be compatible with this convention.</p>
-<p>The <code>main</code> function may return any types that implement <a href="../std/process/trait.Termination.html">the
+<p>The <code>main</code> function may return any types that implement <a href="https://doc.rust-lang.org/std/process/trait.Termination.html">the
 <code>std::process::Termination</code> trait</a><!-- ignore -->, which contains
 a function <code>report</code> that returns an <code>ExitCode</code>. Consult the standard library
 documentation for more information on implementing the <code>Termination</code> trait for
@@ -11442,7 +11442,7 @@ analysis happens at compile time, which doesn’t affect runtime performance!</p
 this chapter: Chapter 18 discusses trait objects, which are another way to use
 traits. There are also more complex scenarios involving lifetime annotations
 that you will only need in very advanced scenarios; for those, you should read
-the <a href="../reference/trait-bounds.html">Rust Reference</a>. But next, you’ll learn how to write tests in
+the <a href="https://doc.rust-lang.org/reference/trait-bounds.html">Rust Reference</a>. But next, you’ll learn how to write tests in
 Rust so that you can make sure your code is working the way it should.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="writing-automated-tests"><a class="header" href="#writing-automated-tests">Writing Automated Tests</a></h1>
@@ -11584,7 +11584,7 @@ Subset of Tests by Name”</a><!-- ignore --> section. Here, we haven’t
 filtered the tests being run, so the end of the summary shows <code>0 filtered out</code>.</p>
 <p>The <code>0 measured</code> statistic is for benchmark tests that measure performance.
 Benchmark tests are, as of this writing, only available in nightly Rust. See
-<a href="../unstable-book/library-features/test.html">the documentation about benchmark tests</a> to learn more.</p>
+<a href="https://doc.rust-lang.org/unstable-book/library-features/test.html">the documentation about benchmark tests</a> to learn more.</p>
 <p>The next part of the test output starting at <code>Doc-tests adder</code> is for the
 results of any documentation tests. We don’t have any documentation tests yet,
 but Rust can compile any code examples that appear in our API documentation.
@@ -15105,7 +15105,7 @@ for a user with a preference for a red shirt and a user without any preference.<
 closures, we’ve stuck to concepts you’ve already learned, except for the body of
 the <code>giveaway</code> method that uses a closure. In the <code>giveaway</code> method, we get the
 user preference as a parameter of type <code>Option&lt;ShirtColor&gt;</code> and call the
-<code>unwrap_or_else</code> method on <code>user_preference</code>. The <a href="../std/option/enum.Option.html#method.unwrap_or_else"><code>unwrap_or_else</code> method on
+<code>unwrap_or_else</code> method on <code>user_preference</code>. The <a href="https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap_or_else"><code>unwrap_or_else</code> method on
 <code>Option&lt;T&gt;</code></a><!-- ignore --> is defined by the standard library.
 It takes one argument: a closure without any arguments that returns a value <code>T</code>
 (the same type stored in the <code>Some</code> variant of the <code>Option&lt;T&gt;</code>, in this case
@@ -19389,7 +19389,7 @@ rules at runtime instead of at compile time.</p>
 functionality of smart pointers. We explored reference cycles that can cause
 memory leaks and how to prevent them using <code>Weak&lt;T&gt;</code>.</p>
 <p>If this chapter has piqued your interest and you want to implement your own
-smart pointers, check out <a href="../nomicon/index.html">“The Rustonomicon”</a> for more useful
+smart pointers, check out <a href="https://doc.rust-lang.org/nomicon/index.html">“The Rustonomicon”</a> for more useful
 information.</p>
 <p>Next, we’ll talk about concurrency in Rust. You’ll even learn about a few new
 smart pointers.</p>
@@ -20316,7 +20316,7 @@ changes to the reference count in a thread-safe way.</p>
 concurrent situations. The <em>a</em> stands for <em>atomic</em>, meaning it’s an <em>atomically
 reference-counted</em> type. Atomics are an additional kind of concurrency
 primitive that we won’t cover in detail here: See the standard library
-documentation for <a href="../std/sync/atomic/index.html"><code>std::sync::atomic</code></a><!-- ignore --> for more
+documentation for <a href="https://doc.rust-lang.org/std/sync/atomic/index.html"><code>std::sync::atomic</code></a><!-- ignore --> for more
 details. At this point, you just need to know that atomics work like primitive
 types but are safe to share across threads.</p>
 <p>You might then wonder why all primitive types aren’t atomic and why standard
@@ -20366,7 +20366,7 @@ counter. Using this strategy, you can divide a calculation into independent
 parts, split those parts across threads, and then use a <code>Mutex&lt;T&gt;</code> to have each
 thread update the final result with its part.</p>
 <p>Note that if you are doing simple numerical operations, there are types simpler
-than <code>Mutex&lt;T&gt;</code> types provided by the <a href="../std/sync/atomic/index.html"><code>std::sync::atomic</code> module of the
+than <code>Mutex&lt;T&gt;</code> types provided by the <a href="https://doc.rust-lang.org/std/sync/atomic/index.html"><code>std::sync::atomic</code> module of the
 standard library</a><!-- ignore -->. These types provide safe, concurrent,
 atomic access to primitive types. We chose to use <code>Mutex&lt;T&gt;</code> with a primitive
 type for this example so that we could concentrate on how <code>Mutex&lt;T&gt;</code> works.</p>
@@ -20447,7 +20447,7 @@ concurrency.</p>
 <p>Manually implementing these traits involves implementing unsafe Rust code.
 We’ll talk about using unsafe Rust code in Chapter 20; for now, the important
 information is that building new concurrent types not made up of <code>Send</code> and
-<code>Sync</code> parts requires careful thought to uphold the safety guarantees. <a href="../nomicon/index.html">“The
+<code>Sync</code> parts requires careful thought to uphold the safety guarantees. <a href="https://doc.rust-lang.org/nomicon/index.html">“The
 Rustonomicon”</a> has more information about these guarantees and how to
 uphold them.</p>
 <h2 id="summary-15"><a class="header" href="#summary-15">Summary</a></h2>
@@ -25453,7 +25453,7 @@ external functions from another language we want to call. The <code>"C"</code> p
 defines which <em>application binary interface (ABI)</em> the external function uses:
 The ABI defines how to call the function at the assembly level. The <code>"C"</code> ABI
 is the most common and follows the C programming language’s ABI. Information
-about all the ABIs Rust supports is available in <a href="../reference/items/external-blocks.html#abi">the Rust Reference</a>.</p>
+about all the ABIs Rust supports is available in <a href="https://doc.rust-lang.org/reference/items/external-blocks.html#abi">the Rust Reference</a>.</p>
 <p>Every item declared within an <code>unsafe extern</code> block is implicitly unsafe.
 However, some FFI functions <em>are</em> safe to call. For example, the <code>abs</code> function
 from C’s standard library does not have any memory safety considerations, and we
@@ -25606,7 +25606,7 @@ A <em>union</em> is similar to a <code>struct</code>, but only one declared fiel
 particular instance at one time. Unions are primarily used to interface with
 unions in C code. Accessing union fields is unsafe because Rust can’t guarantee
 the type of the data currently being stored in the union instance. You can
-learn more about unions in <a href="../reference/items/unions.html">the Rust Reference</a>.</p>
+learn more about unions in <a href="https://doc.rust-lang.org/reference/items/unions.html">the Rust Reference</a>.</p>
 <h3 id="using-miri-to-check-unsafe-code"><a class="header" href="#using-miri-to-check-unsafe-code">Using Miri to Check Unsafe Code</a></h3>
 <p>When writing unsafe code, you might want to check that what you have written
 actually is safe and correct. One of the best ways to do that is to use Miri,
@@ -27009,7 +27009,7 @@ one arm.</p>
 <p>Valid pattern syntax in macro definitions is different from the pattern syntax
 covered in Chapter 19 because macro patterns are matched against Rust code
 structure rather than values. Let’s walk through what the pattern pieces in
-Listing 20-29 mean; for the full macro pattern syntax, see the <a href="../reference/macros-by-example.html">Rust
+Listing 20-29 mean; for the full macro pattern syntax, see the <a href="https://doc.rust-lang.org/reference/macros-by-example.html">Rust
 Reference</a>.</p>
 <p>First, we use a set of parentheses to encompass the whole pattern. We use a
 dollar sign (<code>$</code>) to declare a variable in the macro system that will contain
@@ -28626,8 +28626,8 @@ enough system resources, <code>thread::spawn</code> will panic. That will cause 
 whole server to panic, even though the creation of some threads might
 succeed. For simplicity’s sake, this behavior is fine, but in a production
 thread pool implementation, you’d likely want to use
-<a href="../std/thread/struct.Builder.html"><code>std::thread::Builder</code></a><!-- ignore --> and its
-<a href="../std/thread/struct.Builder.html#method.spawn"><code>spawn</code></a><!-- ignore --> method that returns <code>Result</code> instead.</p>
+<a href="https://doc.rust-lang.org/std/thread/struct.Builder.html"><code>std::thread::Builder</code></a><!-- ignore --> and its
+<a href="https://doc.rust-lang.org/std/thread/struct.Builder.html#method.spawn"><code>spawn</code></a><!-- ignore --> method that returns <code>Result</code> instead.</p>
 </section>
 <p>This code will compile and will store the number of <code>Worker</code> instances we
 specified as an argument to <code>ThreadPool::new</code>. But we’re <em>still</em> not processing
@@ -29947,7 +29947,7 @@ execution.</li>
 <li><strong><code>trait</code></strong>: Define a trait.</li>
 <li><strong><code>true</code></strong>: Boolean true literal.</li>
 <li><strong><code>type</code></strong>: Define a type alias or associated type.</li>
-<li><strong><code>union</code></strong>: Define a <a href="../reference/items/unions.html">union</a><!-- ignore -->; is a keyword only when
+<li><strong><code>union</code></strong>: Define a <a href="https://doc.rust-lang.org/reference/items/unions.html">union</a><!-- ignore -->; is a keyword only when
 used in a union declaration.</li>
 <li><strong><code>unsafe</code></strong>: Denote unsafe code, functions, traits, or implementations.</li>
 <li><strong><code>use</code></strong>: Bring symbols into scope.</li>
@@ -30273,7 +30273,7 @@ library that you can use with <code>derive</code>. Each section covers:</p>
 <li>Examples of operations that require the trait</li>
 </ul>
 <p>If you want different behavior from that provided by the <code>derive</code> attribute,
-consult the <a href="../std/index.html">standard library documentation</a><!-- ignore -->
+consult the <a href="https://doc.rust-lang.org/std/index.html">standard library documentation</a><!-- ignore -->
 for each trait for details on how to manually implement them.</p>
 <p>The traits listed here are the only ones defined by the standard library that
 can be implemented on your types using <code>derive</code>. Other traits defined in the
