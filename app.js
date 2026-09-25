@@ -305,10 +305,10 @@
 
     return `
       <nav class="rmc-sidebar${ui.menuOpen ? ' open' : ''}" id="rmc-sidebar" aria-label="Course navigation">
-        <div class="rmc-brand">
+        <button type="button" class="rmc-brand" data-action="set-view" data-view="roadmap" title="Back to Course Roadmap" aria-label="Back to Course Roadmap">
           <span class="rmc-brand-mark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 2.8C3 2.36 3.36 2 3.8 2H8v11.2H3.8c-.44 0-.8-.36-.8-.8V2.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2h4.2c.44 0 .8.36.8.8v8.6c0 .44-.36.8-.8.8H8" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2v11.2" stroke="currentColor" stroke-width="1.2"/></svg></span>
-          <h1>${esc(courseMeta.title)}</h1>
-        </div>
+          <span class="rmc-brand-title">${esc(courseMeta.title)}</span>
+        </button>
         <div class="rmc-nav-section">
           ${navItems.map((item) => `<button type="button" class="rmc-nav-item${courseView === item.key ? ' active' : ''}" data-action="set-view" data-view="${esc(item.key)}">${esc(item.label)}${item.count > 0 ? `<span class="rmc-nav-count">${item.count}</span>` : ''}</button>`).join('')}
         </div>
@@ -346,7 +346,7 @@
   function MobileBar() {
     return `
       <div class="rmc-mobilebar">
-        <span class="rmc-mobilebar-brand"><span class="rmc-brand-mark" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 2.8C3 2.36 3.36 2 3.8 2H8v11.2H3.8c-.44 0-.8-.36-.8-.8V2.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2h4.2c.44 0 .8.36.8.8v8.6c0 .44-.36.8-.8.8H8" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2v11.2" stroke="currentColor" stroke-width="1.2"/></svg></span>${esc(courseMeta.title)}</span>
+        <button type="button" class="rmc-mobilebar-brand" data-action="set-view" data-view="roadmap" title="Back to Course Roadmap" aria-label="Back to Course Roadmap"><span class="rmc-brand-mark" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 2.8C3 2.36 3.36 2 3.8 2H8v11.2H3.8c-.44 0-.8-.36-.8-.8V2.8Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2h4.2c.44 0 .8.36.8.8v8.6c0 .44-.36.8-.8.8H8" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 2v11.2" stroke="currentColor" stroke-width="1.2"/></svg></span>${esc(courseMeta.title)}</button>
         <button type="button" class="rmc-btn-ghost" data-action="toggle-menu" aria-label="Toggle navigation" aria-expanded="${ui.menuOpen ? 'true' : 'false'}" aria-controls="rmc-sidebar"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Menu</button>
       </div>`;
   }
@@ -592,13 +592,6 @@
         </div>
         ${StatusBadge(status)}
       </div>
-      <p class="rmc-block-objective">${esc(concept.objective)}</p>
-      <div class="rmc-props" aria-label="Page properties">
-        <div class="rmc-prop-row"><span class="rmc-prop-icon" aria-hidden="true">§</span><span class="rmc-prop-name">TRPL reference</span><span class="rmc-prop-value">${esc(concept.trpl.map((t) => t.num).join(', '))}</span></div>
-        <div class="rmc-prop-row"><span class="rmc-prop-icon" aria-hidden="true">◷</span><span class="rmc-prop-name">Estimated time</span><span class="rmc-prop-value"><span class="rmc-prop-tag">${esc(fmtMin(concept.estMinutes))}</span></span></div>
-        <div class="rmc-prop-row"><span class="rmc-prop-icon" aria-hidden="true">●</span><span class="rmc-prop-name">Difficulty</span><span class="rmc-prop-value"><span class="rmc-prop-tag">${esc(String(concept.difficulty))} / 5</span>${concept.fundamental ? '<span class="rmc-prop-tag">Fundamental</span>' : ''}</span></div>
-        <div class="rmc-prop-row"><span class="rmc-prop-icon" aria-hidden="true">→</span><span class="rmc-prop-name">Prerequisites</span><span class="rmc-prop-value">${concept.prerequisites.length === 0 ? 'None — starting point' : esc(concept.prerequisites.length + ' block' + (concept.prerequisites.length > 1 ? 's' : ''))}</span></div>
-      </div>
 
       <div class="rmc-panel">
         <h3>Read — The Book (TRPL) <span class="rmc-panel-tag">master sequence</span></h3>
@@ -707,7 +700,7 @@
       return `
       <div class="rmc-review-card">
         <p class="rmc-review-meta">Recall fundamental · ${esc(c.concept)}</p>
-        <p class="rmc-recall-q">${esc((q1 && q1.prompt) || c.objective)}</p>
+        <p class="rmc-recall-q">${esc((q1 && q1.prompt) || 'Review this concept in the course module.')}</p>
         <details style="margin: 8px 0 12px">
           <summary style="cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:500">Show explanation &amp; answer</summary>
           <div class="rmc-checkpoint-result pass" style="margin-top:8px">${esc((q1 && q1.explain) || 'Review this concept in the course module.')}</div>
@@ -722,8 +715,8 @@
   function mainContent(statusMap, byId) {
     const selectedConcept = ui.selectedConceptId ? byId[ui.selectedConceptId] : null;
     if (ui.view === 'block' && selectedConcept) return LearningBlock(selectedConcept, statusMap, byId);
-    if (ui.view === 'review') return `<div><h2 class="rmc-page-title">Review Queue</h2><p class="rmc-page-sub">Spaced repetition for fundamental blocks you have passed.</p>${ReviewQueue(statusMap)}</div>`;
-    return `<div><h2 class="rmc-page-title">Course Roadmap</h2><p class="rmc-page-sub">One sequence across TRPL, Rust by Example, and Rustlings: read, see, do, recall, advance.</p>${CourseRoadmap(statusMap)}</div>`;
+    if (ui.view === 'review') return `<div><h2 class="rmc-page-title">Review Queue</h2>${ReviewQueue(statusMap)}</div>`;
+    return `<div><h2 class="rmc-page-title">Course Roadmap</h2>${CourseRoadmap(statusMap)}</div>`;
   }
 
   // ---------- Render ----------

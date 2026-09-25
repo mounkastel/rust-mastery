@@ -182,7 +182,6 @@ body {
 .rmc-main > div { max-width: 780px; margin: 0 auto; padding-bottom: 24px; }
 
 .rmc-page-title { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 16px; }
-.rmc-page-sub { font-size: 14px; color: var(--text-3); line-height: 1.6; max-width: 66ch; margin: 0 0 20px; }
 
 /* ---------- 3. Buttons ---------- */
 .rmc button, .rmc .rmc-btn {
@@ -254,7 +253,7 @@ body {
   user-select: none;
   -webkit-user-select: none;
 }
-.rmc-brand { display: flex; align-items: center; gap: 8px; padding: 0 6px; margin-bottom: 2px; }
+button.rmc-brand { display: flex; align-items: center; gap: 8px; width: 100%; height: auto; padding: 4px 6px; margin-bottom: 2px; background: none; border: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .rmc-brand-mark {
   width: 26px; height: 26px; flex-shrink: 0;
   display: inline-flex; align-items: center; justify-content: center;
@@ -267,7 +266,7 @@ body {
   font-weight: 700;
 }
 .rmc-brand-mark svg { display: block; }
-.rmc-brand h1 { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; margin: 0; line-height: 1.25; }
+.rmc-brand-title { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; margin: 0; line-height: 1.25; }
 
 .rmc-nav-section { margin-top: 20px; }
 .rmc-nav-section:first-of-type { margin-top: 14px; }
@@ -458,22 +457,6 @@ body {
 .rmc-block-chapter { font-family: var(--font-sans); font-size: 12px; font-weight: 400; color: var(--text-3); margin: 0; }
 .rmc-breadcrumb { font-family: var(--font-sans); font-size: 12.5px; color: var(--text-3); margin: 0 0 6px; }
 .rmc-block-title { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; margin: 2px 0 8px; }
-.rmc-block-objective { font-size: 14.5px; line-height: 1.65; color: var(--text); max-width: 70ch; margin: 0 0 16px; }
-
-.rmc-props { display: flex; flex-direction: column; border-top: 1px solid var(--border); margin: 0 0 18px; max-width: 560px; }
-.rmc-prop-row { display: flex; align-items: center; gap: 10px; padding: 6px 2px; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.5; }
-.rmc-prop-icon { width: 20px; flex-shrink: 0; text-align: center; font-size: 13px; color: var(--text-4); }
-.rmc-prop-name { width: 130px; flex-shrink: 0; font-size: 12.5px; color: var(--text-3); }
-.rmc-prop-value { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; color: var(--text); }
-.rmc-prop-tag {
-  display: inline-flex; align-items: center;
-  padding: 1px 7px;
-  font-size: 12px; white-space: nowrap;
-  color: var(--text);
-  background: var(--surface-hover);
-  border: none;
-  border-radius: 4px;
-}
 
 .rmc-panel {
   background: var(--surface-panel);
@@ -662,11 +645,13 @@ body {
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border);
   }
-  .rmc-mobilebar-brand {
+  button.rmc-mobilebar-brand {
     display: flex; align-items: center; gap: 8px;
-    min-width: 0;
+    min-width: 0; height: auto; padding: 0;
+    background: none; border: none; font: inherit; color: inherit;
     font-size: 12.5px; font-weight: 650; letter-spacing: -0.01em;
     overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    cursor: pointer;
   }
   /* Higher specificity than the desktop .rmc-sidebar rule (source order),
      so the off-canvas drawer wins on mobile. */
@@ -707,7 +692,6 @@ body {
 @media (max-width: 640px) {
   .rmc-main { padding: 56px 18px 96px; }
   .rmc-main > div { max-width: none; }
-  .rmc-prop-name { width: 104px; }
   .rmc-roadmap-row { flex-wrap: wrap; }
   .rmc-roadmap-num { width: auto; }
   .rmc-roadmap-title { overflow-wrap: break-word; word-break: break-word; }
