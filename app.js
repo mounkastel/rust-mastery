@@ -35,11 +35,6 @@
       window.localStorage.setItem(key, value);
     } catch (_) {}
   }
-  function storageRemove(key) {
-    try {
-      window.localStorage.removeItem(key);
-    } catch (_) {}
-  }
   function themeToggleInner() {
     const dark = getTheme() === 'dark';
     const icon = dark
@@ -439,18 +434,19 @@
   }
 
   // Opening an external resource promotes the block to in-progress (locked blocks never promote).
+  // Quiet: no DOM churn unless the status badge actually flips.
   function markInProgress(conceptId) {
     if (!isValidConceptId(conceptId)) return;
     if (isLockedByPrereqs(conceptId)) return;
     if (getProgress(state, conceptId).status !== 'not-started') return;
-    setState((s) => {
+    setStateQuiet((s) => {
       const cur = getProgress(s, conceptId);
       return {
         ...s,
         lastActiveConceptId: conceptId,
         progress: { ...s.progress, [conceptId]: { ...cur, status: 'in-progress' } },
       };
-    });
+    }, conceptId);
   }
 
   function handleCheckpointResult(conceptId, passed) {
@@ -891,7 +887,7 @@
       if (!isValidConceptId(id) || typeof url !== 'string' || !url) return;
       const concept = derived().byId[id];
       if (!concept || !(concept.rbe || []).some((r) => r.url === url)) return;
-      if (isLockedByPrereqs(id)) { render(); return; }
+      if (isLockedByPrereqs(id)) return;
       const checked = el.checked === true;
       setStateQuiet((s) => {
         const p = getProgress(s, id);
@@ -916,7 +912,7 @@
       if (!isValidConceptId(id) || typeof name !== 'string' || !name) return;
       const concept = derived().byId[id];
       if (!concept || !(concept.rustlings || []).some((r) => r.name === name)) return;
-      if (isLockedByPrereqs(id)) { render(); return; }
+      if (isLockedByPrereqs(id)) return;
       const checked = el.checked === true;
       setStateQuiet((s) => {
         const p = getProgress(s, id);
@@ -941,7 +937,7 @@
       if (!isValidConceptId(id) || typeof task !== 'string' || !task) return;
       const concept = derived().byId[id];
       if (!concept || !((concept.practice || []).some((t) => t.id === task))) return;
-      if (isLockedByPrereqs(id)) { render(); return; }
+      if (isLockedByPrereqs(id)) return;
       const checked = el.checked === true;
       setStateQuiet((s) => {
         const p = getProgress(s, id);

@@ -518,12 +518,10 @@ body {
   border-radius: 4px;
 }
 .rmc-type-EXACT { background: var(--ok-soft); color: var(--ok); }
-.rmc-type-REINFORCEMENT, .rmc-type-PARTIAL { background: var(--accent-soft); color: var(--accent-ink); }
-.rmc-type-ADVANCED { background: var(--violet-bg); color: var(--violet-ink); }
-.rmc-type-GAP { background: var(--bad-soft); color: var(--bad); }
+.rmc-type-REINFORCEMENT { background: var(--accent-soft); color: var(--accent-ink); }
 .rmc-type-CORE { background: var(--primary-bg); color: var(--primary-ink); }
 .rmc-type-DIY { background: var(--violet-bg); color: var(--violet-ink); }
-.rmc-type-OPTIONAL, .rmc-type-REDUNDANT { background: var(--surface-hover); color: var(--text-3); }
+.rmc-type-OPTIONAL { background: var(--surface-hover); color: var(--text-3); }
 
 .rmc-gap-note, .rmc-uncertain-note {
   margin-top: 4px; padding: 9px 12px;
