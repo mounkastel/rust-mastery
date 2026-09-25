@@ -181,6 +181,30 @@
     render();
   }
 
+  // Checkbox ticks must not rebuild the DOM: in-page translators treat a full
+  // innerHTML replacement as a brand-new page and re-translate everything.
+  // A tick changes nothing visible except a possible not-started -> in-progress
+  // flip, so re-render only then (restoring focus to the ticked box).
+  function refocusCheckbox(action, id, key, value) {
+    const boxes = root.querySelectorAll('input[data-action="' + action + '"]');
+    for (const box of boxes) {
+      if (box.dataset.concept === id && box.dataset[key] === value) {
+        box.focus({ preventScroll: true });
+        break;
+      }
+    }
+  }
+
+  function setStateQuiet(next, id, refocus) {
+    const before = getProgress(state, id).status;
+    state = typeof next === 'function' ? next(state) : next;
+    saveState();
+    if (getProgress(state, id).status !== before) {
+      render();
+      if (refocus) refocusCheckbox(refocus.action, id, refocus.key, refocus.value);
+    }
+  }
+
   function getProgress(s, id) {
     const raw = s && s.progress && s.progress[id];
     return sanitizeProgressEntry(raw);
@@ -910,7 +934,7 @@
       if (!concept || !(concept.rbe || []).some((r) => r.url === url)) return;
       if (isLockedByPrereqs(id)) { render(); return; }
       const checked = el.checked === true;
-      setState((s) => {
+      setStateQuiet((s) => {
         const p = getProgress(s, id);
         return {
           ...s,
@@ -924,7 +948,7 @@
             },
           },
         };
-      });
+      }, id, { action: 'toggle-rbe', key: 'url', value: url });
     }
 
     if (action === 'toggle-rustlings') {
@@ -935,7 +959,7 @@
       if (!concept || !(concept.rustlings || []).some((r) => r.name === name)) return;
       if (isLockedByPrereqs(id)) { render(); return; }
       const checked = el.checked === true;
-      setState((s) => {
+      setStateQuiet((s) => {
         const p = getProgress(s, id);
         return {
           ...s,
@@ -949,7 +973,7 @@
             },
           },
         };
-      });
+      }, id, { action: 'toggle-rustlings', key: 'name', value: name });
     }
 
     if (action === 'toggle-practice') {
@@ -960,7 +984,7 @@
       if (!concept || !((concept.practice || []).some((t) => t.id === task))) return;
       if (isLockedByPrereqs(id)) { render(); return; }
       const checked = el.checked === true;
-      setState((s) => {
+      setStateQuiet((s) => {
         const p = getProgress(s, id);
         return {
           ...s,
@@ -974,7 +998,7 @@
             },
           },
         };
-      });
+      }, id, { action: 'toggle-practice', key: 'task', value: task });
     }
   }
 
