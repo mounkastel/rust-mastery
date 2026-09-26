@@ -291,9 +291,106 @@
     return `<pre class="rmc-code-block"><span class="rmc-code-chrome" aria-hidden="true"><span class="rmc-code-dots"></span><span class="rmc-code-lang">Rust</span></span><code>${esc(String(code).trim())}</code></pre>`;
   }
 
-  // Split raw quiz text into segments: { kind: 'text', html } (inline code
-  // parsed, single newlines as <br>) or { kind: 'code', html } (isolated <pre>).
-  function quizSegments(text) {
+  // macOS Terminal Output Component: every captured program-output block
+  // renders here — never as raw text with <br>. Deliberately distinct from
+  // .rmc-code-block (no traffic lights / Rust pill): Console Output label,
+  // dark sunken surface in BOTH themes, ❯ gutter per line, monospace.
+  // Lines render literally (escaped only): stdout is data, so no inline-code
+  // parsing and no quote/punctuation normalization happen here — content
+  // authors shape output lines in data.js instead.
+  function terminalBlockHTML(lines) {
+    const rows = lines
+      .map((l) => String(l).trim())
+      .filter((l) => l !== '')
+      .map((l) => `<span class="rmc-terminal-line"><span class="rmc-terminal-prompt" aria-hidden="true">❯</span><span class="rmc-terminal-text">${esc(l)}</span></span>`)
+      .join('');
+    if (rows === '') return '';
+    return `<div class="rmc-terminal" role="figure" aria-label="Console output"><div class="rmc-terminal-head" aria-hidden="true"><span class="rmc-terminal-title">Console Output</span></div><pre class="rmc-terminal-body"><code>${rows}</code></pre></div>`;
+  }
+
+  // Split a raw explanation paragraph at the `Output:` marker into leading
+  // prose + stdout lines. Content convention (enforced by the data.js sweep):
+  // `Output:` is always paragraph-final, so everything after the marker is
+  // program output. The capital-O marker never occurs in prose (prose uses
+  // lowercase "output"), so a non-word boundary before it is sufficient; the
+  // kept prefix preserves any preceding punctuation for the prose.
+  // Returns { before, lines } or null when no marker exists.
+  function splitTerminalOutput(paragraphRaw) {
+    const p = String(paragraphRaw);
+    const m = /(^|[\s.!?;:"'([{\]])Output:(?=\s)/.exec(p);
+    if (!m) return null;
+    const cutAt = m.index + m[1].length;
+    const lines = p
+      .slice(cutAt + 'Output:'.length)
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l !== '');
+    if (!lines.length) return null;
+    return { before: p.slice(0, cutAt).trimEnd(), lines };
+  }
+
+  // Structured diagnostics: sentences carrying → become numbered execution
+  // steps (cause → effect); all other sentences stay prose. A sentence with
+  // several arrows separated by `;` (e.g. capture ladders) fans out into one
+  // step per arrow. Assumption: → never appears inside `code` spans in
+  // explanations (verified across data.js; option buttons bypass this path).
+  function splitStepParts(sentence) {
+    if ((sentence.match(/→/g) || []).length < 2) return [sentence];
+    const parts = String(sentence).split(/\s*;\s*/);
+    if (!parts.every((p) => p.includes('→'))) return [sentence];
+    return parts;
+  }
+
+  function stepItemHTML(cause, effect, n) {
+    return `<li class="rmc-step"><span class="rmc-step-num" aria-hidden="true">${n}</span><div class="rmc-step-body"><span class="rmc-step-cause">${formatInlineCode(esc(cause.trim()))}</span><span class="rmc-step-arrow" aria-hidden="true">→</span><span class="rmc-step-effect">${formatInlineCode(esc(effect.trim()))}</span></div></li>`;
+  }
+
+  // Render one raw paragraph as structured explanation: prose runs stay in
+  // .rmc-explain-prose paragraphs (single newlines keep their legacy <br>),
+  // each maximal run of → sentences becomes one numbered .rmc-steps list.
+  // Sentence order is preserved, so principle → steps → takeaway reads top
+  // to bottom. The first prose paragraph of an explanation may take the lead
+  // class (high-level takeaway hook) via opts.lead.
+  function structuredTextHTML(paragraphRaw, opts) {
+    const lead = !!(opts && opts.lead);
+    const sentences = String(paragraphRaw).split(/(?<=[.!?])\s+(?=[A-Z0-9"'`({\[])/);
+    let html = '';
+    let prose = [];
+    let steps = [];
+    let stepN = 0;
+    let leadUsed = !lead;
+    const flushProse = () => {
+      if (!prose.length) return;
+      const cls = leadUsed ? 'rmc-explain-prose' : 'rmc-explain-prose rmc-explain-lead';
+      leadUsed = true;
+      html += `<p class="${cls}">${prose.map((s) => formatInlineCode(esc(s)).replace(/\n/g, '<br>')).join(' ')}</p>`;
+      prose = [];
+    };
+    const flushSteps = () => {
+      if (!steps.length) return;
+      html += `<ol class="rmc-steps">${steps.join('')}</ol>`;
+      steps = [];
+    };
+    for (const s of sentences) {
+      if (!s.includes('→')) { flushSteps(); prose.push(s); continue; }
+      flushProse();
+      for (const part of splitStepParts(s)) {
+        const arrowAt = part.indexOf('→');
+        stepN += 1;
+        // Sentence-final `.`/`;` belongs to prose, not to the effect value.
+        const effect = part.slice(arrowAt + 1).replace(/[.;]+$/, '');
+        steps.push(stepItemHTML(part.slice(0, arrowAt), effect, stepN));
+      }
+    }
+    flushSteps();
+    flushProse();
+    return html;
+  }
+
+  // Split raw quiz text into segments: { kind: 'text', html } (structured
+  // prose/steps), { kind: 'code', html } (isolated <pre>) or
+  // { kind: 'terminal', html } (Console Output block for `Output:` stdout).
+  function quizSegments(text, opts) {
     const raw = String(text ?? '');
     const chunks = [];
     const fenceRe = /```(\w*)\n?([\s\S]*?)```/g;
@@ -305,6 +402,7 @@
     }
     if (last < raw.length) chunks.push({ type: 'text', value: raw.slice(last) });
     const segs = [];
+    let leadArmed = !!(opts && opts.lead);
     for (const c of chunks) {
       if (c.type === 'code') {
         if (c.value.trim() !== '') segs.push({ kind: 'code', html: codeBlockHTML(c.value) });
@@ -312,26 +410,28 @@
       }
       for (const p of c.value.split(/\n\s*\n/)) {
         if (p.trim() === '') continue;
-        if (looksLikeCode(p)) {
-          segs.push({ kind: 'code', html: codeBlockHTML(p) });
-        } else {
-          segs.push({ kind: 'text', html: formatInlineCode(esc(p)).replace(/\n/g, '<br>') });
+        const term = splitTerminalOutput(p);
+        const head = term ? term.before : p;
+        if (head.trim() !== '') {
+          if (looksLikeCode(head)) {
+            segs.push({ kind: 'code', html: codeBlockHTML(head) });
+          } else {
+            segs.push({ kind: 'text', html: structuredTextHTML(head, { lead: leadArmed }) });
+            if (/<p class="rmc-explain-prose/.test(segs[segs.length - 1].html)) leadArmed = false;
+          }
         }
+        if (term) segs.push({ kind: 'terminal', html: terminalBlockHTML(term.lines) });
       }
     }
     return segs;
   }
 
-  // Flat rendering for <div> contexts (verdicts, explanations): paragraphs
-  // rejoin with double breaks, code stays isolated. Never emits bare backticks.
+  // Block-level rendering for <div> contexts (verdicts, explanations):
+  // segments are self-spacing blocks (prose, steps, code, terminal), so they
+  // concatenate directly — rhythm comes from the design-token margins in CSS.
+  // Never emits bare backticks or raw <br> output streams.
   function formatQuizContent(text) {
-    const segs = quizSegments(text);
-    let out = '';
-    segs.forEach((s, i) => {
-      if (i > 0 && s.kind === 'text' && segs[i - 1].kind === 'text') out += '<br><br>';
-      out += s.html;
-    });
-    return out;
+    return quizSegments(text, { lead: true }).map((s) => s.html).join('');
   }
 
   const CONCEPT_BY_ID = (typeof concepts !== 'undefined' && Array.isArray(concepts))
@@ -382,7 +482,9 @@
 
   function RustBar(fraction, done) {
     const width = Math.round(Math.max(0, Math.min(1, fraction)) * 100);
-    return `<div class="rmc-rust-bar"><div class="rmc-rust-bar-fill${done ? ' done' : ''}" style="width:${width}%"></div></div>`;
+    // Dynamic fill driven by a token variable, not a layout declaration:
+    // width comes from --rmc-bar-width in the token system (styles.css).
+    return `<div class="rmc-rust-bar"><div class="rmc-rust-bar-fill${done ? ' done' : ''}" style="--rmc-bar-width:${width}%"></div></div>`;
   }
 
   function moduleStatus(m, selectedConceptId, statusMap) {
@@ -495,13 +597,13 @@
             <p class="rmc-roadmap-meta">${doneCount}/${visibleConcepts.length} concepts completed</p>
           </div>
           ${RustBar(doneCount / total, doneCount === visibleConcepts.length && visibleConcepts.length > 0)}
-          <span class="rmc-roadmap-toggle" aria-hidden="true" style="display:inline-flex;transform:${isOpen ? 'rotate(90deg)' : 'none'};transition:transform 150ms ease">›</span>
+          <span class="rmc-roadmap-toggle${isOpen ? ' open' : ''}" aria-hidden="true">›</span>
         </div>
         <div class="rmc-roadmap-children"${isOpen ? '' : ' hidden'}>
-          ${visibleConcepts.map((c) => `<div class="rmc-roadmap-row" style="padding:9px 14px" role="button" tabindex="0" aria-label="${esc(c.concept)} — ${esc(statusLabel(statusMap[c.id]))}" data-action="open-concept" data-concept="${esc(c.id)}">
+          ${visibleConcepts.map((c) => `<div class="rmc-roadmap-row rmc-roadmap-row--child" role="button" tabindex="0" aria-label="${esc(c.concept)} — ${esc(statusLabel(statusMap[c.id]))}" data-action="open-concept" data-concept="${esc(c.id)}">
             <span class="rmc-dot rmc-dot-${esc(statusMap[c.id])}"></span>
             <div class="rmc-roadmap-main">
-              <p class="rmc-roadmap-title" style="font-size:13px">${esc(c.concept)}</p>
+              <p class="rmc-roadmap-title rmc-roadmap-title--child">${esc(c.concept)}</p>
               <p class="rmc-roadmap-meta">${fmtMin(c.estMinutes)} · difficulty ${c.difficulty}/5</p>
             </div>
             ${StatusBadge(statusMap[c.id])}
@@ -524,7 +626,7 @@
     return `<div>
       <p class="rmc-quiz-progress" data-quiz-progress="${esc(concept.id)}">${judged} of ${qs.length} answered · All must be correct</p>
       ${qs.map((q, i) => quizQuestionMarkup(concept, q, i, answers[i])).join('')}
-      <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Restart Quiz</button>
+      <button type="button" class="rmc-btn-ghost rmc-quiz-restart" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Restart Quiz</button>
     </div>`;
   }
 
@@ -625,10 +727,12 @@
       return `<button type="button" class="rmc-btn-ghost" data-action="reveal-checkpoint" data-concept="${cid}" data-q="${qi}">Reveal Answer</button>`;
     }
     if (state === 'revealed') {
-      return `<div class="rmc-checkpoint-result pass" style="margin-bottom:10px">${formatQuizContent(q.explain)}</div>
-        <p style="font-size:12.5px;color:var(--text-2);margin-bottom:8px">Did you get it right before revealing?</p>
-        <button type="button" class="rmc-btn-ghost" style="margin-right:8px" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="true">Yes</button>
-        <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="false">No</button>`;
+      // Unified self-check action bar: answer on its own surface, then one
+      // consistent prompt + Yes/No control row. Hooks unchanged.
+      return `<div class="rmc-checkpoint-result pass rmc-selfcheck-answer">${formatQuizContent(q.explain)}</div>
+        <div class="rmc-selfcheck-bar"><p class="rmc-selfcheck-prompt">Did you get it right before revealing?</p>
+        <div class="rmc-selfcheck-actions"><button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="true">Yes</button>
+        <button type="button" class="rmc-btn-ghost" data-action="self-check" data-concept="${cid}" data-q="${qi}" data-passed="false">No</button></div></div>`;
     }
     const ok = state === 'correct';
     return quizResultHTML(ok, ok ? 'Correct' : 'Needs Review', q.explain);
@@ -860,7 +964,7 @@
             <div class="rmc-checkpoint-result ${checkpointOutcome ? 'pass' : 'fail'}">
               ${checkpointOutcome ? 'Passed' : 'Not passed yet'}
             </div>
-            <button type="button" class="rmc-btn-ghost" style="margin-top:10px" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Retake Checkpoint</button>
+            <button type="button" class="rmc-btn-ghost rmc-quiz-restart" data-action="retake-checkpoint" data-concept="${esc(concept.id)}">Retake Checkpoint</button>
           </div>` : ''}
         ${cUi.show ? CheckpointMarkup(concept) : ''}
         ${checkpointOutcome === false ? `<div class="rmc-remediation">
@@ -938,11 +1042,11 @@
       <div class="rmc-review-card">
         <p class="rmc-review-meta">Recall · ${esc(c.concept)}</p>
         <p class="rmc-recall-q">${formatInlineCode(esc((q && q.prompt) || 'Review this concept in the course module.')).replace(/\n/g, '<br>')}</p>
-        <details style="margin: 8px 0 12px">
-          <summary style="cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:500">Show Answer</summary>
-          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${formatQuizContent((q && q.explain) || 'Review this concept in the course module.')}</div>
+        <details class="rmc-review-answer">
+          <summary class="rmc-review-summary">Show Answer</summary>
+          <div class="rmc-checkpoint-result pass rmc-review-result">${formatQuizContent((q && q.explain) || 'Review this concept in the course module.')}</div>
         </details>
-        <div style="display:flex;gap:8px">
+        <div class="rmc-review-actions">
           <button type="button" class="rmc-btn-primary" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="true">Got It</button>
           <button type="button" class="rmc-btn-ghost" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="false">Still Learning</button>
         </div>

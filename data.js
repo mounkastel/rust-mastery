@@ -1,9 +1,13 @@
 // rust-mastery-data.js
-// Prebuilt static mdbook output: book-html/ (TRPL) and rbe-html/ (Rust by Example).
+// Local mdbook build of TRPL (~/rust/book) — see book-html/. Rebuild with:
+// ~/rust/book/bin/mdbook build -d /home/alice/rust/book-html
 const BOOK = 'book-html/';
+// Local mdbook build of Rust by Example (~/rust/rust-by-example) — see rbe-html/. Rebuild with:
+// ~/rust/book/bin/mdbook build -d /home/alice/rust/rbe-html
 // NOTE: "Run" buttons inside RBE pages need network (play.rust-lang.org); reading works offline.
 const RBE = 'rbe-html/';
-// Vendored rustlings exercises (rustlings/exercises/) — plain .rs files, readable offline.
+// Local rustlings checkout (~/rustlings) — exercises are plain .rs files, readable offline.
+// NOTE: paths are relative to ~/rust/, so serve/open the app from there.
 // Exercise `name` equals the file stem; checkbox progress is keyed by it.
 const RL = 'rustlings/exercises/';
 
@@ -51,7 +55,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let apples = 5;\n    println!("I have {apples} apples, that is {apples} total");\n}',
-        explain: 'Inline format args (Rust 2021+) capture `apples` directly. Output: "I have 5 apples, that is 5 total".',
+        explain: 'Inline format args (Rust 2021+) capture `apples` directly — no positional `{}` placeholder needed. Output:\nI have 5 apples, that is 5 total',
         },
         {
         type: 'find_bug',
@@ -194,12 +198,12 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nlet x = 5;\nlet x = x + 1;\n{\n    let x = x * 2;\n    println!("inner: {x}");\n}\nprintln!("outer: {x}");',
-        explain: 'Shadowing creates a new binding each time. Inner block: (5+1)*2=12 → "inner: 12". After the block ends, the outer shadow (6) is back in scope → "outer: 6".',
+        explain: 'Shadowing creates a new binding each time — the outer value is never touched. Inner block: `(5 + 1) * 2` evaluates to `12` → prints `inner: 12`. After the block ends the outer shadow (`6`) is back in scope → prints `outer: 6`.',
         },
         {
         type: 'find_bug',
         prompt: 'let x = 5;\nx = 6;\n\nThis fails, yet `let x = 5; let x = 6;` compiles. What is the error, and why the difference?',
-        explain: 'Reassignment to an immutable binding → E0384 (cannot assign twice to immutable variable). The second version shadows: it declares a brand-new binding that merely reuses the name.',
+        explain: 'Reassignment targets the SAME binding → `E0384` (cannot assign twice to immutable variable). Shadowing instead declares a brand-new binding that merely reuses the name.',
         },
         {
         type: 'multiple_choice',
@@ -215,7 +219,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let mut x = 1;\n    {\n        let x = x + 10;\n        println!("{x}");\n    }\n    x += 1;\n    println!("{x}");\n}',
-        explain: 'The inner `let x` shadows (prints `11`) without touching the outer binding; after the block the outer `x` is still `1`, and `+= 1` makes `2`. Output:\n11\n2. Shadowing never mutates — it temporarily hides.',
+        explain: 'The inner `let x` shadows without touching the outer binding: it prints `11`, then the block ends. The outer `x` is still `1`, and `+= 1` makes `2` — shadowing never mutates, it temporarily hides. Output:\n11\n2',
         },
       ],
     },
@@ -251,7 +255,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let t = (1, 2.5, \'a\');\n    let (x, _, z) = t;\n    println!("{x} {z}");\n}',
-        explain: 'Destructuring binds x=1 and z=\'a\'; `_` discards the 2.5. Output: "1 a".',
+        explain: 'Destructuring binds `x` to `1` and `z` to `\'a\'`; `_` discards the `2.5`. Output:\n1 a',
         },
         {
         type: 'multiple_choice',
@@ -428,7 +432,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let s = String::from("a");\n    {\n        let s = String::from("b");\n        println!("{s}");\n    }\n    println!("{s}");\n}',
-        explain: 'The inner `let s` shadows the outer one: `"b"` prints, then the inner `String` is dropped at the block end, and the untouched outer `"a"` prints. Output:\nb\na. Shadowing never moves or drops the shadowed value early.',
+        explain: 'The inner `let s` shadows the outer one: `"b"` prints, then the inner `String` drops at the block end. The untouched outer `"a"` prints — shadowing never moves or drops the shadowed value early. Output:\nb\na',
         },
         {
         type: 'find_bug',
@@ -469,7 +473,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let mut s = String::from("hi");\n    {\n        let r = &mut s;\n        r.push(\'!\');\n    }\n    println!("{s}");\n}',
-        explain: 'The mutable borrow ends when `r` goes out of scope, so the later borrow for println! is legal. Output: "hi!".',
+        explain: 'The mutable borrow ends when `r` goes out of scope, so the later borrow for `println!` is legal. Output:\nhi!',
         },
         {
         type: 'multiple_choice',
@@ -504,7 +508,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'let a = [1, 2, 3, 4, 5];\nlet s = &a[1..3];\nprintln!("{:?}", s);',
-        explain: 'Range `1..3` is half-open: indices 1 and 2, excluding 3. Output: [2, 3].',
+        explain: 'Range `1..3` is half-open: indices `1` and `2`, excluding `3`. Output:\n[2, 3]',
         },
         {
         type: 'find_bug',
@@ -530,7 +534,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn first(s: &str) -> &str {\n    &s[0..1]\n}\nfn main() {\n    println!("{}", first("abc"));\n}',
-        explain: 'Byte range `0..1` is one ASCII char, so `"a"` prints. Note the signature needs zero lifetime annotations thanks to elision: the output borrow is tied to the input borrow. Output: "a".',
+        explain: 'Byte range `0..1` covers one ASCII char, so `"a"` prints. The signature needs zero lifetime annotations thanks to elision: the output borrow is tied to the input borrow. Output:\na',
         },
       ],
     },
@@ -673,7 +677,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nenum M { On(String), Off }\nfn main() {\n    let m = M::On(String::from("hi"));\n    match m {\n        M::On(s) => println!("on {s}"),\n        M::Off => println!("off"),\n    }\n}',
-        explain: 'The `On` arm binds the inner String to `s`. Output: "on hi". Variants can carry data of different types.',
+        explain: 'The `On` arm binds the inner `String` to `s` — variants can carry data of different types. Output:\non hi',
         },
         {
         type: 'multiple_choice',
@@ -725,7 +729,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'let a: Option<i32> = Some(10);\nlet b: Option<i32> = None;\nprintln!("{} {}", a.unwrap_or(0), b.unwrap_or(0));',
-        explain: 'unwrap_or returns the value inside Some, or the provided fallback default if None. Output: 10 0.',
+        explain: '`unwrap_or` returns the value inside `Some`, or the provided fallback default for `None`. Output:\n10 0',
         },
         {
         type: 'find_bug',
@@ -746,7 +750,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn f(x: Option<i32>) -> Option<i32> {\n    let y = x?;\n    Some(y * 2)\n}\nfn main() {\n    println!("{:?} {:?}", f(Some(21)), f(None));\n}',
-        explain: '`?` unwraps `Some` or early-returns `None` from the whole function — exactly as it propagates `Err` on `Result` (TRPL 9.2). Output:\nSome(42) None.',
+        explain: '`?` unwraps `Some` or early-returns `None` from the whole function — exactly as it propagates `Err` on `Result` (TRPL 9.2). Output:\nSome(42) None',
         },
       ],
     },
@@ -769,7 +773,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let n = 7;\n    match n {\n        x if x < 5 => println!("small"),\n        x if x % 2 == 1 => println!("odd {x}"),\n        _ => println!("other"),\n    }\n}',
-        explain: 'Arms try in order with their guards: 7 is not < 5, is odd → binds x=7. Output: "odd 7".',
+        explain: 'Arms try in order with their guards. `7` is not `< 5`, but it is odd → binds `x` to `7`. Output:\nodd 7',
         },
         {
         type: 'multiple_choice',
@@ -1063,7 +1067,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let mut v = vec![1, 2, 3];\n    for x in &mut v {\n        *x *= 2;\n    }\n    println!("{:?}", v);\n}',
-        explain: 'Iterating `&mut v` yields mutable references; dereferencing writes through them in place. Output: [2, 4, 6].',
+        explain: 'Iterating `&mut v` yields mutable references; dereferencing writes through them in place. Output:\n[2, 4, 6]',
         },
         {
         type: 'multiple_choice',
@@ -1129,7 +1133,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let s = "abc";\n    for b in s.bytes() {\n        print!("{b} ");\n    }\n}',
-        explain: '`bytes()` yields raw `u8` values: ASCII `a`/`b`/`c` are 97/98/99. Output:\n97 98 99 . Contrast `chars()` (Unicode scalar values — identical here, different for `é`) and `len()` (byte count, not character count).',
+        explain: '`bytes()` yields raw `u8` values: ASCII `a`/`b`/`c` are `97`/`98`/`99`. Contrast `chars()` (Unicode scalar values — identical here, different for `é`) and `len()` (byte count, not character count). Output:\n97 98 99',
         },
       ],
     },
@@ -1275,7 +1279,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let r: Result<i32, &str> = Ok(5);\n    let out = r.map(|x| x * 2).unwrap_or(0);\n    println!("{out}");\n}',
-        explain: '`map` transforms the `Ok` payload (Err would pass through untouched); `unwrap_or` extracts with a fallback. Output: 10.',
+        explain: '`map` transforms the `Ok` payload (`Err` would pass through untouched); `unwrap_or` extracts with a fallback. Output:\n10',
         },
         {
         type: 'multiple_choice',
@@ -1303,7 +1307,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let r: Result<i32, &str> = Err("boom");\n    let out = r.unwrap_or_else(|e| e.len() as i32);\n    println!("{out}");\n}',
-        explain: '`unwrap_or_else` runs the closure only on `Err`: `"boom".len()` is 4. Output: `4`. Contrast `unwrap_or(default)`, which always evaluates its argument — the `*_else` family exists for lazy, possibly expensive fallbacks.',
+        explain: '`unwrap_or_else` runs the closure only on `Err`: `"boom".len()` is `4`. Contrast `unwrap_or(default)`, which always evaluates its argument — the `*_else` family exists for lazy, possibly expensive fallbacks. Output:\n4',
         },
       ],
     },
@@ -1701,7 +1705,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print with `IGNORE_CASE=1` set?\n\nfn main() {\n    let case_sensitive = std::env::var("IGNORE_CASE").is_err();\n    println!("{case_sensitive}");\n}',
-        explain: '`var("IGNORE_CASE")` succeeds (`Ok`), so `.is_err()` is `false`. Output: `false`. The double negative reads oddly but encodes the book\'s convention exactly: presence of the flag *disables* sensitivity (TRPL 12.6).',
+        explain: '`var("IGNORE_CASE")` succeeds (`Ok`), so `.is_err()` is `false`. The double negative reads oddly but encodes the book\'s convention exactly: presence of the flag *disables* sensitivity (TRPL 12.6). Output:\nfalse',
         },
       ],
     },
@@ -1729,7 +1733,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'let x = 4;\nlet equal_to_x = |z| z == x;\nprintln!("{}", equal_to_x(4));',
-        explain: 'The closure borrows x from its environment immutably. equal_to_x(4) compares 4 == 4 → true.',
+        explain: 'The closure borrows `x` from its environment immutably. `equal_to_x(4)` compares `4 == 4` → `true`.',
         },
         {
         type: 'find_bug',
@@ -1757,7 +1761,7 @@ const concepts = [
           { id: 'd', text: 'None implements any `Fn` trait without an explicit annotation' },
         ],
         correct: 'a',
-        explain: 'TRPL 13.1 capture ladder: shared-borrow body → `Fn`; `&mut` body → `FnMut`; by-value move-out (`drop(s)`) → `FnOnce`. Option (c) misreads moving as mutating — `drop` consumes, it does not borrow mutably.',
+        explain: 'A closure captures only what its body needs, as cheaply as possible. TRPL 13.1 capture ladder: a shared-borrow body → `Fn`; an `&mut` body → `FnMut`; by-value move-out (`drop(s)`) → `FnOnce`. Option (c) misreads moving as mutating — `drop` consumes, it does not borrow mutably.',
         },
         {
         type: 'multiple_choice',
@@ -1837,7 +1841,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let v = vec![1, 2, 3, 4];\n    let r: Vec<i32> = v.iter().filter(|x| *x % 2 == 0).map(|x| x * 10).collect();\n    println!("{:?}", r);\n}',
-        explain: 'Adapters stay lazy until `collect`: evens `[2, 4]` map to `[20, 40]`. Output:\n[20, 40]. Note the explicit derefs — `iter()` yields `&i32`, so each closure parameter is `&i32`.',
+        explain: 'Adapters stay lazy until `collect`: evens `[2, 4]` map to `[20, 40]`. Note the explicit derefs — `iter()` yields `&i32`, so each closure parameter is `&i32`. Output:\n[20, 40]',
         },
       ],
     },
@@ -1932,7 +1936,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nenum List {\n    Cons(i32, Box<List>),\n    Nil,\n}\nfn main() {\n    let l = List::Cons(1, Box::new(List::Nil));\n    if let List::Cons(x, _) = l {\n        println!("{x}");\n    }\n}',
-        explain: 'Pattern matching sees through the Box: `x` binds the head 1. Output: "1". The Box only fixed the type’s size, nothing about usage changes.',
+        explain: 'Pattern matching sees through the `Box`: `x` binds the head `1`. The `Box` only fixed the type\'s size — nothing about usage changes. Output:\n1',
         },
         {
         type: 'multiple_choice',
@@ -1960,7 +1964,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let b = Box::new(5);\n    println!("{}", *b + 1);\n}',
-        explain: '`*b` follows the pointer via `Deref` to the heap `5`; `+ 1` makes `6`. Output: `6`. The `*` here dereferences a smart pointer — no `unsafe` involved.',
+        explain: '`*b` follows the pointer via `Deref` to the heap `5`; `+ 1` makes `6`. The `*` here dereferences a smart pointer — no `unsafe` involved. Output:\n6',
         },
       ],
     },
@@ -2003,12 +2007,12 @@ const concepts = [
           { id: 'c', text: 'The compiler inserts a clone' },
         ],
         correct: 'a',
-        explain: 'Deref coercion rewrites `&String` → `&str` (and `&Vec<T>` → `&[T]`) wherever a reference of the target type is expected. No clone, no cost.',
+        explain: 'Deref coercion is free — no clone, no cost. It rewrites `&String` → `&str`. It rewrites `&Vec<T>` → `&[T]`, wherever the target reference type is expected.',
         },
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nstruct S(&\'static str);\nimpl Drop for S {\n    fn drop(&mut self) { println!("drop {}", self.0); }\n}\nfn main() {\n    let a = S("a");\n    let _b = S("b");\n}',
-        explain: 'Locals drop in reverse declaration order: `_b` then `a`. Output:\ndrop b\ndrop a. TRPL 15.3: deterministic destruction is what makes RAII (`MutexGuard`, files, locks) sound. The underscore prefix changes nothing about dropping.',
+        explain: 'Locals drop in reverse declaration order: `_b` then `a`. TRPL 15.3: deterministic destruction is what makes RAII (`MutexGuard`, files, locks) sound. The underscore prefix changes nothing about dropping. Output:\ndrop b\ndrop a',
         },
         {
         type: 'multiple_choice',
@@ -2113,7 +2117,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nuse std::cell::RefCell;\nfn main() {\n    let x = RefCell::new(5);\n    *x.borrow_mut() += 1;\n    println!("{}", x.borrow());\n}',
-        explain: 'Single-threaded runtime checks pass here: the mutable borrow ends before `borrow()` runs. Output: 6. Overlap them and it panics instead.',
+        explain: 'Single-threaded runtime checks pass here: the mutable borrow ends before `borrow()` runs. Overlap them and it panics instead. Output:\n6',
         },
         {
         type: 'multiple_choice',
@@ -2141,7 +2145,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    use std::cell::RefCell;\n    let x = RefCell::new(5);\n    {\n        let mut a = x.borrow_mut();\n        *a += 1;\n    }\n    println!("{}", x.borrow());\n}',
-        explain: 'The `RefMut` guard releases at the block end, so the later `borrow()` is legal. Output: `6`. Same scoping discipline as lexical borrows — except violations panic at runtime instead of failing compilation.',
+        explain: 'The `RefMut` guard releases at the block end, so the later `borrow()` is legal. Same scoping discipline as lexical borrows — except violations panic at runtime instead of failing compilation. Output:\n6',
         },
         {
         type: 'find_bug',
@@ -2301,7 +2305,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nuse std::sync::Mutex;\nfn main() {\n    let m = Mutex::new(5);\n    *m.lock().unwrap() += 1;\n    println!("{}", m.into_inner().unwrap());\n}',
-        explain: '`lock()` yields a guard dereferencing to the inner value; `into_inner` consumes the mutex to reclaim it. Output: 6. (The `unwrap`s cover poisoning — a panicked-while-locked thread.)',
+        explain: '`lock()` yields a guard dereferencing to the inner value; `into_inner` consumes the mutex to reclaim it. (The `unwrap`s cover poisoning — a panicked-while-locked thread.) Output:\n6',
         },
         {
         type: 'multiple_choice',
@@ -2329,7 +2333,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    use std::sync::Mutex;\n    let m = Mutex::new(1);\n    let _g = m.lock().unwrap();\n    match m.try_lock() {\n        Ok(_) => println!("open"),\n        Err(_) => println!("held"),\n    }\n}',
-        explain: '`_g` still holds the guard, so `try_lock` fails immediately instead of blocking. Output: `held`. Contrast blocking `lock()`, which here would deadlock the single thread — `try_lock` exists precisely to ask without waiting.',
+        explain: '`_g` still holds the guard, so `try_lock` fails immediately instead of blocking. Contrast blocking `lock()`, which here would deadlock the single thread — `try_lock` exists precisely to ask without waiting. Output:\nheld',
         },
         {
         type: 'find_bug',
@@ -2403,7 +2407,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let f = async {\n        println!("polled");\n        1\n    };\n    println!("built");\n    futures::executor::block_on(async {\n        let x = f.await;\n        println!("got {x}");\n    });\n}',
-        explain: 'Nothing inside `f` runs at construction — the first poll happens at `.await`, driven by `block_on`. Output:\nbuilt\npolled\ngot 1.',
+        explain: 'Nothing inside `f` runs at construction — the first poll happens at `.await`, driven by `block_on`. Output:\nbuilt\npolled\ngot 1',
         },
       ],
     },
@@ -2610,7 +2614,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\ntrait Sound { fn sound(&self) -> &\'static str; }\nstruct Cat;\nstruct Dog;\nimpl Sound for Cat { fn sound(&self) -> &\'static str { "meow" } }\nimpl Sound for Dog { fn sound(&self) -> &\'static str { "woof" } }\nfn main() {\n    let v: Vec<Box<dyn Sound>> = vec![Box::new(Cat), Box::new(Dog)];\n    for s in &v {\n        print!("{} ", s.sound());\n    }\n}',
-        explain: 'Each call dispatches through that object\'s vtable to the concrete impl — heterogeneous behavior from a homogeneous container. Output:\nmeow woof . No downcasting needed; the vtable carries the right function pointer per object.',
+        explain: 'Each call dispatches through that object\'s vtable to the concrete impl — heterogeneous behavior from a homogeneous container. No downcasting needed; the vtable carries the right function pointer per object. Output:\nmeow woof',
         },
       ],
     },
@@ -2644,7 +2648,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let mut v = vec![1, 2, 3];\n    let mut out = vec![];\n    while let Some(x) = v.pop() {\n        out.push(x);\n    }\n    println!("{out:?}");\n}',
-        explain: '`pop` removes from the END, so the loop drains 3, 2, 1 in that order. Output: [3, 2, 1]. `while let` keeps matching until the pattern fails (`None` on empty).',
+        explain: '`pop` removes from the END, so the loop drains `3`, `2`, `1` in that order. `while let` keeps matching until the pattern fails (`None` on empty). Output:\n[3, 2, 1]',
         },
         {
         type: 'multiple_choice',
@@ -2693,7 +2697,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let n = 5;\n    match n {\n        x @ 1..=5 => println!("in {x}"),\n        _ => println!("out"),\n    }\n}',
-        explain: '`@` binds the matched value WHILE testing the sub-pattern: 5 is in range, so `x` = 5. Output: "in 5". Without `@` you could test but not keep the value.',
+        explain: '`@` binds the matched value WHILE testing the sub-pattern: `5` is in range, so `x` becomes `5`. Without `@` you could test but not keep the value. Output:\nin 5',
         },
         {
         type: 'multiple_choice',
@@ -2721,7 +2725,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let a = [1, 2, 3, 4];\n    match a {\n        [first, .., last] => println!("{first} {last}"),\n    }\n}',
-        explain: '`..` absorbs the middle (`2, 3`); bindings take the ends. Output:\n1 4. Rest patterns also power `Struct { x, .. }` partial destructuring.',
+        explain: '`..` absorbs the middle (`2`, `3`); bindings take the ends. Rest patterns also power `Struct { x, .. }` partial destructuring. Output:\n1 4',
         },
       ],
     },
@@ -2840,7 +2844,7 @@ const concepts = [
           { id: 'd', text: 'Never — generics strictly dominate associated types' },
         ],
         correct: 'a',
-        explain: 'TRPL 20.3: one-impl-one-choice → associated type (no annotation burden); many-choices-per-type → generics (an associated type would forbid a second impl). Option (b) states the generic case; (c) invents a runtime difference — both monomorphize identically.',
+        explain: 'TRPL 20.3: one-impl-one-choice → `associated type` (no annotation burden); many-choices-per-type → `generics` (an associated type would forbid a second impl). Option (b) states the generic case; (c) invents a runtime difference — both monomorphize identically.',
         },
         {
         type: 'find_bug',
@@ -2909,7 +2913,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print, and why should it worry you?\n\nmacro_rules! twice {\n    ($x:expr) => { $x + $x };\n}\nfn main() {\n    let mut n = 0;\n    let r = twice!({ n += 1; n });\n    println!("{r} {n}");\n}',
-        explain: 'Output: "3 2". The block runs TWICE (yielding 1, then 2; 1+2=3) — macros substitute tokens with zero memoization. An argument with side effects executes once per mention: the reason careful macros bind temporaries.',
+        explain: 'Macros substitute tokens with zero memoization: the block runs TWICE (yielding `1`, then `2`; `1 + 2 = 3`). An argument with side effects executes once per mention — the reason careful macros bind temporaries. Output:\n3 2',
         },
         {
         type: 'multiple_choice',
@@ -3125,7 +3129,7 @@ const concepts = [
         {
         type: 'predict_output',
         prompt: 'What does this print?\n\nfn main() {\n    let n: i32 = "42".parse().unwrap();\n    println!("{}", n + 1);\n}',
-        explain: 'The annotation drives inference: `parse` resolves to `FromStr for i32`. Output: 43. Remove the annotation and inference fails — there is nothing left to pin the target type.',
+        explain: 'The annotation drives inference: `parse` resolves to `FromStr for i32`. Remove the annotation and inference fails — there is nothing left to pin the target type. Output:\n43',
         },
         {
         type: 'multiple_choice',
