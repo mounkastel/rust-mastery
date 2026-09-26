@@ -223,7 +223,7 @@ const concepts = [
   {
     id: 'data-types', chapter: 3, chapterTitle: 'Common Programming Concepts', fundamental: false,
     trpl: [{ num: '3.2', title: 'Data Types', url: BOOK + 'ch03-02-data-types.html' }],
-    concept: 'Scalar and compound types (integers, floats, bool, char, tuples, arrays)',
+    concept: 'Scalar and compound types',
     prerequisites: ['variables-mutability'],
     rbe: [],
     rustlings: [
@@ -282,7 +282,7 @@ const concepts = [
   {
     id: 'functions', chapter: 3, chapterTitle: 'Common Programming Concepts', fundamental: false,
     trpl: [{ num: '3.3', title: 'Functions', url: BOOK + 'ch03-03-how-functions-work.html' }],
-    concept: 'Functions, parameters, statements vs. expressions, return values',
+    concept: 'Functions, statements vs expressions',
     prerequisites: ['data-types'],
     rbe: [],
     rustlings: [
@@ -983,7 +983,7 @@ const concepts = [
       { num: '7.4', title: 'Bringing Paths into Scope with the use Keyword', url: BOOK + 'ch07-04-bringing-paths-into-scope-with-the-use-keyword.html' },
       { num: '7.5', title: 'Separating Modules into Different Files', url: BOOK + 'ch07-05-separating-modules-into-different-files.html' },
     ],
-    concept: 'use, re-exporting with pub use, splitting modules across files',
+    concept: 'use paths, re-exports, file modules',
     prerequisites: ['modules-privacy'],
     rbe: [],
     rustlings: [
@@ -1087,7 +1087,7 @@ const concepts = [
   {
     id: 'strings', chapter: 8, chapterTitle: 'Common Collections', fundamental: true,
     trpl: [{ num: '8.2', title: 'Storing UTF-8 Encoded Text with Strings', url: BOOK + 'ch08-02-strings.html' }],
-    concept: 'String vs &str, UTF-8, why you can’t index a String by integer',
+    concept: 'String vs &str and UTF-8',
     prerequisites: ['vectors'],
     rbe: [],
     rustlings: [
@@ -1446,7 +1446,7 @@ const concepts = [
   {
     id: 'lifetimes', chapter: 10, chapterTitle: 'Generic Types, Traits, and Lifetimes', fundamental: true,
     trpl: [{ num: '10.3', title: 'Validating References with Lifetimes', url: BOOK + 'ch10-03-lifetime-syntax.html' }],
-    concept: 'Lifetime annotations, the borrow checker’s scope reasoning',
+    concept: 'Lifetime annotations and scope reasoning',
     prerequisites: ['borrowing', 'traits'],
     rbe: [],
     rustlings: [
@@ -1781,7 +1781,7 @@ const concepts = [
       { num: '13.3', title: 'Improving Our I/O Project', url: BOOK + 'ch13-03-improving-our-io-project.html' },
       { num: '13.4', title: 'Performance in Loops vs. Iterators', url: BOOK + 'ch13-04-performance.html' },
     ],
-    concept: 'The Iterator trait, .map/.filter/.collect, lazy evaluation',
+    concept: 'Iterators: map, filter, collect, laziness',
     prerequisites: ['closures', 'generics', 'vectors'],
     rbe: [],
     rustlings: [
@@ -2098,7 +2098,7 @@ const concepts = [
       { num: '15.5', title: 'RefCell<T> and the Interior Mutability Pattern', url: BOOK + 'ch15-05-interior-mutability.html' },
       { num: '15.6', title: 'Reference Cycles Can Leak Memory', url: BOOK + 'ch15-06-reference-cycles.html' },
     ],
-    concept: 'RefCell<T> (interior mutability), Rc<RefCell<T>>, Weak<T>',
+    concept: 'RefCell<T> and interior mutability',
     prerequisites: ['rc'],
     rbe: [],
     rustlings: [],
@@ -2497,7 +2497,7 @@ const concepts = [
       { num: '18.1', title: 'Characteristics of Object-Oriented Languages', url: BOOK + 'ch18-01-what-is-oo.html' },
       { num: '18.0', title: 'Object Oriented Programming Features (chapter overview)', url: BOOK + 'ch18-00-oop.html' },
     ],
-    concept: 'Encapsulation and composition in Rust (no classical inheritance)',
+    concept: 'Encapsulation without inheritance',
     prerequisites: ['traits'],
     rbe: [],
     rustlings: [],
@@ -2623,7 +2623,7 @@ const concepts = [
       { num: '19.1', title: 'All the Places Patterns Can Be Used', url: BOOK + 'ch19-01-all-the-places-for-patterns.html' },
       { num: '19.0', title: 'Patterns and Matching (chapter overview)', url: BOOK + 'ch19-00-patterns.html' },
     ],
-    concept: 'Patterns across match, let, if let, while let, let-else, for loops, and function params',
+    concept: 'Patterns everywhere: match, let, loops, params',
     prerequisites: ['match'],
     rbe: [],
     rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs' }],
@@ -2678,7 +2678,7 @@ const concepts = [
       { num: '19.2', title: 'Refutability', url: BOOK + 'ch19-02-refutability.html' },
       { num: '19.3', title: 'Pattern Syntax', url: BOOK + 'ch19-03-pattern-syntax.html' },
     ],
-    concept: 'Refutable vs irrefutable patterns, match guards, @ bindings',
+    concept: 'Pattern syntax: guards, bindings, refutability',
     prerequisites: ['patterns-everywhere'],
     rbe: [],
     rustlings: [{ name: 'options3', url: RL + '12_options/options3.rs' }],
@@ -2796,7 +2796,7 @@ const concepts = [
       { num: '20.3', title: 'Advanced Types', url: BOOK + 'ch20-03-advanced-types.html' },
       { num: '20.4', title: 'Advanced Functions and Closures', url: BOOK + 'ch20-04-advanced-functions-and-closures.html' },
     ],
-    concept: 'Associated types, supertraits, newtype pattern, type aliases',
+    concept: 'Associated types, supertraits, newtype',
     prerequisites: ['traits', 'generics'],
     rbe: [],
     rustlings: [{ name: 'traits5', url: RL + '15_traits/traits5.rs' }],
@@ -2865,7 +2865,7 @@ const concepts = [
   {
     id: 'macros', chapter: 20, chapterTitle: 'Advanced Features', fundamental: false,
     trpl: [{ num: '20.5', title: 'Macros', url: BOOK + 'ch20-05-macros.html' }],
-    concept: 'Declarative macros (macro_rules!) vs procedural macros',
+    concept: 'Declarative vs procedural macros',
     prerequisites: ['functions'],
     rbe: [
       { title: 'Syntax', url: RBE + 'macros/syntax.html', type: 'REINFORCEMENT' },
