@@ -328,8 +328,8 @@ const concepts = [
   {
     id: 'control-flow', chapter: 3, chapterTitle: 'Common Programming Concepts', fundamental: false,
     trpl: [
-      { num: '3.4', title: 'Comments', url: BOOK + 'ch03-04-comments.html' },
       { num: '3.5', title: 'Control Flow', url: BOOK + 'ch03-05-control-flow.html' },
+      { num: '3.4', title: 'Comments', url: BOOK + 'ch03-04-comments.html' },
     ],
     concept: 'if/else as expressions, loop, while, for',
     prerequisites: ['functions'],
