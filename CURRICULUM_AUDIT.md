@@ -10,9 +10,9 @@ Replace 2–3 shallow recall questions per checkpoint with **4–6 diagnostic,
 code-centric questions** that verify the student can mentally emulate the
 borrow checker and predict compiler behavior. 100% TRPL-grounded, zero trivia.
 
-**Scale:** 163 questions today → **255 target** → **92 new questions** to author
-across 6 batches. Rule: difficulty 1–2 → 4 Qs, difficulty 3 → 5 Qs,
-difficulty 4 → 6 Qs.
+**Scale:** 163 questions at start → **256 target** → **93 new questions** to author
+across 6 batches (13 done in Batch 1, 80 remaining). Rule: difficulty 1–2 → 4 Qs,
+difficulty 3 → 5 Qs, difficulty 4 → 6 Qs.
 
 ## 2. Schema contract (`data.js` ↔ `app.js`)
 
@@ -54,10 +54,10 @@ Each concept: `checkpoint: { questions: [...] }`, where a question is:
 | Batch | Scope (our `chapter` = TRPL 2024) | Concepts | Q now → target |
 |---|---|---|---|
 | 1 | Foundations, Ch 1–4 | 10 | 30 → 43 |
-| 2 | Structures & Flow, Ch 5–7 | 9 | 27 → 40 |
-| 3 | Collections, Errors, Generics, Ch 8–10 | 8 | 24 → 40 |
-| 4 | Closures, Smart Pointers, Concurrency, Ch 13/15/16 | 9 | 28 → 46 |
-| 5 | Async, OOP, Patterns, Advanced, Ch 17–20 | 9 | 27 → 46 |
+| 2 | Structures & Flow, Ch 5–7 | 9 | 27 → 39 |
+| 3 | Collections, Errors, Generics, Ch 8–10 | 8 | 24 → 38 |
+| 4 | Closures, Smart Pointers, Concurrency, Ch 13/15/16 | 9 | 28 → 47 |
+| 5 | Async, OOP, Patterns, Advanced, Ch 17–20 | 9 | 27 → 49 |
 | 6 | Tooling, Capstone, Bonus (Ch 11/12/14/21/0) | 9 | 27 → 40 |
 
 Batches run in prerequisite order. One `node --check data.js` per batch,
