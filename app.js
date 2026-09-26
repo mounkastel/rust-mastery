@@ -808,6 +808,11 @@
     const trplList = Array.isArray(concept.trpl) ? concept.trpl : [];
     const rbeList = Array.isArray(concept.rbe) ? concept.rbe : [];
     const rustlingsList = Array.isArray(concept.rustlings) ? concept.rustlings : [];
+    // Read panel follows book order (overview `x.0` first, then sections
+    // ascending). Data order is untouched: `trplList[0]` stays the primary
+    // page for pagination titles and remediation links.
+    const trplOrdered = trplList.slice().sort((a, b) =>
+      String(a.num || '').localeCompare(String(b.num || ''), undefined, { numeric: true }));
 
     return `<div>
       <div class="rmc-block-header">
@@ -820,7 +825,7 @@
 
       <div class="rmc-panel">
         <h3>Read · TRPL <span class="rmc-panel-tag">Core</span></h3>
-        ${trplList.map((t) => `<div class="rmc-resource-row">
+        ${trplOrdered.map((t) => `<div class="rmc-resource-row">
           <span class="rmc-resource-name">${esc(t.num)} ${esc(t.title)}</span>
           <div class="rmc-resource-actions">
             <a class="rmc-btn rmc-btn-ghost" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer" data-action="open-resource" data-concept="${esc(concept.id)}">Open TRPL</a>
