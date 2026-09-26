@@ -407,11 +407,21 @@
     }
   }
 
-  function sidebarLessonLabel(c) {
-    if (c && c.trpl && c.trpl.length && c.trpl[0] && c.trpl[0].num && c.trpl[0].title) {
-      return `${c.trpl[0].num} ${c.trpl[0].title}`;
-    }
-    return (c && c.concept) || '';
+  // One sidebar row per TRPL page (plus a fallback row for pageless
+  // concepts like `attributes`): every bundled page stays discoverable.
+  // All rows open the same concept — classes, data-action and data-concept
+  // hooks are identical to the old single-row markup.
+  function sidebarLessonRows(c, active, status) {
+    const pages = (c && Array.isArray(c.trpl) && c.trpl.length)
+      ? c.trpl.filter((t) => t && t.title).map((t) => ({
+        label: t.num ? `${t.num} ${t.title}` : t.title,
+        title: t.num ? `${t.num} ${t.title}` : t.title,
+      }))
+      : [{ label: (c && c.concept) || '', title: (c && c.concept) || '' }];
+    return pages.map((p) => `<button type="button" class="rmc-tree-lesson${active ? ' active' : ''}" title="${esc(p.title)}" aria-current="${active ? 'true' : 'false'}" data-action="open-concept" data-concept="${esc(c.id)}">
+                      <span class="rmc-dot rmc-dot-${esc(status)}"></span>
+                      <span class="rmc-tree-lesson-label">${esc(p.label)}</span>
+                    </button>`).join('');
   }
 
   function Sidebar(view, selectedConceptId, statusMap) {
@@ -455,10 +465,7 @@
                 <div class="rmc-tree-lessons"${open ? '' : ' hidden'}>
                   ${chapterConcepts.map((c) => {
                     const active = c.id === selectedConceptId;
-                    return `<button type="button" class="rmc-tree-lesson${active ? ' active' : ''}" title="${esc(c.concept)}" aria-current="${active ? 'true' : 'false'}" data-action="open-concept" data-concept="${esc(c.id)}">
-                      <span class="rmc-dot rmc-dot-${esc(statusMap[c.id])}"></span>
-                      <span class="rmc-tree-lesson-label">${esc(sidebarLessonLabel(c))}</span>
-                    </button>`;
+                    return sidebarLessonRows(c, active, statusMap[c.id]);
                   }).join('')}
                 </div>
               </div>`;
