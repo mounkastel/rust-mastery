@@ -484,7 +484,7 @@ button.rmc-brand:hover { background: var(--surface-hover); box-shadow: none; }
   line-height: 1.6;
 }
 .rmc-sidebar-foot span { display: block; font-variant-numeric: tabular-nums; }
-.rmc button.rmc-theme-toggle {
+.rmc button.rmc-theme-toggle, .rmc button.rmc-reset-btn {
   display: inline-flex; align-items: center; gap: 8px;
   width: auto; min-height: 32px;
   margin-top: 10px; padding: 6px 12px 6px 10px;
@@ -496,8 +496,35 @@ button.rmc-brand:hover { background: var(--surface-hover); box-shadow: none; }
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-xs);
 }
-.rmc button.rmc-theme-toggle:hover { background: var(--surface-hover); color: var(--text); }
-.rmc button.rmc-theme-toggle svg { flex-shrink: 0; display: block; }
+.rmc button.rmc-theme-toggle:hover, .rmc button.rmc-reset-btn:hover { background: var(--surface-hover); color: var(--text); }
+.rmc button.rmc-theme-toggle svg, .rmc button.rmc-reset-btn svg { flex-shrink: 0; display: block; }
+.rmc button.rmc-reset-btn { margin-left: 6px; }
+
+/* Course preamble: onboarding card pinned above the roadmap. */
+.rmc-preamble {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  margin-bottom: var(--space-7);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  min-width: 0;
+}
+.rmc-preamble-kicker {
+  margin: 0;
+  font-size: 11.5px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-4); line-height: 1.5;
+}
+.rmc-preamble-text {
+  margin: 0;
+  font-size: 13.5px; line-height: 1.65;
+  color: var(--text-2);
+  overflow-wrap: break-word; word-break: break-word;
+}
+.rmc-preamble-text strong { color: var(--text); font-weight: 650; }
+.rmc-preamble .rmc-btn-primary { align-self: flex-start; max-width: 100%; white-space: normal; text-align: left; }
 
 /* ============ 5. Roadmap — airy cards, no collisions ============ */
 .rmc-roadmap-chapter {
@@ -1037,6 +1064,7 @@ html[data-theme="dark"] .rmc-locked-banner {
   .rmc-main { padding: var(--space-6) var(--space-4) 48px; min-height: 0; }
   .rmc-main > div { max-width: none; }
   .rmc-panel { padding: var(--space-5); }
+  .rmc-preamble { padding: var(--space-5); }
   .rmc-locked-banner { padding: var(--space-5); margin-top: var(--space-5); }
   .rmc-review-card { padding: var(--space-5); }
   .rmc-roadmap-row { flex-wrap: wrap; gap: 10px; }

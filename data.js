@@ -14,7 +14,6 @@ const concepts = [
     trpl: [
       { num: '1.1', title: 'Installation', url: BOOK + 'ch01-01-installation.html' },
       { num: '1.2', title: 'Hello, World!', url: BOOK + 'ch01-02-hello-world.html' },
-      { num: '0', title: 'Introduction — how to read this book', url: BOOK + 'ch00-00-introduction.html' },
       { num: '1.0', title: 'Getting Started (chapter overview)', url: BOOK + 'ch01-00-getting-started.html' },
     ],
     concept: 'Installing Rust & your first program',

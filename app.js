@@ -473,7 +473,7 @@
             }).join('')}
           </div>
         </div>
-        <div class="rmc-sidebar-foot"><span>${completedCount} of ${conceptList.length} completed</span><button type="button" class="rmc-theme-toggle" data-action="toggle-theme" aria-label="Toggle dark theme" title="Toggle dark theme">${themeToggleInner()}</button></div>
+        <div class="rmc-sidebar-foot"><span>${completedCount} of ${conceptList.length} completed</span><button type="button" class="rmc-theme-toggle" data-action="toggle-theme" aria-label="Toggle dark theme" title="Toggle dark theme">${themeToggleInner()}</button> <button type="button" class="rmc-reset-btn" data-action="reset-progress" aria-label="Reset all course progress" title="Reset all course progress"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.61-3.9M13.5 1.5v3h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Reset</span></button></div>
       </nav>`;
   }
 
@@ -928,14 +928,20 @@
     if (!shown.length) return '<div class="rmc-empty">All caught up — reviews reappear on schedule.</div>';
 
     return `<div>${shown.map((c) => {
-      const q1 = c.checkpoint && c.checkpoint.questions && c.checkpoint.questions[0];
+      // Varied retrieval: rotate through the checkpoint's questions by SRS
+      // repetition count instead of always drilling question 1. Prompt and
+      // answer always come from the same question.
+      const qs = (c.checkpoint && c.checkpoint.questions) || [];
+      const rp = getProgress(state, c.id);
+      const rep = (rp.review && typeof rp.review.repetitions === 'number') ? rp.review.repetitions : 0;
+      const q = qs.length ? qs[rep % qs.length] : null;
       return `
       <div class="rmc-review-card">
         <p class="rmc-review-meta">Recall · ${esc(c.concept)}</p>
-        <p class="rmc-recall-q">${formatInlineCode(esc((q1 && q1.prompt) || 'Review this concept in the course module.')).replace(/\n/g, '<br>')}</p>
+        <p class="rmc-recall-q">${formatInlineCode(esc((q && q.prompt) || 'Review this concept in the course module.')).replace(/\n/g, '<br>')}</p>
         <details style="margin: 8px 0 12px">
           <summary style="cursor:pointer;font-size:12.5px;color:var(--accent);font-weight:500">Show Answer</summary>
-          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${formatQuizContent((q1 && q1.explain) || 'Review this concept in the course module.')}</div>
+          <div class="rmc-checkpoint-result pass" style="margin-top:8px">${formatQuizContent((q && q.explain) || 'Review this concept in the course module.')}</div>
         </details>
         <div style="display:flex;gap:8px">
           <button type="button" class="rmc-btn-primary" data-action="review-mark" data-concept="${esc(c.id)}" data-got-it="true">Got It</button>
@@ -944,11 +950,32 @@
       </div>`;}).join('')}</div>`;
   }
 
+  // Roadmap header: course preamble (method + book-intro link) and a
+  // Continue button for returning learners. Uses only the existing
+  // open-concept hook; plain link needs no JS at all.
+  function roadmapHead(statusMap, byId) {
+    const d = derived();
+    let targetId = null;
+    if (state.lastActiveConceptId && isValidConceptId(state.lastActiveConceptId)) {
+      targetId = state.lastActiveConceptId;
+    } else if (d.upNextId) {
+      targetId = d.upNextId;
+    }
+    const target = targetId ? byId[targetId] : null;
+    const done = target && statusMap[target.id] === 'completed';
+    const verb = !state.lastActiveConceptId ? 'Start' : (done ? 'Review' : 'Continue');
+    return `<section class="rmc-preamble" aria-label="How this course works">
+      <p class="rmc-preamble-kicker">How this course works</p>
+      <p class="rmc-preamble-text"><strong>Read</strong> the book, <strong>see</strong> it in action, <strong>do</strong> the drills, then <strong>prove it</strong> in the checkpoint. New here? Start with <a href="book-html/ch00-00-introduction.html">How to read TRPL</a>.</p>
+      ${target ? `<button type="button" class="rmc-btn-primary" data-action="open-concept" data-concept="${esc(target.id)}">${verb}: ${esc(target.concept)} →</button>` : ''}
+    </section>`;
+  }
+
   function mainContent(statusMap, byId) {
     const selectedConcept = ui.selectedConceptId ? byId[ui.selectedConceptId] : null;
     if (ui.view === 'block' && selectedConcept) return LearningBlock(selectedConcept, statusMap, byId);
     if (ui.view === 'review') return `<div><h2 class="rmc-page-title">Review Queue</h2>${ReviewQueue(statusMap)}</div>`;
-    return `<div><h2 class="rmc-page-title">Course Roadmap</h2>${CourseRoadmap(statusMap)}</div>`;
+    return `<div><h2 class="rmc-page-title">Course Roadmap</h2>${roadmapHead(statusMap, byId)}${CourseRoadmap(statusMap)}</div>`;
   }
 
   // ---------- Render ----------
@@ -1144,6 +1171,24 @@
       // Surgical: only the toggle button label/icon changes; the CSS keys
       // off documentElement dataset.theme (already flipped in applyTheme).
       toggleThemeSurgical();
+      return;
+    }
+
+    if (action === 'reset-progress') {
+      let ok = true;
+      try {
+        ok = typeof window.confirm === 'function'
+          ? window.confirm('Reset all course progress? This cannot be undone.')
+          : true;
+      } catch (_) { ok = true; }
+      if (!ok) return;
+      try { window.localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      state = defaultState();
+      ui.checkpoint = {};
+      invalidateDerivedCache();
+      saveState();
+      render();
+      scrollTop();
       return;
     }
 
