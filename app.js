@@ -635,6 +635,55 @@
     return cUi.answers || {};
   }
 
+  // Unbiased Fisher-Yates (Knuth) shuffle. Pure: returns a new array, never
+  // mutates input. `rand` injectable for tests; runtime passes Math.random.
+  function fisherYates(arr, rand) {
+    const r = typeof rand === 'function' ? rand : Math.random;
+    const a = (arr || []).slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(r() * (i + 1));
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // Session-stable display order for MC options. The permutation of option
+  // ids lives in ephemeral UI state (ui.checkpoint[id].order[qi]) so it is
+  // generated once per attempt and NEVER reshuffled by re-renders, answer
+  // clicks, or surgical DOM paints. Fresh orders appear only on first mount
+  // (lazy init here) or explicit retake (resetOptionOrder). True randomness:
+  // no de-streak forcing — repeats across questions are mathematically valid.
+  // Scoring stays identity-based (option ids, never display indexes).
+  function displayOptions(conceptId, qi, q, rand) {
+    const opts = (q && q.options) || [];
+    const cUi = ui.checkpoint[conceptId] || {};
+    const order = cUi.order || {};
+    if (Array.isArray(order[qi]) && order[qi].length === opts.length) {
+      const byId = {};
+      opts.forEach((o) => { byId[o.id] = o; });
+      const mapped = order[qi].map((id) => byId[id]).filter(Boolean);
+      // Defensive: content updates may add options unknown to a stored order.
+      opts.forEach((o) => { if (!mapped.includes(o)) mapped.push(o); });
+      if (mapped.length === opts.length) return mapped;
+    }
+    const shuffled = fisherYates(opts, rand);
+    ui.checkpoint[conceptId] = {
+      ...(ui.checkpoint[conceptId] || {}),
+      order: { ...(order || {}), [qi]: shuffled.map((o) => o.id) },
+    };
+    return shuffled;
+  }
+
+  // Explicit reshuffle trigger for retake-checkpoint: drops the stored
+  // permutation so the next render deals a fresh Fisher-Yates order.
+  function resetOptionOrder(conceptId) {
+    const cUi = ui.checkpoint[conceptId] || {};
+    if (!cUi.order) return;
+    const { order, ...rest } = cUi;
+    void order;
+    ui.checkpoint[conceptId] = rest;
+  }
+
   // open | revealed (self Q, shown but unjudged) | correct | wrong
   function quizQuestionState(q, a) {
     if (!q) return 'open';
@@ -712,7 +761,10 @@
     const state = quizQuestionState(q, a);
     if (q.type === 'multiple_choice') {
       const judged = state === 'correct' || state === 'wrong';
-      return `${q.options.map((opt) => {
+      // Display order is the session-stable shuffle, NOT data order.
+      // Grading below still compares immutable option ids (opt.id vs
+      // q.correct), so transient positions can never corrupt scoring.
+      return `${displayOptions(concept.id, qi, q).map((opt) => {
           let cls = 'rmc-option-btn';
           if (judged && opt.id === q.correct) cls += ' correct';
           else if (judged && opt.id === (a && a.selected)) cls += ' incorrect';
@@ -1351,6 +1403,7 @@
       const id = el.dataset.concept;
       if (!isValidConceptId(id)) return;
       ui.checkpoint[id] = { show: true, answers: {}, outcome: null };
+      resetOptionOrder(id);
       render();
       focusFirstQuizQuestion(id);
       return;
