@@ -407,20 +407,21 @@
     }
   }
 
-  // One sidebar row per TRPL page (plus a fallback row for pageless
-  // concepts like `attributes`): every bundled page stays discoverable.
+  // One sidebar row per substantive TRPL page: structural front-matter
+  // (book intro `0`, chapter overviews `x.0`, appendix index `App.`) stays in
+  // the Read panel — nav rows are real lessons only, in book order. Pageless
+  // concepts (e.g. `attributes`) fall back to a single concept row.
   // All rows open the same concept — classes, data-action and data-concept
   // hooks are identical to the old single-row markup.
   function sidebarLessonRows(c, active, status) {
-    const pages = (c && Array.isArray(c.trpl) && c.trpl.length)
-      ? c.trpl.filter((t) => t && t.title).map((t) => ({
-        label: t.num ? `${t.num} ${t.title}` : t.title,
-        title: t.num ? `${t.num} ${t.title}` : t.title,
-      }))
-      : [{ label: (c && c.concept) || '', title: (c && c.concept) || '' }];
-    return pages.map((p) => `<button type="button" class="rmc-tree-lesson${active ? ' active' : ''}" title="${esc(p.title)}" aria-current="${active ? 'true' : 'false'}" data-action="open-concept" data-concept="${esc(c.id)}">
+    const all = (c && Array.isArray(c.trpl)) ? c.trpl.filter((t) => t && t.title) : [];
+    const substantive = all.filter((t) => !/^(0|App\.|\d+\.0)$/.test(t.num || ''));
+    const list = (substantive.length ? substantive : all).slice().sort((a, b) =>
+      String(a.num || '').localeCompare(String(b.num || ''), undefined, { numeric: true }));
+    const pages = list.length ? list : [{ num: '', title: (c && c.concept) || '' }];
+    return pages.map((p) => `<button type="button" class="rmc-tree-lesson${active ? ' active' : ''}" title="${esc(p.num ? `${p.num} ${p.title}` : p.title)}" aria-current="${active ? 'true' : 'false'}" data-action="open-concept" data-concept="${esc(c.id)}">
                       <span class="rmc-dot rmc-dot-${esc(status)}"></span>
-                      <span class="rmc-tree-lesson-label">${esc(p.label)}</span>
+                      <span class="rmc-tree-lesson-label">${esc(p.num ? `${p.num} ${p.title}` : p.title)}</span>
                     </button>`).join('');
   }
 
