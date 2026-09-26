@@ -407,22 +407,16 @@
     }
   }
 
-  // One sidebar row per substantive TRPL page: structural front-matter
-  // (book intro `0`, chapter overviews `x.0`, appendix index `App.`) stays in
-  // the Read panel — nav rows are real lessons only, in book order. Pageless
-  // concepts (e.g. `attributes`) fall back to a single concept row.
-  // All rows open the same concept — classes, data-action and data-concept
-  // hooks are identical to the old single-row markup.
+  // One sidebar row per lesson, labeled with our own lesson name
+  // (`c.concept` — the same title the roadmap and the lesson header use).
+  // TRPL page numbers live in the lesson's Read panel, not in navigation,
+  // so exactly one row is ever highlighted. Hooks match the old markup.
   function sidebarLessonRows(c, active, status) {
-    const all = (c && Array.isArray(c.trpl)) ? c.trpl.filter((t) => t && t.title) : [];
-    const substantive = all.filter((t) => !/^(0|App\.|\d+\.0)$/.test(t.num || ''));
-    const list = (substantive.length ? substantive : all).slice().sort((a, b) =>
-      String(a.num || '').localeCompare(String(b.num || ''), undefined, { numeric: true }));
-    const pages = list.length ? list : [{ num: '', title: (c && c.concept) || '' }];
-    return pages.map((p) => `<button type="button" class="rmc-tree-lesson${active ? ' active' : ''}" title="${esc(p.num ? `${p.num} ${p.title}` : p.title)}" aria-current="${active ? 'true' : 'false'}" data-action="open-concept" data-concept="${esc(c.id)}">
+    const label = (c && c.concept) || '';
+    return `<button type="button" class="rmc-tree-lesson${active ? ' active' : ''}" title="${esc(label)}" aria-current="${active ? 'true' : 'false'}" data-action="open-concept" data-concept="${esc(c.id)}">
                       <span class="rmc-dot rmc-dot-${esc(status)}"></span>
-                      <span class="rmc-tree-lesson-label">${esc(p.num ? `${p.num} ${p.title}` : p.title)}</span>
-                    </button>`).join('');
+                      <span class="rmc-tree-lesson-label">${esc(label)}</span>
+                    </button>`;
   }
 
   function Sidebar(view, selectedConceptId, statusMap) {
