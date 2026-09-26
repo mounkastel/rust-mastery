@@ -16,7 +16,7 @@ const concepts = [
       { num: '1.2', title: 'Hello, World!', url: BOOK + 'ch01-02-hello-world.html' },
       { num: '1.0', title: 'Getting Started (chapter overview)', url: BOOK + 'ch01-00-getting-started.html' },
     ],
-    concept: 'Installing Rust & Your First Program',
+    concept: 'Setup and Hello',
     prerequisites: [],
     rbe: [],
     rustlings: [
@@ -64,7 +64,7 @@ const concepts = [
   {
     id: 'cargo-basics', chapter: 1, chapterTitle: 'Getting Started', fundamental: false,
     trpl: [{ num: '1.3', title: 'Hello, Cargo!', url: BOOK + 'ch01-03-hello-cargo.html' }],
-    concept: 'Cargo: Projects, Builds, Dependencies',
+    concept: 'Cargo Basics',
     prerequisites: ['installation-hello'],
     rbe: [],
     rustlings: [],
@@ -120,7 +120,7 @@ const concepts = [
   {
     id: 'guessing-game', chapter: 2, chapterTitle: 'Programming a Guessing Game', fundamental: false, integrative: true,
     trpl: [{ num: '2', title: 'Programming a Guessing Game', url: BOOK + 'ch02-00-guessing-game-tutorial.html' }],
-    concept: 'Your First Complete Program',
+    concept: 'Guessing Game',
     prerequisites: ['cargo-basics'],
     rbe: [],
     rustlings: [],
@@ -177,7 +177,7 @@ const concepts = [
       { num: '3.1', title: 'Variables and Mutability', url: BOOK + 'ch03-01-variables-and-mutability.html' },
       { num: '3.0', title: 'Common Programming Concepts (chapter overview)', url: BOOK + 'ch03-00-common-programming-concepts.html' },
     ],
-    concept: 'Variables, Mutability, Shadowing, Constants',
+    concept: 'Variables and Mutability',
     prerequisites: ['guessing-game'],
     rbe: [],
     rustlings: [
@@ -223,7 +223,7 @@ const concepts = [
   {
     id: 'data-types', chapter: 3, chapterTitle: 'Common Programming Concepts', fundamental: false,
     trpl: [{ num: '3.2', title: 'Data Types', url: BOOK + 'ch03-02-data-types.html' }],
-    concept: 'Scalar and Compound Types',
+    concept: 'Data Types',
     prerequisites: ['variables-mutability'],
     rbe: [],
     rustlings: [
@@ -282,7 +282,7 @@ const concepts = [
   {
     id: 'functions', chapter: 3, chapterTitle: 'Common Programming Concepts', fundamental: false,
     trpl: [{ num: '3.3', title: 'Functions', url: BOOK + 'ch03-03-how-functions-work.html' }],
-    concept: 'Functions, Statements vs Expressions',
+    concept: 'Writing Functions',
     prerequisites: ['data-types'],
     rbe: [],
     rustlings: [
@@ -330,7 +330,7 @@ const concepts = [
       { num: '3.5', title: 'Control Flow', url: BOOK + 'ch03-05-control-flow.html' },
       { num: '3.4', title: 'Comments', url: BOOK + 'ch03-04-comments.html' },
     ],
-    concept: 'if/else Expressions, loop, while, for',
+    concept: 'Control Flow',
     prerequisites: ['functions'],
     rbe: [],
     rustlings: [
@@ -392,7 +392,7 @@ const concepts = [
       { num: '4.1', title: 'What is Ownership?', url: BOOK + 'ch04-01-what-is-ownership.html' },
       { num: '4.0', title: 'Understanding Ownership (chapter overview)', url: BOOK + 'ch04-00-understanding-ownership.html' },
     ],
-    concept: 'Ownership, Moves, and Clone',
+    concept: 'Ownership and Moves',
     prerequisites: ['control-flow'],
     rbe: [],
     rustlings: [
@@ -441,7 +441,7 @@ const concepts = [
   {
     id: 'borrowing', chapter: 4, chapterTitle: 'Understanding Ownership', fundamental: true,
     trpl: [{ num: '4.2', title: 'References and Borrowing', url: BOOK + 'ch04-02-references-and-borrowing.html' }],
-    concept: 'References and Borrowing Rules',
+    concept: 'Borrowing Rules',
     prerequisites: ['ownership'],
     rbe: [],
     rustlings: [
@@ -494,7 +494,7 @@ const concepts = [
   {
     id: 'slices', chapter: 4, chapterTitle: 'Understanding Ownership', fundamental: true,
     trpl: [{ num: '4.3', title: 'The Slice Type', url: BOOK + 'ch04-03-slices.html' }],
-    concept: 'String and Array Slices',
+    concept: 'Slice Types',
     prerequisites: ['borrowing'],
     rbe: [],
     rustlings: [],
@@ -544,7 +544,7 @@ const concepts = [
       { num: '5.2', title: 'An Example Program Using Structs', url: BOOK + 'ch05-02-example-structs.html' },
       { num: '5.0', title: 'Using Structs (chapter overview)', url: BOOK + 'ch05-00-structs.html' },
     ],
-    concept: 'Classic, Tuple, and Unit Structs',
+    concept: 'Defining Structs',
     prerequisites: ['ownership', 'data-types'],
     rbe: [],
     rustlings: [
@@ -599,7 +599,7 @@ const concepts = [
   {
     id: 'methods', chapter: 5, chapterTitle: 'Using Structs to Structure Related Data', fundamental: false,
     trpl: [{ num: '5.3', title: 'Methods', url: BOOK + 'ch05-03-method-syntax.html' }],
-    concept: 'Methods, &self, Associated Functions',
+    concept: 'Struct Methods',
     prerequisites: ['structs'],
     rbe: [],
     rustlings: [{ name: 'structs3', url: RL + '07_structs/structs3.rs' }],
@@ -649,7 +649,7 @@ const concepts = [
       { num: '6.1', title: 'Defining an Enum', url: BOOK + 'ch06-01-defining-an-enum.html' },
       { num: '6.0', title: 'Enums and Pattern Matching (chapter overview)', url: BOOK + 'ch06-00-enums.html' },
     ],
-    concept: 'Enums Carrying Data',
+    concept: 'Enums with Data',
     prerequisites: ['structs'],
     rbe: [],
     rustlings: [
@@ -712,7 +712,7 @@ const concepts = [
       { num: '6.1', title: 'The Option Enum (Option section)', url: BOOK + 'ch06-01-defining-an-enum.html#the-option-enum-and-its-advantages-over-null-values' },
       { num: 'std', title: 'Option<T> API docs', url: 'https://doc.rust-lang.org/std/option/enum.Option.html' },
     ],
-    concept: 'Option<T>: Some, None, No Null',
+    concept: 'The Option Type',
     prerequisites: ['enums'],
     rbe: [],
     rustlings: [
@@ -754,7 +754,7 @@ const concepts = [
   {
     id: 'match', chapter: 6, chapterTitle: 'Enums and Pattern Matching', fundamental: true,
     trpl: [{ num: '6.2', title: 'The match Control Flow Construct', url: BOOK + 'ch06-02-match.html' }],
-    concept: 'match: Exhaustiveness and Bindings',
+    concept: 'Pattern Matching',
     prerequisites: ['enums'],
     rbe: [],
     rustlings: [{ name: 'enums3', url: RL + '08_enums/enums3.rs' }],
@@ -805,7 +805,7 @@ const concepts = [
   {
     id: 'if-let', chapter: 6, chapterTitle: 'Enums and Pattern Matching', fundamental: false,
     trpl: [{ num: '6.3', title: 'Concise Control Flow with if let and let...else', url: BOOK + 'ch06-03-if-let.html' }],
-    concept: 'if let, while let, let-else',
+    concept: 'Shorthand Matching',
     prerequisites: ['match'],
     rbe: [],
     rustlings: [{ name: 'options2', url: RL + '12_options/options2.rs' }],
@@ -862,7 +862,7 @@ const concepts = [
       { num: '7.1', title: 'Packages and Crates', url: BOOK + 'ch07-01-packages-and-crates.html' },
       { num: '7.0', title: 'Packages, Crates, and Modules (chapter overview)', url: BOOK + 'ch07-00-managing-growing-projects-with-packages-crates-and-modules.html' },
     ],
-    concept: 'Packages, Crates, and Targets',
+    concept: 'Packages and Crates',
     prerequisites: ['functions'],
     rbe: [],
     rustlings: [],
@@ -923,7 +923,7 @@ const concepts = [
       { num: '7.2', title: 'Defining Modules to Control Scope and Privacy', url: BOOK + 'ch07-02-defining-modules-to-control-scope-and-privacy.html' },
       { num: '7.3', title: 'Paths for Referring to an Item in the Module Tree', url: BOOK + 'ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html' },
     ],
-    concept: 'Module Trees and Privacy',
+    concept: 'Modules and Privacy',
     prerequisites: ['packages-crates'],
     rbe: [],
     rustlings: [{ name: 'modules1', url: RL + '10_modules/modules1.rs' }],
@@ -983,7 +983,7 @@ const concepts = [
       { num: '7.4', title: 'Bringing Paths into Scope with the use Keyword', url: BOOK + 'ch07-04-bringing-paths-into-scope-with-the-use-keyword.html' },
       { num: '7.5', title: 'Separating Modules into Different Files', url: BOOK + 'ch07-05-separating-modules-into-different-files.html' },
     ],
-    concept: 'use Paths, Re-exports, File Modules',
+    concept: 'Paths and Imports',
     prerequisites: ['modules-privacy'],
     rbe: [],
     rustlings: [
@@ -1043,7 +1043,7 @@ const concepts = [
       { num: '8.1', title: 'Storing Lists of Values with Vectors', url: BOOK + 'ch08-01-vectors.html' },
       { num: '8.0', title: 'Common Collections (chapter overview)', url: BOOK + 'ch08-00-common-collections.html' },
     ],
-    concept: 'Vec<T>: Push, Index, Iterate',
+    concept: 'Working with Vectors',
     prerequisites: ['slices'],
     rbe: [],
     rustlings: [
@@ -1087,7 +1087,7 @@ const concepts = [
   {
     id: 'strings', chapter: 8, chapterTitle: 'Common Collections', fundamental: true,
     trpl: [{ num: '8.2', title: 'Storing UTF-8 Encoded Text with Strings', url: BOOK + 'ch08-02-strings.html' }],
-    concept: 'String vs &str in UTF-8',
+    concept: 'Strings and UTF-8',
     prerequisites: ['vectors'],
     rbe: [],
     rustlings: [
@@ -1137,7 +1137,7 @@ const concepts = [
   {
     id: 'hashmaps', chapter: 8, chapterTitle: 'Common Collections', fundamental: false,
     trpl: [{ num: '8.3', title: 'Storing Keys with Associated Values in Hash Maps', url: BOOK + 'ch08-03-hash-maps.html' }],
-    concept: 'HashMap and the Entry API',
+    concept: 'Hash Maps',
     prerequisites: ['vectors'],
     rbe: [],
     rustlings: [
@@ -1193,7 +1193,7 @@ const concepts = [
       { num: '9.1', title: 'Unrecoverable Errors with panic!', url: BOOK + 'ch09-01-unrecoverable-errors-with-panic.html' },
       { num: '9.0', title: 'Error Handling (chapter overview)', url: BOOK + 'ch09-00-error-handling.html' },
     ],
-    concept: 'panic!: Unwind vs Abort',
+    concept: 'Unrecoverable Errors',
     prerequisites: ['control-flow'],
     rbe: [],
     rustlings: [],
@@ -1248,7 +1248,7 @@ const concepts = [
       { num: '9.2', title: 'Recoverable Errors with Result', url: BOOK + 'ch09-02-recoverable-errors-with-result.html' },
       { num: '9.3', title: 'To panic! or Not to panic!', url: BOOK + 'ch09-03-to-panic-or-not-to-panic.html' },
     ],
-    concept: 'Result<T, E> and the ? Operator',
+    concept: 'Error Propagation',
     prerequisites: ['panic', 'enums'],
     rbe: [
       { title: '`?` in `main`', url: RBE + 'error/result/enter_question_mark.html', type: 'REINFORCEMENT' },
@@ -1316,7 +1316,7 @@ const concepts = [
       { num: '10.1', title: 'Generic Data Types', url: BOOK + 'ch10-01-syntax.html' },
       { num: '10.0', title: 'Generic Types, Traits, and Lifetimes (chapter overview)', url: BOOK + 'ch10-00-generics.html' },
     ],
-    concept: 'Generics: Functions, Structs, Enums',
+    concept: 'Generic Types',
     prerequisites: ['structs', 'enums'],
     rbe: [],
     rustlings: [
@@ -1376,7 +1376,7 @@ const concepts = [
   {
     id: 'traits', chapter: 10, chapterTitle: 'Generic Types, Traits, and Lifetimes', fundamental: true,
     trpl: [{ num: '10.2', title: 'Defining Shared Behavior with Traits', url: BOOK + 'ch10-02-traits.html' }],
-    concept: 'Traits, Bounds, and impl Trait',
+    concept: 'Traits and Bounds',
     prerequisites: ['generics'],
     rbe: [],
     rustlings: [
@@ -1446,7 +1446,7 @@ const concepts = [
   {
     id: 'lifetimes', chapter: 10, chapterTitle: 'Generic Types, Traits, and Lifetimes', fundamental: true,
     trpl: [{ num: '10.3', title: 'Validating References with Lifetimes', url: BOOK + 'ch10-03-lifetime-syntax.html' }],
-    concept: 'Lifetime Annotations and Elision',
+    concept: 'Lifetime Annotations',
     prerequisites: ['borrowing', 'traits'],
     rbe: [],
     rustlings: [
@@ -1519,7 +1519,7 @@ const concepts = [
       { num: '11.2', title: 'Controlling How Tests Are Run', url: BOOK + 'ch11-02-running-tests.html' },
       { num: '11.0', title: 'Writing Automated Tests (chapter overview)', url: BOOK + 'ch11-00-testing.html' },
     ],
-    concept: '#[test], assert!, should_panic',
+    concept: 'Writing Tests',
     prerequisites: ['functions'],
     rbe: [
       { title: 'Development dependencies', url: RBE + 'testing/dev_dependencies.html', type: 'REINFORCEMENT' },
@@ -1579,7 +1579,7 @@ const concepts = [
   {
     id: 'test-org', chapter: 11, chapterTitle: 'Writing Automated Tests', fundamental: false,
     trpl: [{ num: '11.3', title: 'Test Organization', url: BOOK + 'ch11-03-test-organization.html' }],
-    concept: 'Unit vs Integration Tests',
+    concept: 'Test Organization',
     prerequisites: ['writing-tests'],
     rbe: [],
     rustlings: [],
@@ -1640,7 +1640,7 @@ const concepts = [
       { num: '12.5', title: 'Working with Environment Variables', url: BOOK + 'ch12-05-working-with-environment-variables.html' },
       { num: '12.6', title: 'Redirecting Errors to Standard Error', url: BOOK + 'ch12-06-writing-to-stderr-instead-of-stdout.html' },
     ],
-    concept: 'Minigrep: A CLI Project',
+    concept: 'Minigrep Project',
     prerequisites: ['result', 'vectors', 'strings'],
     rbe: [
       { title: 'Program arguments', url: RBE + 'std_misc/arg.html', type: 'REINFORCEMENT' },
@@ -1714,7 +1714,7 @@ const concepts = [
       { num: '13.1', title: 'Closures', url: BOOK + 'ch13-01-closures.html' },
       { num: '13.0', title: 'Functional Language Features (chapter overview)', url: BOOK + 'ch13-00-functional-features.html' },
     ],
-    concept: 'Closures: Fn, FnMut, FnOnce',
+    concept: 'Closures and Capture',
     prerequisites: ['functions', 'ownership'],
     rbe: [],
     rustlings: [],
@@ -1781,7 +1781,7 @@ const concepts = [
       { num: '13.3', title: 'Improving Our I/O Project', url: BOOK + 'ch13-03-improving-our-io-project.html' },
       { num: '13.4', title: 'Performance in Loops vs. Iterators', url: BOOK + 'ch13-04-performance.html' },
     ],
-    concept: 'Iterator Adapters and Laziness',
+    concept: 'Iterators and Adapters',
     prerequisites: ['closures', 'generics', 'vectors'],
     rbe: [],
     rustlings: [
@@ -1854,7 +1854,7 @@ const concepts = [
       { num: '14.4', title: 'Installing Binaries with cargo install', url: BOOK + 'ch14-04-installing-binaries.html' },
       { num: '14.5', title: 'Extending Cargo with Custom Commands', url: BOOK + 'ch14-05-extending-cargo.html' },
     ],
-    concept: 'Profiles, Publishing, Workspaces',
+    concept: 'Advanced Cargo',
     prerequisites: ['packages-crates'],
     rbe: [],
     rustlings: [],
@@ -1917,7 +1917,7 @@ const concepts = [
       { num: '15.1', title: 'Using Box<T> to Point to Data on the Heap', url: BOOK + 'ch15-01-box.html' },
       { num: '15.0', title: 'Smart Pointers (chapter overview)', url: BOOK + 'ch15-00-smart-pointers.html' },
     ],
-    concept: 'Box<T>: Heap and Recursion',
+    concept: 'Heap with Box',
     prerequisites: ['ownership'],
     rbe: [],
     rustlings: [{ name: 'box1', url: RL + '19_smart_pointers/box1.rs' }],
@@ -1971,7 +1971,7 @@ const concepts = [
       { num: '15.2', title: 'Treating Smart Pointers Like Regular References', url: BOOK + 'ch15-02-deref.html' },
       { num: '15.3', title: 'Running Code on Cleanup with the Drop Trait', url: BOOK + 'ch15-03-drop.html' },
     ],
-    concept: 'Deref Coercion and Drop',
+    concept: 'Deref and Drop',
     prerequisites: ['box', 'traits'],
     rbe: [],
     rustlings: [],
@@ -2028,7 +2028,7 @@ const concepts = [
   {
     id: 'rc', chapter: 15, chapterTitle: 'Smart Pointers', fundamental: true,
     trpl: [{ num: '15.4', title: 'Rc<T>, the Reference Counted Smart Pointer', url: BOOK + 'ch15-04-rc.html' }],
-    concept: 'Rc<T> and Arc<T>: Shared Ownership',
+    concept: 'Shared Ownership',
     prerequisites: ['box'],
     rbe: [],
     rustlings: [
@@ -2098,7 +2098,7 @@ const concepts = [
       { num: '15.5', title: 'RefCell<T> and the Interior Mutability Pattern', url: BOOK + 'ch15-05-interior-mutability.html' },
       { num: '15.6', title: 'Reference Cycles Can Leak Memory', url: BOOK + 'ch15-06-reference-cycles.html' },
     ],
-    concept: 'RefCell<T>: Interior Mutability',
+    concept: 'Interior Mutability',
     prerequisites: ['rc'],
     rbe: [],
     rustlings: [],
@@ -2159,7 +2159,7 @@ const concepts = [
       { num: '16.1', title: 'Using Threads to Run Code Simultaneously', url: BOOK + 'ch16-01-threads.html' },
       { num: '16.0', title: 'Fearless Concurrency (chapter overview)', url: BOOK + 'ch16-00-concurrency.html' },
     ],
-    concept: 'Spawning and Joining Threads',
+    concept: 'Spawning Threads',
     prerequisites: ['closures'],
     rbe: [],
     rustlings: [
@@ -2226,7 +2226,7 @@ const concepts = [
   {
     id: 'message-passing', chapter: 16, chapterTitle: 'Fearless Concurrency', fundamental: true,
     trpl: [{ num: '16.2', title: 'Transfer Data Between Threads with Message Passing', url: BOOK + 'ch16-02-message-passing.html' }],
-    concept: 'Message Passing with mpsc',
+    concept: 'Message Passing',
     prerequisites: ['threads'],
     rbe: [],
     rustlings: [{ name: 'threads3', url: RL + '20_threads/threads3.rs' }],
@@ -2286,7 +2286,7 @@ const concepts = [
       { num: '16.3', title: 'Shared-State Concurrency', url: BOOK + 'ch16-03-shared-state.html' },
       { num: '16.4', title: 'Extensible Concurrency with Send and Sync', url: BOOK + 'ch16-04-extensible-concurrency-sync-and-send.html' },
     ],
-    concept: 'Shared State: Mutex, Arc, Send/Sync',
+    concept: 'Shared State',
     prerequisites: ['threads', 'rc'],
     rbe: [],
     rustlings: [{ name: 'threads2', url: RL + '20_threads/threads2.rs' }],
@@ -2347,7 +2347,7 @@ const concepts = [
       { num: '17.1', title: 'Futures and the Async Syntax', url: BOOK + 'ch17-01-futures-and-syntax.html' },
       { num: '17.0', title: 'Fundamentals of Asynchronous Programming (chapter overview)', url: BOOK + 'ch17-00-async-await.html' },
     ],
-    concept: 'async/.await and Futures',
+    concept: 'Async and Await',
     prerequisites: ['closures', 'traits'],
     rbe: [],
     rustlings: [
@@ -2417,7 +2417,7 @@ const concepts = [
       { num: '17.5', title: 'A Closer Look at the Traits for Async', url: BOOK + 'ch17-05-traits-for-async.html' },
       { num: '17.6', title: 'Futures, Tasks, and Threads', url: BOOK + 'ch17-06-futures-tasks-threads.html' },
     ],
-    concept: 'Async Concurrency Patterns',
+    concept: 'Async Concurrency',
     prerequisites: ['async-futures', 'threads'],
     rbe: [],
     rustlings: [],
@@ -2497,7 +2497,7 @@ const concepts = [
       { num: '18.1', title: 'Characteristics of Object-Oriented Languages', url: BOOK + 'ch18-01-what-is-oo.html' },
       { num: '18.0', title: 'Object Oriented Programming Features (chapter overview)', url: BOOK + 'ch18-00-oop.html' },
     ],
-    concept: 'Encapsulation Without Inheritance',
+    concept: 'Encapsulation in Rust',
     prerequisites: ['traits'],
     rbe: [],
     rustlings: [],
@@ -2558,7 +2558,7 @@ const concepts = [
       { num: '18.2', title: 'Using Trait Objects to Abstract over Shared Behavior', url: BOOK + 'ch18-02-trait-objects.html' },
       { num: '18.3', title: 'Implementing an Object-Oriented Design Pattern', url: BOOK + 'ch18-03-oo-design-patterns.html' },
     ],
-    concept: 'dyn Trait and Dynamic Dispatch',
+    concept: 'Dynamic Dispatch',
     prerequisites: ['traits', 'generics'],
     rbe: [],
     rustlings: [],
@@ -2678,7 +2678,7 @@ const concepts = [
       { num: '19.2', title: 'Refutability', url: BOOK + 'ch19-02-refutability.html' },
       { num: '19.3', title: 'Pattern Syntax', url: BOOK + 'ch19-03-pattern-syntax.html' },
     ],
-    concept: 'Guards, Bindings, Refutability',
+    concept: 'Pattern Syntax',
     prerequisites: ['patterns-everywhere'],
     rbe: [],
     rustlings: [{ name: 'options3', url: RL + '12_options/options3.rs' }],
@@ -2734,7 +2734,7 @@ const concepts = [
       { num: '20.1', title: 'Unsafe Rust', url: BOOK + 'ch20-01-unsafe-rust.html' },
       { num: '20.0', title: 'Advanced Features (chapter overview)', url: BOOK + 'ch20-00-advanced-features.html' },
     ],
-    concept: 'The Unsafe Superpowers',
+    concept: 'Unsafe Rust',
     prerequisites: ['lifetimes'],
     rbe: [
       { title: 'Foreign Function Interface', url: RBE + 'std_misc/ffi.html', type: 'REINFORCEMENT' },
@@ -2796,7 +2796,7 @@ const concepts = [
       { num: '20.3', title: 'Advanced Types', url: BOOK + 'ch20-03-advanced-types.html' },
       { num: '20.4', title: 'Advanced Functions and Closures', url: BOOK + 'ch20-04-advanced-functions-and-closures.html' },
     ],
-    concept: 'Advanced Traits and Types',
+    concept: 'Advanced Traits',
     prerequisites: ['traits', 'generics'],
     rbe: [],
     rustlings: [{ name: 'traits5', url: RL + '15_traits/traits5.rs' }],
@@ -2865,7 +2865,7 @@ const concepts = [
   {
     id: 'macros', chapter: 20, chapterTitle: 'Advanced Features', fundamental: false,
     trpl: [{ num: '20.5', title: 'Macros', url: BOOK + 'ch20-05-macros.html' }],
-    concept: 'Declarative vs Procedural Macros',
+    concept: 'Writing Macros',
     prerequisites: ['functions'],
     rbe: [
       { title: 'Syntax', url: RBE + 'macros/syntax.html', type: 'REINFORCEMENT' },
@@ -2953,7 +2953,7 @@ const concepts = [
       { num: '21.2', title: 'From Single-Threaded to Multithreaded Server', url: BOOK + 'ch21-02-multithreaded.html' },
       { num: '21.3', title: 'Graceful Shutdown and Cleanup', url: BOOK + 'ch21-03-graceful-shutdown-and-cleanup.html' },
     ],
-    concept: 'Capstone: Multithreaded Web Server',
+    concept: 'Web Server Capstone',
     prerequisites: ['threads', 'message-passing', 'shared-state', 'box', 'closures', 'result', 'traits'],
     rbe: [],
     rustlings: [],
@@ -3031,7 +3031,7 @@ const concepts = [
   {
     id: 'clippy-tooling', chapter: 0, chapterTitle: 'Bonus — Tooling & Conversions', fundamental: false, bonus: true,
     trpl: [{ num: 'App. D', title: 'Appendix D: Useful Development Tools', url: BOOK + 'appendix-04-useful-development-tools.html' }],
-    concept: 'Clippy and Idiomatic Tooling',
+    concept: 'Clippy and Rustfmt',
     prerequisites: ['functions'],
     rbe: [],
     rustlings: [
@@ -3093,7 +3093,7 @@ const concepts = [
   {
     id: 'type-conversions', chapter: 0, chapterTitle: 'Bonus — Tooling & Conversions', fundamental: false, bonus: true,
     trpl: [{ num: 'App. C', title: 'Appendix C: Derivable Traits (From/TryFrom context)', url: BOOK + 'appendix-03-derivable-traits.html' }],
-    concept: 'Conversions: as, From, TryFrom',
+    concept: 'Type Conversions',
     prerequisites: ['traits', 'generics'],
     rbe: [
       { title: 'Conversion (From/Into, TryFrom/TryInto)', url: RBE + 'conversion.html', type: 'EXACT' },
@@ -3175,7 +3175,7 @@ const concepts = [
       { num: 'App. F', title: 'Translations of the Book', url: BOOK + 'appendix-06-translation.html' },
       { num: 'App. G', title: 'How Rust is Made and “Nightly Rust”', url: BOOK + 'appendix-07-nightly-rust.html' },
     ],
-    concept: 'Appendices: Keywords, Operators, Editions',
+    concept: 'Appendix Reference',
     prerequisites: ['functions'],
     rbe: [],
     rustlings: [],
@@ -3233,7 +3233,7 @@ const concepts = [
   {
     id: 'attributes', chapter: 0, chapterTitle: 'Bonus — RBE Cookbook', fundamental: false, bonus: true,
     trpl: [],
-    concept: 'Attributes That Steer Compilation',
+    concept: 'Compiler Attributes',
     prerequisites: ['functions'],
     rbe: [
       { title: 'Attributes', url: RBE + 'attribute.html', type: 'EXACT' },
