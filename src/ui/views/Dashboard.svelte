@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { conceptById, curriculum, firstLesson, type Chapter } from '../../content';
+  import { chapterOf, conceptById, curriculum, firstLesson, type Chapter } from '../../content';
   import type { CourseStore } from '../../lib/app/store.svelte';
   import { lessonHref } from '../../lib/app/router';
   import { formatMinutes } from '../../lib/domain/clock';
@@ -11,6 +11,15 @@
   }
   const { store }: Props = $props();
 
+  const LOCK_ORDER: LockState[] = ['available', 'started', 'revisit', 'locked', 'passed'];
+  const LOCK_WORD: Record<LockState, string> = {
+    locked: 'Locked',
+    available: 'Not started',
+    started: 'In progress',
+    revisit: 'Retake due',
+    passed: 'Passed',
+  };
+
   const summary = $derived(store.summarise());
   const due = $derived(store.dueToday());
   const retention = $derived(store.retention());
@@ -20,30 +29,8 @@
       ? null
       : (conceptById.get(store.progress.lastLessonId) ?? null),
   );
-  const nextChapter = $derived(
-    next === null
-      ? null
-      : (curriculum.chapters.find((c) => c.concepts.some((x) => x.id === next.id)) ?? null),
-  );
-  const upcoming = $derived(
-    curriculum.chapters
-      .map((c) => ({ chapter: c, done: countDone(c) }))
-      .filter((row) => row.done < row.chapter.concepts.length)
-      .slice(0, 4),
-  );
+  const nextChapter = $derived(next === null ? null : (chapterOf(next.id) ?? null));
 
-  function countDone(chapter: Chapter): number {
-    return chapter.concepts.filter((c) => store.lessonOf(c.id).passed).length;
-  }
-
-  const LOCK_ORDER: LockState[] = ['available', 'started', 'revisit', 'locked', 'passed'];
-  const LOCK_WORD: Record<LockState, string> = {
-    locked: 'Locked',
-    available: 'Not started',
-    started: 'In progress',
-    revisit: 'Retake due',
-    passed: 'Passed',
-  };
   const tally = $derived.by(() => {
     const counts: Record<LockState, number> = {
       locked: 0,
@@ -55,6 +42,16 @@
     for (const view of store.views()) counts[view.lock] += 1;
     return LOCK_ORDER.map((lock) => ({ lock, n: counts[lock] })).filter((row) => row.n > 0);
   });
+
+  const upcoming = $derived(
+    curriculum.chapters
+      .map((chapter: Chapter) => ({
+        chapter,
+        done: chapter.concepts.filter((c) => store.lessonOf(c.id).passed).length,
+      }))
+      .filter((row) => row.done < row.chapter.concepts.length)
+      .slice(0, 4),
+  );
 </script>
 
 <svelte:head><title>Rust Mastery</title></svelte:head>
@@ -65,9 +62,7 @@
   <h2 id="next-heading" class="visually-hidden">Next lesson</h2>
   {#if next !== null}
     <p class="eyebrow">Next up</p>
-    <h3 class="next-title">
-      <a href={lessonHref(next.id)}>{next.title}</a>
-    </h3>
+    <h3 class="next-title"><a href={lessonHref(next.id)}>{next.title}</a></h3>
     <p class="next-meta">
       {#if nextChapter !== null}{nextChapter.title} ·{/if}
       {formatMinutes(next.estMinutes)} · {next.questions.length} questions
@@ -80,11 +75,10 @@
   {:else}
     <p class="eyebrow">Start here</p>
     <h3 class="next-title"><a href={lessonHref(firstLesson.id)}>{firstLesson.title}</a></h3>
+    <a class="cta" href={lessonHref(firstLesson.id)}>Open lesson</a>
   {/if}
   {#if last !== null && next !== null && last.id !== next.id}
-    <p class="resume">
-      You were last in <a href={lessonHref(last.id)}>{last.title}</a>.
-    </p>
+    <p class="resume">You were last in <a href={lessonHref(last.id)}>{last.title}</a>.</p>
   {/if}
 </section>
 
@@ -124,9 +118,9 @@
   <ul>
     {#each tally as row (row.lock)}
       <li>
-        <span class="swatch" data-lock={row.lock} aria-hidden="true"></span>{LOCK_WORD[
-          row.lock
-        ]}<span class="count">{row.n}</span>
+        <span class="swatch" data-lock={row.lock} aria-hidden="true"></span>
+        <span>{LOCK_WORD[row.lock]}</span>
+        <span class="count">{row.n}</span>
       </li>
     {/each}
   </ul>
@@ -252,15 +246,15 @@
     font-size: var(--step--1);
   }
   .count {
-    font-variant-numeric: tabular-nums;
-    font-weight: 620;
     color: var(--text);
+    font-weight: 620;
+    font-variant-numeric: tabular-nums;
   }
   .swatch {
     inline-size: 0.6rem;
     block-size: 0.6rem;
-    border-radius: 50%;
     border: 1.5px solid var(--edge-strong);
+    border-radius: 50%;
   }
   .swatch[data-lock='started'] {
     border-color: var(--warn);

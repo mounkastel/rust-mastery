@@ -23,12 +23,14 @@ test.describe('narrow viewports', () => {
 
   test('tapping the scrim closes the drawer', async ({ page }) => {
     await page.goto('./');
-    await page.getByRole('button', { name: 'Lessons menu' }).click();
+    const toggle = page.getByRole('button', { name: 'Lessons menu' });
+    await toggle.click();
+    // The drawer slides in over 160ms; the scrim is only reliably on top once
+    // the transition has finished, so wait for the settled transform.
+    await expect(page.locator('#nav')).toHaveCSS('transform', 'none');
     await page.getByRole('button', { name: 'Close menu' }).click();
-    await expect(page.getByRole('button', { name: 'Lessons menu' })).toHaveAttribute(
-      'aria-expanded',
-      'false',
-    );
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('#nav')).not.toBeInViewport();
   });
 
   test('nothing overflows the viewport horizontally', async ({ page }) => {
