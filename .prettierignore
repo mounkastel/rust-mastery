@@ -1,0 +1,9 @@
+# Vendored upstream output. Never reformat these: they are checksummed.
+public/
+
+# Generated
+dist/
+coverage/
+playwright-report/
+test-results/
+package-lock.json

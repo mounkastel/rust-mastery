@@ -1,33 +1,46 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)">
-  <meta name="description" content="Rust Mastery — one sequence across TRPL, Rust by Example, and Rustlings: read, see, do, recall, advance.">
-  <meta property="og:title" content="Rust Mastery — TRPL × Rust by Example × Rustlings">
-  <meta property="og:description" content="One sequence across three Rust resources: read, see, do, recall, advance. Progress and spaced review included.">
-  <meta property="og:type" content="website">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231d1d1f'/%3E%3Ctext x='32' y='43' font-family='system-ui,sans-serif' font-size='32' font-weight='700' fill='%23fb923c' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
-  <title>Rust Mastery — TRPL × Rust by Example × Rustlings</title>
-  <link rel="stylesheet" href="styles.css">
-  <script>
-  // Pre-paint theme: avoid light flash when OS/stored preference is dark.
-  try {
-    var __t = window.localStorage.getItem('rust-mastery-theme');
-    if (__t !== 'dark' && __t !== 'light') {
-      __t = (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
-    }
-    document.documentElement.dataset.theme = __t;
-  } catch (_) {}
-  </script>
-</head>
-<body>
-  <div id="app" class="rmc">Loading…</div>
-
-  <script src="data.js"></script>
-  <script src="app.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f6f6f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1013" media="(prefers-color-scheme: dark)" />
+    <title>Rust Mastery</title>
+    <meta
+      name="description"
+      content="One ordered Rust curriculum across The Rust Programming Language, Rust by Example and Rustlings. Read, see, do, then recall on a schedule."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23a8420f'/%3E%3Ctext x='16' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='700' fill='%23fff' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E"
+    />
+    <script>
+      // Resolve the theme before the first paint so a dark-mode reader never
+      // sees a white flash. 'system' is expressed by omitting the attribute,
+      // which lets the prefers-color-scheme block in tokens.css take over.
+      try {
+        var stored = localStorage.getItem('rust-mastery:v3');
+        if (stored) {
+          var theme = JSON.parse(stored).theme;
+          if (theme === 'light' || theme === 'dark') {
+            document.documentElement.dataset.theme = theme;
+          }
+        }
+      } catch (_) {
+        // Private mode or corrupt data: fall through to the system preference.
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>
+      <p style="padding: 2rem; font-family: system-ui, sans-serif">
+        Rust Mastery is a single-page app and needs JavaScript. The books it sequences are readable
+        without it: <a href="book-html/">The Rust Programming Language</a> and
+        <a href="rbe-html/">Rust by Example</a>.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
