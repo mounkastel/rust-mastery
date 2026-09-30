@@ -10,10 +10,31 @@
   }
   const { store }: Props = $props();
 
-  const due = $derived(store.dueToday());
   const retention = $derived(store.retention());
-  let done = $state(0);
+
+  /**
+   * The queue is frozen at mount. Grading a card pushes its lesson into the
+   * future, so re-reading `dueToday()` would both shrink the queue and make
+   * the "session complete" branch fire early; an undo has to bring a card
+   * back, which a derived list cannot do.
+   */
+  const queue = $state<{ conceptId: string; overdueDays: number }[]>([]);
+  const graded = $state<string[]>([]);
   const startedAt = Date.now();
+
+  const remaining = $derived(queue.filter((card) => !graded.includes(card.conceptId)));
+  const current = $derived(
+    remaining[0] === undefined ? null : (conceptById.get(remaining[0].conceptId) ?? null),
+  );
+  const overdueDays = $derived(remaining[0]?.overdueDays ?? 0);
+  const finished = $derived(queue.length > 0 && graded.length === queue.length);
+  const minutesSpent = $derived(Math.max(1, Math.round((Date.now() - startedAt) / 60000)));
+
+  $effect(() => {
+    // Populated once, on mount. Reading dueToday() here rather than in a
+    // $derived is deliberate; see the comment on `queue`.
+    if (queue.length === 0 && graded.length === 0) queue.push(...store.dueToday());
+  });
 
   const RATE: { rating: Rating; label: string; hint: string }[] = [
     { rating: 'again', label: 'Again', hint: 'Show it tomorrow' },
@@ -22,11 +43,9 @@
     { rating: 'easy', label: 'Easy', hint: 'Skip ahead' },
   ];
 
-  const minutesSpent = $derived(Math.max(1, Math.round((Date.now() - startedAt) / 60000)));
-
   function rate(id: string, rating: Rating): void {
     store.rate(id, rating);
-    done += 1;
+    graded.push(id);
   }
 
   /** A question the learner has answered before, rotating on the streak. */
@@ -45,11 +64,11 @@
 
 <h1>Recall</h1>
 <p class="intro">
-  {#if due.length === 0}
+  {#if queue.length === 0}
     Nothing is due. Lessons you pass join the schedule the next day.
   {:else}
-    {due.length}
-    {due.length === 1 ? 'lesson is' : 'lessons are'} scheduled. Answer from memory first, then check.
+    {queue.length}
+    {queue.length === 1 ? 'lesson is' : 'lessons are'} scheduled. Answer from memory first, then check.
   {/if}
 </p>
 
@@ -67,69 +86,69 @@
       class="btn"
       onclick={() => {
         store.undoLastRate();
-      }}>Undo last grade</button
+        graded.pop();
+      }}
     >
+      Undo last grade
+    </button>
   </p>
 {/if}
 
-{#if due.length === 0}
+{#if queue.length === 0}
   <p><a href="#/course">Back to the sequence</a></p>
-{:else if done >= due.length}
+{:else if finished}
   <section class="done" aria-live="polite">
     <h2>Session complete</h2>
     <p>
-      {done}
-      {done === 1 ? 'card' : 'cards'} graded in {minutesSpent} min.
+      {graded.length}
+      {graded.length === 1 ? 'card' : 'cards'} graded in {minutesSpent} min.
     </p>
     <p><a href="#/">Back to the dashboard</a></p>
   </section>
-{:else}
-  <ol class="cards" start={done + 1}>
-    {#each due.slice(done) as card (card.conceptId)}
-      {@const concept = conceptById.get(card.conceptId)}
-      {#if concept !== undefined}
-        {@const question = recallCard(concept)}
-        <li class="card">
-          <p class="card-meta">
-            <a href={lessonHref(concept.id)}>{concept.title}</a>
-            {#if card.overdueDays > 0}
-              <span class="late"
-                >{card.overdueDays} {card.overdueDays === 1 ? 'day' : 'days'} late</span
-              >
-            {:else}
-              <span class="due">due today</span>
-            {/if}
-          </p>
-          {#if question !== undefined}
-            <div class="card-body">
-              <RichText text={question.prompt} lead />
-            </div>
-            <details>
-              <summary>Show the answer</summary>
-              <div class="card-body">
-                <RichText text={question.explain} />
-              </div>
-            </details>
-          {/if}
-          <div class="grades" role="group" aria-label="How well did you recall it?">
-            {#each RATE as option (option.rating)}
-              <button
-                type="button"
-                class="grade"
-                data-rating={option.rating}
-                onclick={() => {
-                  rate(concept.id, option.rating);
-                }}
-              >
-                <span class="grade-label">{option.label}</span>
-                <span class="grade-hint">{option.hint}</span>
-              </button>
-            {/each}
-          </div>
-        </li>
+{:else if current !== null}
+  {@const question = recallCard(current)}
+  <p class="position">
+    {remaining.length} left
+  </p>
+  <article class="card">
+    <p class="card-meta">
+      <a href={lessonHref(current.id)}>{current.title}</a>
+      {#if overdueDays > 0}
+        <span class="late">
+          {overdueDays}
+          {overdueDays === 1 ? 'day' : 'days'} late
+        </span>
+      {:else}
+        <span class="due">due today</span>
       {/if}
-    {/each}
-  </ol>
+    </p>
+    {#if question !== undefined}
+      <div class="card-body">
+        <RichText text={question.prompt} lead />
+      </div>
+      <details>
+        <summary>Show the answer</summary>
+        <div class="card-body">
+          <RichText text={question.explain} />
+        </div>
+      </details>
+    {/if}
+    <div class="grades" role="group" aria-label="How well did you recall it?">
+      {#each RATE as option (option.rating)}
+        <button
+          type="button"
+          class="grade"
+          data-rating={option.rating}
+          onclick={() => {
+            rate(current.id, option.rating);
+          }}
+        >
+          <span class="grade-label">{option.label}</span>
+          <span class="grade-hint">{option.hint}</span>
+        </button>
+      {/each}
+    </div>
+  </article>
 {/if}
 
 <style>
@@ -137,25 +156,20 @@
     margin-block-end: var(--space-2);
   }
   .intro,
-  .retention {
+  .retention,
+  .position {
     max-inline-size: var(--measure);
     color: var(--text-muted);
   }
-  .retention {
+  .retention,
+  .position {
     font-size: var(--step--1);
   }
   .undo {
     margin-block: var(--space-3);
   }
-  .cards {
-    display: grid;
-    gap: var(--space-4);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    counter-reset: card;
-  }
   .card {
+    max-inline-size: 46rem;
     padding: var(--space-4);
     border: 1px solid var(--edge);
     border-radius: var(--radius-3);
@@ -172,11 +186,11 @@
   .card-meta a {
     font-weight: 580;
   }
-  .late {
-    color: var(--warn);
-  }
   .due {
     color: var(--text-faint);
+  }
+  .late {
+    color: var(--warn);
   }
   .card-body {
     max-inline-size: var(--measure);
@@ -221,6 +235,7 @@
     font-size: var(--step--1);
   }
   .done {
+    max-inline-size: 46rem;
     padding: var(--space-5);
     border: 1px solid var(--ok);
     border-radius: var(--radius-3);

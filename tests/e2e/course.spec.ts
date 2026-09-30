@@ -11,6 +11,48 @@ function questionCount(page: Page): Promise<number> {
 
 const LETTERS = ['a', 'b', 'c', 'd'] as const;
 
+/**
+ * Puts lessons in a passed state with reviews due now, so the review queue has
+ * something in it. Done through an init script because the store reads storage
+ * once, at construction.
+ */
+interface Review {
+  dueDay: number;
+  intervalDays: number;
+  streak: number;
+  lapses: number;
+}
+
+async function seedPassedLessons(page: Page, ids: string[]): Promise<void> {
+  await page.addInitScript((lessonIds: string[]) => {
+    const day = Math.floor(new Date().setHours(0, 0, 0, 0) / 86400000);
+    const lessons: Record<string, unknown> = {};
+    for (const id of lessonIds) {
+      lessons[id] = {
+        status: 'passed',
+        examples: {},
+        drills: {},
+        practice: {},
+        attempts: 1,
+        passed: true,
+        review: { dueDay: day - 1, intervalDays: 7, streak: 2, lapses: 0 },
+        correct: [],
+        firstPassedDay: day - 3,
+      };
+    }
+    localStorage.setItem(
+      'rust-mastery:v3',
+      JSON.stringify({
+        version: 3,
+        lessons,
+        lastRecalledDay: {},
+        lastLessonId: lessonIds.at(-1) ?? null,
+        theme: 'light',
+      }),
+    );
+  }, ids);
+}
+
 const LESSON = './#/lesson/installation-hello';
 
 function card(page: Page, id: string): Locator {
@@ -194,6 +236,55 @@ test.describe('the checkpoint', () => {
     }
     await page.goto('./#/review');
     await expect(page.getByText('Nothing is due')).toBeVisible();
+  });
+});
+
+test.describe('review flow', () => {
+  test('the queue shows one card at a time and undo brings it back', async ({ page }) => {
+    await seedPassedLessons(page, ['guessing-game', 'variables-mutability']);
+    await page.goto('./#/review');
+    await expect(page.getByText('2 left')).toBeVisible();
+    await expect(page.locator('.card')).toHaveCount(1);
+
+    await page.locator('.grade[data-rating="good"]').click();
+    await expect(page.getByText('1 left')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Undo last grade' }).click();
+    await expect(page.getByText('2 left')).toBeVisible();
+  });
+
+  test('grading every card shows a session summary', async ({ page }) => {
+    await seedPassedLessons(page, ['guessing-game', 'variables-mutability']);
+    await page.goto('./#/review');
+    await page.locator('.grade[data-rating="good"]').click();
+    await expect(page.getByText('1 left')).toBeVisible();
+    await page.locator('.grade[data-rating="easy"]').click();
+    await expect(page.getByRole('heading', { name: 'Session complete' })).toBeVisible();
+    await expect(page.getByText('2 cards graded')).toBeVisible();
+  });
+
+  test('again pushes the card one day out and resets the streak', async ({ page }) => {
+    await seedPassedLessons(page, ['guessing-game']);
+    const readReview = (): Promise<Review> =>
+      page.evaluate((): Review => {
+        const parsed = JSON.parse(localStorage.getItem('rust-mastery:v3') ?? '{}') as {
+          lessons: Record<string, { review: Review }>;
+        };
+        return parsed.lessons['guessing-game']?.review as Review;
+      });
+
+    await page.goto('./#/review');
+    await page.waitForSelector('h1');
+    const before = await readReview();
+
+    await page.locator('.grade[data-rating="again"]').click();
+    await expect(page.getByRole('heading', { name: 'Session complete' })).toBeVisible();
+    const after = await readReview();
+
+    // Due again tomorrow rather than today, with the streak gone.
+    expect(after.intervalDays).toBe(1);
+    expect(after.streak).toBe(0);
+    expect(after.dueDay).toBeGreaterThan(before.dueDay);
   });
 });
 

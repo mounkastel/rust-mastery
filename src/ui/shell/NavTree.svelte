@@ -94,12 +94,10 @@
     background: var(--bg-sunken);
     color: var(--text);
   }
+  /* Locked is dimmed, not struck through: most of the course is locked at
+     the start, and 53 struck-through lines read as a wall of "no". */
   .tree-row[data-lock='locked'] {
     color: var(--text-faint);
-  }
-  .tree-row[data-lock='locked'] .tree-label {
-    text-decoration: line-through;
-    text-decoration-color: var(--edge-strong);
   }
   .tree-row.is-current {
     border-inline-start-color: var(--accent);
