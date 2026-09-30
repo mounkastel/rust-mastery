@@ -1,6 +1,6 @@
 import { conceptById, type Concept } from '../../content';
 import { localDayNumber } from '../domain/clock';
-import { lessonViews, nextLessonId, summarise } from '../domain/curriculum';
+import { lessonViews, summarise } from '../domain/curriculum';
 import { shuffled, type Random } from '../domain/random';
 import {
   correctQuestionIds,
@@ -43,7 +43,6 @@ type Activity = 'examples' | 'drills' | 'practice';
 interface PendingUndo {
   conceptId: string;
   review: LessonProgress['review'];
-  recalledDay: number | undefined;
 }
 
 interface ImportOutcome {
@@ -94,10 +93,6 @@ export class CourseStore {
 
   views(): ReturnType<typeof lessonViews> {
     return lessonViews(this.#progress);
-  }
-
-  nextId(): string | null {
-    return nextLessonId(this.#progress);
   }
 
   summarise(): ReturnType<typeof summarise> {
@@ -217,23 +212,11 @@ export class CourseStore {
     const current = this.lessonOf(conceptId);
     if (!current.passed) return;
     const today = this.#deps.now();
-    this.#undo = {
-      conceptId,
-      review: current.review,
-      recalledDay: this.#progress.lastRecalledDay[conceptId],
-    };
+    this.#undo = { conceptId, review: current.review };
     this.#commit(
-      withLesson(
-        {
-          ...this.#progress,
-          lastRecalledDay: {
-            ...this.#progress.lastRecalledDay,
-            [conceptId]: localDayNumber(today),
-          },
-        },
-        conceptId,
-        { review: schedule(current.review ?? initialReview(today), rating, today) },
-      ),
+      withLesson(this.#progress, conceptId, {
+        review: schedule(current.review ?? initialReview(today), rating, today),
+      }),
     );
   }
 
@@ -241,20 +224,7 @@ export class CourseStore {
     const pending = this.#undo;
     if (pending === null) return;
     this.#undo = null;
-    const recalled = { ...this.#progress.lastRecalledDay };
-    if (pending.recalledDay === undefined) {
-      Reflect.deleteProperty(recalled, pending.conceptId);
-    } else {
-      recalled[pending.conceptId] = pending.recalledDay;
-    }
-    this.#commit({
-      ...this.#progress,
-      lessons: {
-        ...this.#progress.lessons,
-        [pending.conceptId]: { ...this.lessonOf(pending.conceptId), review: pending.review },
-      },
-      lastRecalledDay: recalled,
-    });
+    this.#commit(withLesson(this.#progress, pending.conceptId, { review: pending.review }));
   }
 
   setTheme(theme: Progress['theme']): void {
@@ -324,13 +294,7 @@ export class CourseStore {
 }
 
 function emptyCourse(): Progress {
-  return {
-    version: 3,
-    lessons: {},
-    lastRecalledDay: {},
-    lastLessonId: null,
-    theme: 'system',
-  };
+  return { version: 3, lessons: {}, lastLessonId: null, theme: 'system' };
 }
 
 /** A tick is only accepted for an activity this lesson actually lists. */

@@ -32,7 +32,6 @@ const lessonSchema = v.object({
 export const progressSchema = v.object({
   version: v.literal(3),
   lessons: v.record(v.string(), lessonSchema),
-  lastRecalledDay: v.record(v.string(), v.pipe(v.number(), v.integer(), v.minValue(0))),
   lastLessonId: v.nullable(v.string()),
   theme: v.picklist(['light', 'dark', 'system']),
 });

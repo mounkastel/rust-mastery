@@ -18,7 +18,6 @@ function emptyCourse(): Progress {
   return {
     version: 3,
     lessons: {},
-    lastRecalledDay: {},
     lastLessonId: null,
     theme: 'system',
   };

@@ -18,7 +18,6 @@ const sample: Progress = {
   ...emptyProgress(),
   lastLessonId: 'ownership',
   theme: 'dark',
-  lastRecalledDay: { ownership: 20_000 },
   lessons: {
     ownership: {
       status: 'passed',

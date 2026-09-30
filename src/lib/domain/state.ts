@@ -26,20 +26,12 @@ export interface LessonProgress {
 export interface Progress {
   version: 3;
   lessons: Readonly<Record<string, LessonProgress>>;
-  /** Local calendar day of the most recent successful recall, per lesson. */
-  lastRecalledDay: Readonly<Record<string, number>>;
   lastLessonId: string | null;
   theme: 'light' | 'dark' | 'system';
 }
 
 export function emptyProgress(): Progress {
-  return {
-    version: 3,
-    lessons: {},
-    lastRecalledDay: {},
-    lastLessonId: null,
-    theme: 'system',
-  };
+  return { version: 3, lessons: {}, lastLessonId: null, theme: 'system' };
 }
 
 export function lesson(
