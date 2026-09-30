@@ -1,0 +1,190 @@
+/*
+ * Design tokens.
+ *
+ * One accent hue (rust orange), one neutral ramp, and a type scale on a 1.2
+ * ratio. Both themes are defined as token sets rather than as overrides, so a
+ * component never names a colour. Contrast of every text/background pair used
+ * for prose meets WCAG AA (4.5:1) in both themes; the muted pairs meet AA large
+ * text and 3:1 for non-text UI.
+ */
+
+:root {
+  color-scheme: light;
+
+  --neutral-0: #ffffff;
+  --neutral-25: #fcfcfd;
+  --neutral-50: #f6f6f8;
+  --neutral-100: #eeeef1;
+  --neutral-200: #dcdce2;
+  --neutral-400: #8b8b96;
+  --neutral-600: #5c5c68;
+  --neutral-500: #6e6e7a;
+  --neutral-800: #2c2c36;
+  --neutral-900: #16161c;
+  --neutral-950: #0c0c10;
+
+  --accent: #a8420f;
+  --accent-hover: #8d360b;
+  --accent-quiet: #fdf0e8;
+  --accent-ink: #ffffff;
+
+  --ok: #1c6b3a;
+  --ok-quiet: #e8f4ec;
+  --warn: #8a5a00;
+  --warn-quiet: #fdf3e0;
+  --bad: #a41c22;
+  --bad-quiet: #fdeced;
+  --info: #1f5c8a;
+  --info-quiet: #e9f2f8;
+
+  /* Terminal surfaces stay dark in both themes: program output reads as data,
+     not as page text, and a light terminal misreads as body copy. */
+  --terminal-bg: #14161a;
+  --terminal-fg: #d7dae0;
+  --terminal-edge: #262a31;
+  --code-bg: #f4f4f6;
+  --code-edge: #e2e2e8;
+
+  --bg: var(--neutral-50);
+  --bg-raised: var(--neutral-0);
+  --bg-sunken: var(--neutral-100);
+  --bg-nav: var(--neutral-25);
+  --text: var(--neutral-900);
+  --text-muted: var(--neutral-600);
+  --text-faint: var(--neutral-500);
+  --edge: var(--neutral-200);
+  --edge-strong: var(--neutral-400);
+  --focus: #0b5cd5;
+
+  --step--1: 0.8125rem;
+  --step-0: 0.9375rem;
+  --step-1: 1.0625rem;
+  --step-2: 1.25rem;
+  --step-3: 1.5rem;
+  --step-4: 1.875rem;
+  --step-5: 2.375rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius-1: 4px;
+  --radius-2: 8px;
+  --radius-3: 12px;
+
+  --shadow-1: 0 1px 2px rgb(16 16 24 / 6%);
+  --shadow-2: 0 4px 16px rgb(16 16 24 / 10%);
+
+  --sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --measure: 68ch;
+  --nav-width: 17.5rem;
+  --bar-height: 3.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --accent: #f0803c;
+    --accent-hover: #ff9455;
+    --accent-quiet: #2a1710;
+    --accent-ink: #1a0d06;
+
+    --ok: #62c48c;
+    --ok-quiet: #10251a;
+    --warn: #e0b055;
+    --warn-quiet: #2a2110;
+    --bad: #f08a90;
+    --bad-quiet: #2c1417;
+    --info: #74b6e4;
+    --info-quiet: #10212e;
+
+    --code-bg: #1a1c22;
+    --code-edge: #2b2f38;
+
+    --bg: #0f1013;
+    --bg-raised: #17191e;
+    --bg-sunken: #1e2027;
+    --bg-nav: #131418;
+    --text: #e8e9ed;
+    --text-muted: #a4a7b0;
+    --text-faint: #8b8e99;
+    --edge: #2a2d35;
+    --edge-strong: #454953;
+    --focus: #79b8ff;
+
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow-2: 0 6px 20px rgb(0 0 0 / 50%);
+  }
+}
+
+/* The app sets data-theme on <html> to the resolved choice so a manual override
+   beats the OS preference without a flash. */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --accent: #a8420f;
+  --accent-hover: #8d360b;
+  --accent-quiet: #fdf0e8;
+  --accent-ink: #ffffff;
+  --ok: #1c6b3a;
+  --ok-quiet: #e8f4ec;
+  --warn: #8a5a00;
+  --warn-quiet: #fdf3e0;
+  --bad: #a41c22;
+  --bad-quiet: #fdeced;
+  --info: #1f5c8a;
+  --info-quiet: #e9f2f8;
+  --code-bg: #f4f4f6;
+  --code-edge: #e2e2e8;
+  --bg: var(--neutral-50);
+  --bg-raised: var(--neutral-0);
+  --bg-sunken: var(--neutral-100);
+  --bg-nav: var(--neutral-25);
+  --text: var(--neutral-900);
+  --text-muted: var(--neutral-600);
+  --text-faint: var(--neutral-500);
+  --edge: var(--neutral-200);
+  --edge-strong: var(--neutral-400);
+  --focus: #0b5cd5;
+  --shadow-1: 0 1px 2px rgb(16 16 24 / 6%);
+  --shadow-2: 0 4px 16px rgb(16 16 24 / 10%);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --accent: #f0803c;
+  --accent-hover: #ff9455;
+  --accent-quiet: #2a1710;
+  --accent-ink: #1a0d06;
+  --ok: #62c48c;
+  --ok-quiet: #10251a;
+  --warn: #e0b055;
+  --warn-quiet: #2a2110;
+  --bad: #f08a90;
+  --bad-quiet: #2c1417;
+  --info: #74b6e4;
+  --info-quiet: #10212e;
+  --code-bg: #1a1c22;
+  --code-edge: #2b2f38;
+  --bg: #0f1013;
+  --bg-raised: #17191e;
+  --bg-sunken: #1e2027;
+  --bg-nav: #131418;
+  --text: #e8e9ed;
+  --text-muted: #a4a7b0;
+  --text-faint: #8b8e99;
+  --edge: #2a2d35;
+  --edge-strong: #454953;
+  --focus: #79b8ff;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-2: 0 6px 20px rgb(0 0 0 / 50%);
+}
