@@ -1,105 +1,17 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
-/** Scoped to the checkpoint: the lesson itself is also an <article>. */
-function question(page: Page, index: number): Locator {
-  return page.locator('article[data-qid]').nth(index);
-}
-
-function questionCount(page: Page): Promise<number> {
-  return page.locator('article[data-qid]').count();
-}
-
-const LETTERS = ['a', 'b', 'c', 'd'] as const;
-
-/**
- * Puts lessons in a passed state with reviews due now, so the review queue has
- * something in it. Done through an init script because the store reads storage
- * once, at construction.
- */
-interface Review {
-  dueDay: number;
-  intervalDays: number;
-  streak: number;
-  lapses: number;
-}
-
-async function seedPassedLessons(page: Page, ids: string[]): Promise<void> {
-  await page.addInitScript((lessonIds: string[]) => {
-    const day = Math.floor(new Date().setHours(0, 0, 0, 0) / 86400000);
-    const lessons: Record<string, unknown> = {};
-    for (const id of lessonIds) {
-      lessons[id] = {
-        status: 'passed',
-        examples: {},
-        drills: {},
-        practice: {},
-        attempts: 1,
-        passed: true,
-        review: { dueDay: day - 1, intervalDays: 7, streak: 2, lapses: 0 },
-        correct: [],
-        firstPassedDay: day - 3,
-      };
-    }
-    localStorage.setItem(
-      'rust-mastery:v3',
-      JSON.stringify({
-        version: 3,
-        lessons,
-        lastRecalledDay: {},
-        lastLessonId: lessonIds.at(-1) ?? null,
-        theme: 'light',
-      }),
-    );
-  }, ids);
-}
-
-const LESSON = './#/lesson/installation-hello';
-
-function card(page: Page, id: string): Locator {
-  return page.locator(`article[data-qid="${id}"]`);
-}
-
-/**
- * Opens the lesson with a clean attempt. Navigating to the same URL with the
- * same hash does not re-create the document, so the reload is what actually
- * clears the previous attempt.
- */
-async function openLesson(page: Page): Promise<void> {
-  await page.goto(LESSON);
-  await page.reload();
-}
-
-/**
- * Answers a multiple-choice question correctly within one page session.
- * Attempts live in memory, so the test must not reload between tries: a wrong
- * click is undone with the "Retry" button, which clears only that question.
- */
-/** The letter of the option the app considers correct, found by trying each. */
-async function correctLetter(page: Page, id: string): Promise<string> {
-  for (const letter of LETTERS) {
-    await openLesson(page);
-    await card(page, id).locator(`button.option:has(.option-key:text-is("${letter}"))`).click();
-    if ((await card(page, id).getAttribute('data-state')) === 'correct') return letter;
-  }
-  throw new Error(`${id}: no option was accepted`);
-}
-
-async function answerChoice(page: Page, id: string): Promise<void> {
-  for (const letter of LETTERS) {
-    await card(page, id).locator(`button.option:has(.option-key:text-is("${letter}"))`).click();
-    if ((await card(page, id).getAttribute('data-state')) === 'correct') return;
-    await page.getByRole('button', { name: /Retry \d+ question/ }).click();
-  }
-  throw new Error(`${id}: no option was accepted`);
-}
-
-async function reveal(q: Locator): Promise<void> {
-  await q.getByRole('button', { name: 'Show the answer' }).click();
-}
-
-async function grade(q: Locator, passed: boolean): Promise<void> {
-  await q.getByRole('button', { name: passed ? 'Yes' : 'No', exact: true }).click();
-}
+import {
+  answerChoice,
+  card,
+  grade,
+  LESSON,
+  openLesson,
+  question,
+  questionCount,
+  readReview,
+  reveal,
+  seedPassedLessons,
+} from './helpers';
 
 test.describe('walking the course', () => {
   test('a locked lesson names its prerequisites and links to them', async ({ page }) => {
@@ -112,14 +24,14 @@ test.describe('walking the course', () => {
   });
 
   test('the first lesson shows its reading, drills and checkpoint', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await expect(page.getByRole('heading', { level: 1, name: 'Setup and Hello' })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Read/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Recall/ })).toBeVisible();
   });
 
   test('a TRPL link points at the vendored page and opens in a new tab', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     const link = page.getByRole('link', { name: /Open.*Getting Started/ }).first();
     await expect(link).toHaveAttribute('href', /^\/rust-mastery\/book-html\//);
     await expect(link).toHaveAttribute('target', '_blank');
@@ -127,19 +39,19 @@ test.describe('walking the course', () => {
   });
 
   test('a Rustlings row names the exact exercise command', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await expect(page.getByText('rustlings exercise 00_intro/intro1').first()).toBeVisible();
   });
 
   test('ticking a drill survives a reload', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await page.locator('input[type="checkbox"]').first().check();
     await page.reload();
     await expect(page.locator('input[type="checkbox"]').first()).toBeChecked();
   });
 
   test('the pager moves to the next lesson', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await page.locator('.pager a[rel="next"]').click();
     await expect(page).toHaveURL(/lesson\/cargo-basics/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cargo Basics');
@@ -148,7 +60,7 @@ test.describe('walking the course', () => {
 
 test.describe('the checkpoint', () => {
   test('answering a choice question judges it and counts the question', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await question(page, 0).locator('button.option').first().click();
     await expect(question(page, 0)).toHaveAttribute('data-state', /correct|wrong/);
     await expect(page.getByRole('status')).toContainText('1 of');
@@ -158,7 +70,7 @@ test.describe('the checkpoint', () => {
   test('a self-graded question reveals the answer before the grade is recorded', async ({
     page,
   }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     const selfGraded = page
       .locator('article[data-qid]')
       .filter({ hasText: /Predict the output|Find the bug|Write it out/ })
@@ -172,16 +84,15 @@ test.describe('the checkpoint', () => {
   test('a wrong answer can be retried on its own', async ({ page }) => {
     await openLesson(page);
     const id = (await question(page, 0).getAttribute('data-qid'))!;
-
-    // Answer the first question, then the second, so the retry has to preserve
-    // a correct answer alongside the wrong one it clears.
     const second = (await question(page, 1).getAttribute('data-qid'))!;
-    const rightForFirst = await correctLetter(page, id);
-    const wrong = LETTERS.find((l) => l !== rightForFirst)!;
 
-    await openLesson(page);
+    // Answer the second question, then the first, so the retry has to preserve
+    // a correct answer alongside the wrong one it clears.
     await answerChoice(page, second);
-    await card(page, id).locator(`button.option:has(.option-key:text-is("${wrong}"))`).click();
+    for (const letter of ['a', 'b', 'c', 'd'] as const) {
+      await card(page, id).locator(`button.option:has(.option-key:text-is("${letter}"))`).click();
+      if ((await card(page, id).getAttribute('data-state')) === 'wrong') break;
+    }
     await expect(card(page, id)).toHaveAttribute('data-state', 'wrong');
     await expect(page.getByRole('button', { name: /Retry 1 question/ })).toBeVisible();
 
@@ -195,16 +106,15 @@ test.describe('the checkpoint', () => {
   });
 
   test('starting over clears every answer', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await question(page, 0).locator('button.option').first().click();
     await page.getByRole('button', { name: 'Start over' }).click();
     await expect(page.getByRole('button', { name: 'Start over' })).toHaveCount(0);
   });
 
   test('passing every question completes the lesson and moves the dashboard', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     const total = await questionCount(page);
-
     for (let i = 0; i < total; i += 1) {
       const id = (await question(page, i).getAttribute('data-qid'))!;
       if ((await card(page, id).locator('button.option').count()) === 0) {
@@ -214,7 +124,6 @@ test.describe('the checkpoint', () => {
       }
       await answerChoice(page, id);
     }
-
     await expect(page.getByText('Passed.')).toBeVisible();
     await page.goto('./#/');
     await expect(page.getByRole('heading', { name: 'Lessons passed' }).locator('..')).toContainText(
@@ -223,7 +132,7 @@ test.describe('the checkpoint', () => {
   });
 
   test('a lesson passed today is scheduled for tomorrow, not due now', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     const total = await questionCount(page);
     for (let i = 0; i < total; i += 1) {
       const id = (await question(page, i).getAttribute('data-qid'))!;
@@ -265,21 +174,13 @@ test.describe('review flow', () => {
 
   test('again pushes the card one day out and resets the streak', async ({ page }) => {
     await seedPassedLessons(page, ['guessing-game']);
-    const readReview = (): Promise<Review> =>
-      page.evaluate((): Review => {
-        const parsed = JSON.parse(localStorage.getItem('rust-mastery:v3') ?? '{}') as {
-          lessons: Record<string, { review: Review }>;
-        };
-        return parsed.lessons['guessing-game']?.review as Review;
-      });
-
     await page.goto('./#/review');
     await page.waitForSelector('h1');
-    const before = await readReview();
+    const before = await readReview(page, 'guessing-game');
 
     await page.locator('.grade[data-rating="again"]').click();
     await expect(page.getByRole('heading', { name: 'Session complete' })).toBeVisible();
-    const after = await readReview();
+    const after = await readReview(page, 'guessing-game');
 
     // Due again tomorrow rather than today, with the streak gone.
     expect(after.intervalDays).toBe(1);
@@ -307,6 +208,13 @@ test.describe('search', () => {
   test('asks for two characters before searching', async ({ page }) => {
     await page.goto('./#/search?q=a');
     await expect(page.getByText('Type at least two characters')).toBeVisible();
+  });
+
+  test('typing in the field drives the search', async ({ page }) => {
+    await page.goto('./#/search?q=');
+    await page.getByLabel('Search lessons, questions and answers').pressSequentially('borrow');
+    await expect(page).toHaveURL(/q=borrow/);
+    await expect(page.getByRole('status')).toContainText('match');
   });
 
   test('a result navigates to the lesson', async ({ page }) => {
@@ -365,7 +273,7 @@ test.describe('keyboard', () => {
 
 test.describe('data management', () => {
   test('reset takes two presses and then clears progress', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await page.locator('input[type="checkbox"]').first().check();
     await page.reload();
     await expect(page.locator('input[type="checkbox"]').first()).toBeChecked();
@@ -379,7 +287,7 @@ test.describe('data management', () => {
   });
 
   test('export downloads a file this app can import', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await page.locator('input[type="checkbox"]').first().check();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -394,7 +302,7 @@ test.describe('data management', () => {
   });
 
   test('importing a corrupt file explains itself and keeps progress', async ({ page }) => {
-    await page.goto('./#/lesson/installation-hello');
+    await page.goto(LESSON);
     await page.locator('input[type="checkbox"]').first().check();
     await page.setInputFiles('input[type="file"]', {
       name: 'broken.json',
