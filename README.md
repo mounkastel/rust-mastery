@@ -39,9 +39,11 @@ Each was run against a clean clone before this branch was cut.
 | `npm test`                | Vitest unit tests                                            |
 | `npm run e2e`             | Playwright against the built site served at the Pages prefix |
 | `npm run build`           | production build into `dist/`                                |
-| `npm run preview:subpath` | serve `dist/` at `/rust-mastery/` (what `e2e` starts)        |
+| `npm run preview`         | Vite's own preview server, also at `/rust-mastery/`          |
+| `npm run preview:subpath` | serve `dist/` at `/rust-mastery/` with a plain static server |
 | `npm run check:content`   | vendored-tree checksums and root-absolute URL check          |
-| `npm run verify`          | lint, typecheck, test, build, check:content                  |
+| `npm run check:budget`    | app-shell gzip size against the budget below                 |
+| `npm run verify`          | lint, typecheck, test, build, check:content, check:budget    |
 
 `npm run e2e` builds and starts the subpath server itself, so it needs no
 separate terminal. If a browser is missing: `npx playwright install chromium`.
@@ -60,10 +62,10 @@ losing it.
 
 ## Bundle budget
 
-The app shell must stay under **120 kB gzip** of JavaScript and CSS. Nearly all
-of it is curriculum text, which is the point; the framework's share is small.
-`npm run verify` reports the sizes on every build, and the workflow fails if the
-build errors, not if it grows — the number is here to make growth deliberate.
+The app shell must stay under **120 kB gzip** of JavaScript and CSS, which
+`npm run check:budget` enforces in CI. Nearly all of it is curriculum text,
+which is the point; the framework's share is small. If a change pushes the
+number up, the size is printed per asset so it is obvious which one grew.
 
 ## Adding curriculum content
 
