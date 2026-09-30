@@ -28,7 +28,14 @@ test.describe('narrow viewports', () => {
     // The drawer slides in over 160ms; the scrim is only reliably on top once
     // the transition has finished, so wait for the settled transform.
     await expect(page.locator('#nav')).toHaveCSS('transform', 'none');
-    await page.getByRole('button', { name: 'Close menu' }).click();
+
+    // The drawer covers the left 85vw, so the scrim is only tappable in the
+    // strip to its right. A click at the scrim's centre would land on the nav.
+    const scrim = page.getByRole('button', { name: 'Close menu' });
+    const box = await scrim.boundingBox();
+    expect(box).not.toBeNull();
+    await scrim.click({ position: { x: (box?.width ?? 0) - 8, y: (box?.height ?? 0) / 2 } });
+
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(page.locator('#nav')).not.toBeInViewport();
   });
