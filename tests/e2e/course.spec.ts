@@ -9,6 +9,7 @@ import {
   question,
   questionCount,
   readReview,
+  rejectedLetter,
   reveal,
   seedPassedLessons,
 } from './helpers';
@@ -41,6 +42,43 @@ test.describe('walking the course', () => {
   test('a Rustlings row names the exact exercise command', async ({ page }) => {
     await page.goto(LESSON);
     await expect(page.getByText('rustlings exercise 00_intro/intro1').first()).toBeVisible();
+  });
+
+  test('a Rustlings row links to the stub next to its checkbox', async ({ page }) => {
+    await page.goto(LESSON);
+    const row = page
+      .locator('.res')
+      .filter({ has: page.locator('input[type="checkbox"]') })
+      .first();
+    await expect(row.getByRole('link', { name: /Open/ })).toHaveAttribute(
+      'href',
+      '/rust-mastery/rustlings/exercises/00_intro/intro1.rs',
+    );
+  });
+
+  test('an RBE row links to the page next to its checkbox', async ({ page }) => {
+    await seedPassedLessons(page, ['result', 'vectors', 'strings']);
+    await page.goto('./#/lesson/io-project');
+    const row = page
+      .locator('.res')
+      .filter({ has: page.locator('input[type="checkbox"]') })
+      .first();
+    await expect(row.getByRole('link', { name: /Open/ })).toHaveAttribute(
+      'href',
+      /^\/rust-mastery\/rbe-html\//,
+    );
+  });
+
+  test('a DIY task offers a checkbox and no link, and says so', async ({ page }) => {
+    await seedPassedLessons(page, ['functions', 'ownership']);
+    await page.goto('./#/lesson/closures');
+    await expect(page.getByRole('heading', { name: /On your own/ })).toBeVisible();
+    const row = page
+      .locator('.res')
+      .filter({ has: page.locator('input[type="checkbox"]') })
+      .first();
+    await expect(row).toContainText('write your own');
+    await expect(row.getByRole('link')).toHaveCount(0);
   });
 
   test('ticking a drill survives a reload', async ({ page }) => {
@@ -85,14 +123,13 @@ test.describe('the checkpoint', () => {
     await openLesson(page);
     const id = (await question(page, 0).getAttribute('data-qid'))!;
     const second = (await question(page, 1).getAttribute('data-qid'))!;
+    const rejected = await rejectedLetter(page, id);
 
-    // Answer the second question, then the first, so the retry has to preserve
-    // a correct answer alongside the wrong one it clears.
+    // Answer the second question, then get the first one wrong, so the retry has
+    // to preserve a correct answer alongside the wrong one it clears.
+    await openLesson(page);
     await answerChoice(page, second);
-    for (const letter of ['a', 'b', 'c', 'd'] as const) {
-      await card(page, id).locator(`button.option:has(.option-key:text-is("${letter}"))`).click();
-      if ((await card(page, id).getAttribute('data-state')) === 'wrong') break;
-    }
+    await card(page, id).locator(`button.option:has(.option-key:text-is("${rejected}"))`).click();
     await expect(card(page, id)).toHaveAttribute('data-state', 'wrong');
     await expect(page.getByRole('button', { name: /Retry 1 question/ })).toBeVisible();
 

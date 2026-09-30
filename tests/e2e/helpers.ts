@@ -56,6 +56,22 @@ export async function answerChoice(page: Page, id: string): Promise<void> {
 }
 
 /**
+ * A letter the app rejects, found by trying each on a throwaway attempt. Options
+ * are disabled once the card is judged, so every try needs a reload; callers
+ * reload again afterwards to get a clean lesson back.
+ */
+export async function rejectedLetter(page: Page, id: string): Promise<string> {
+  for (const letter of LETTERS) {
+    await openLesson(page);
+    const option = card(page, id).locator(`button.option:has(.option-key:text-is("${letter}"))`);
+    if ((await option.count()) === 0) continue;
+    await option.click();
+    if ((await card(page, id).getAttribute('data-state')) === 'wrong') return letter;
+  }
+  throw new Error(`${id}: every option was accepted`);
+}
+
+/**
  * Puts lessons in a passed state with reviews due now, so the review queue has
  * something in it. Done through an init script because the store reads storage
  * once, at construction. Every key the storage schema requires is written: a
