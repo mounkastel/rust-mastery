@@ -1,12 +1,11 @@
 # Rust Mastery
 
-> **Before merging the rewrite to `master`:** in the repository settings, set
-> **Settings → Pages → Source** to **GitHub Actions**. Until that is done,
-> GitHub Pages keeps serving whatever the old source setting points at, and a
-> merge will either 404 or serve unbuilt source. To roll back, set Source back
-> to **Deploy from a branch** and select the previous commit.
-
 Live site: <https://mounkastel.github.io/rust-mastery/>
+
+> **Leave Settings → Pages → Source on GitHub Actions.** The site is published
+> by a workflow; no build output is committed. Switching Source back to
+> **Deploy from a branch** makes Pages serve the repository root, which is Vite
+> source rather than a build, and the live site goes blank.
 
 One ordered Rust curriculum that sequences three upstream resources. Each of the
 54 lessons is: read the book section, see the same idea as a runnable example,
@@ -28,7 +27,7 @@ refresh on a deep link works on a static host with no rewrite rule.
 
 ## Commands
 
-Each was run against a clean clone before this branch was cut.
+Each was run against a clean clone of `master` before it was merged.
 
 | Command                   | What it does                                                 |
 | ------------------------- | ------------------------------------------------------------ |
@@ -87,5 +86,10 @@ licences and are marked `linguist-vendored` in `.gitattributes`; see
 ## Deployment
 
 `master` is built and deployed by [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
-through GitHub Pages. Pull requests run the same lint, typecheck, unit, build
-and end-to-end steps but do not deploy.
+through GitHub Pages, with **Pages → Source set to GitHub Actions**. Pull
+requests run the same lint, typecheck, unit, build and end-to-end steps but do
+not deploy.
+
+To roll back a bad deploy, push the revert. `deploy.yml` also takes a manual
+`workflow_dispatch`, but it publishes the current `master`, so a revert has to
+land first. Do not roll back by changing the Pages Source.

@@ -1,8 +1,8 @@
 name: Deploy
 
-# The Pages source must be set to "GitHub Actions" in the repository settings
-# before this workflow can publish. Until then, this job builds and verifies
-# but uploads nothing.
+# The Pages source is set to "GitHub Actions", so this workflow is what
+# publishes the site. Pointing the source at a branch instead would make Pages
+# serve the repository root, which is source rather than a build.
 on:
   push:
     branches: [master]
