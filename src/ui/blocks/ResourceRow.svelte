@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { withBase } from '../../lib/app/paths';
+  import { isExternal, withBase } from '../../lib/app/paths';
 
   interface Props {
     label: string;
@@ -20,9 +20,7 @@
       .replace(/^-|-$/g, '')}`,
   );
   /** Content may point at a vendored file or at an external doc page. */
-  const url = $derived(
-    href === undefined ? null : /^https?:\/\//.test(href) ? href : withBase(href),
-  );
+  const url = $derived(href === undefined ? null : isExternal(href) ? href : withBase(href));
 </script>
 
 <div class="res">

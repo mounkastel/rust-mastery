@@ -4,6 +4,7 @@
   import { lessonHref } from '../../lib/app/router';
   import { formatMinutes } from '../../lib/domain/clock';
   import { lockState } from '../../lib/domain/curriculum';
+  import { resourceHref } from '../../lib/app/paths';
   import Checkpoint from '../blocks/Checkpoint.svelte';
   import ResourceRow from '../blocks/ResourceRow.svelte';
 
@@ -74,7 +75,11 @@
         <h2 id="read-h"><span class="verb">Read</span> The book</h2>
         <div class="panel">
           {#each reading as page (page.href)}
-            <ResourceRow meta={page.num} label={page.title} href="book-html/{page.href}" />
+            <ResourceRow
+              meta={page.num}
+              label={page.title}
+              href={resourceHref('book-html', page.href)}
+            />
           {/each}
         </div>
       </section>
@@ -87,7 +92,7 @@
           {#each concept.examples as example (example.href)}
             <ResourceRow
               label={example.title}
-              href="rbe-html/{example.href}"
+              href={resourceHref('rbe-html', example.href)}
               note={example.kind === 'exact' ? 'closest match' : 'reinforcement'}
               checked={examples[example.href] === true}
               oncheck={(v: boolean) => {
@@ -111,7 +116,7 @@
             <ResourceRow
               meta="code"
               label={drill.name}
-              href="rustlings/exercises/{drill.href}"
+              href={resourceHref('rustlings/exercises', drill.href)}
               note={`rustlings exercise ${drill.href.replace(/\.rs$/, '')}`}
               checked={drills[drill.name] === true}
               oncheck={(v: boolean) => {

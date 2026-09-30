@@ -81,6 +81,15 @@ test.describe('walking the course', () => {
     await expect(row.getByRole('link')).toHaveCount(0);
   });
 
+  test('a reading entry that points off-site keeps its own URL', async ({ page }) => {
+    await seedPassedLessons(page, ['enums']);
+    await page.goto('./#/lesson/option-type');
+    await expect(page.getByRole('link', { name: /Option<T> API docs/ })).toHaveAttribute(
+      'href',
+      'https://doc.rust-lang.org/std/option/enum.Option.html',
+    );
+  });
+
   test('ticking a drill survives a reload', async ({ page }) => {
     await page.goto(LESSON);
     await page.locator('input[type="checkbox"]').first().check();
