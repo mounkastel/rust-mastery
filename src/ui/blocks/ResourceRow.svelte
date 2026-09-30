@@ -3,7 +3,8 @@
 
   interface Props {
     label: string;
-    href: string;
+    /** Omitted for a task with no page to open, such as a DIY exercise. */
+    href?: string;
     meta?: string;
     note?: string;
     checked?: boolean;
@@ -12,14 +13,16 @@
   const { label, href, meta = '', note = '', checked = false, oncheck }: Props = $props();
 
   const inputId = $derived(
-    `res-${[label, href]
+    `res-${[label, href ?? '']
       .join(' ')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')}`,
   );
   /** Content may point at a vendored file or at an external doc page. */
-  const url = $derived(/^https?:\/\//.test(href) ? href : withBase(href));
+  const url = $derived(
+    href === undefined ? null : /^https?:\/\//.test(href) ? href : withBase(href),
+  );
 </script>
 
 <div class="res">
@@ -34,14 +37,19 @@
         }}
       />
     {/if}
-    <label class="res-label" class:mono={meta === 'code'} for={inputId}>
+    <label
+      class="res-label"
+      class:mono={meta === 'code'}
+      class:clickable={oncheck !== undefined}
+      for={inputId}
+    >
       {#if meta !== '' && meta !== 'code'}<span class="res-meta">{meta}</span>{/if}
       {label}
     </label>
   </div>
   <div class="res-side">
     {#if note !== ''}<span class="res-note">{note}</span>{/if}
-    {#if oncheck === undefined}
+    {#if url !== null}
       <a class="link" href={url} target="_blank" rel="noopener noreferrer">
         Open<span class="visually-hidden"> {label} in a new tab</span>
         <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -87,6 +95,9 @@
   .res-label {
     min-inline-size: 0;
     overflow-wrap: anywhere;
+  }
+  /* Only a label with a checkbox to drive is a control. */
+  .res-label.clickable {
     cursor: pointer;
   }
   .res-label.mono {
@@ -101,11 +112,14 @@
     font-family: var(--mono);
     font-size: var(--step--1);
   }
+  /* The note and the link are allowed to stack: a long command next to a link
+     is wider than a 360px viewport. */
   .res-side {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-3);
     align-items: baseline;
-    flex: none;
+    min-inline-size: 0;
   }
   .res-note {
     color: var(--text-faint);

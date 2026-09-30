@@ -101,7 +101,10 @@
 
     {#if concept.drills.length > 0 || (concept.practice?.length ?? 0) > 0}
       <section aria-labelledby="do-h">
-        <h2 id="do-h"><span class="verb">Do</span> Rustlings</h2>
+        <h2 id="do-h">
+          <span class="verb">Do</span>
+          {#if concept.drills.length > 0}Rustlings{:else}On your own{/if}
+        </h2>
         <p class="count">{doneCount} of {total} done</p>
         <div class="panel">
           {#each concept.drills as drill (drill.href)}
@@ -117,9 +120,9 @@
             />
           {/each}
           {#each concept.practice ?? [] as task (task.id)}
+            <!-- No href: a DIY task has no page to open. -->
             <ResourceRow
               label={task.text}
-              href="rustlings/exercises/README.md"
               note="write your own"
               checked={practice[task.id] === true}
               oncheck={(v: boolean) => {
