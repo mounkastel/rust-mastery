@@ -11,6 +11,8 @@
   let importing = $state<HTMLInputElement | null>(null);
   let pendingReset = $state(false);
 
+  const summary = $derived(store.summarise());
+
   function download(): void {
     const url = URL.createObjectURL(new Blob([store.exportJson()], { type: 'application/json' }));
     const anchor = document.createElement('a');
@@ -26,13 +28,13 @@
     const file = input.files?.[0];
     if (file === undefined) return;
     const result = store.importJson(await file.text());
-    message = result.ok
-      ? `Loaded ${file.name}.`
-      : (result.reason ?? 'That file could not be read.');
+    if (result.ok) message = `Loaded ${file.name}.`;
+    else message = result.reason ?? 'That file could not be read.';
     input.value = '';
   }
 
-  function confirmReset(): void {
+  /** Two presses, because a single mis-click here is unrecoverable. */
+  function reset(): void {
     if (!pendingReset) {
       pendingReset = true;
       message = 'This deletes every tick, grade and review date. Choose Reset again to confirm.';
@@ -45,11 +47,19 @@
 </script>
 
 <div class="data">
-  <p class="count">{store.summarise().passed} of {store.summarise().total} passed</p>
+  <p class="count">{summary.passed} of {summary.total} passed</p>
   <div class="row">
     <button type="button" class="link" onclick={download}>Export</button>
-    <button type="button" class="link" onclick={() => importing?.click()}>Import</button>
-    <button type="button" class="link danger" onclick={confirmReset}>
+    <button
+      type="button"
+      class="link"
+      onclick={() => {
+        importing?.click();
+      }}
+    >
+      Import
+    </button>
+    <button type="button" class="link danger" onclick={reset}>
       {pendingReset ? 'Confirm reset' : 'Reset'}
     </button>
   </div>
@@ -57,9 +67,10 @@
     bind:this={importing}
     type="file"
     accept="application/json,.json"
-    class="file"
     onchange={onFile}
-    aria-label="Import a progress file"
+    tabindex="-1"
+    aria-hidden="true"
+    class="file"
   />
   {#if message !== ''}
     <p class="message" role="status">{message}</p>
@@ -97,9 +108,11 @@
   .link.danger {
     color: var(--bad);
   }
+  /* The Import button drives this; it is not a control in its own right, so it
+     is out of the tab order and out of the accessibility tree. */
   .file {
-    inline-size: 0;
-    block-size: 0;
+    inline-size: 1px;
+    block-size: 1px;
     opacity: 0;
   }
   .message {

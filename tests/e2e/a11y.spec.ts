@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+const THEMES = ['light', 'dark'] as const;
 
 const PAGES = [
   { name: 'dashboard', hash: '#/' },
@@ -10,36 +12,79 @@ const PAGES = [
   { name: 'search results', hash: '#/search?q=ownership' },
 ];
 
+const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] as const;
+
+function passedLesson(dueDay: number): Record<string, unknown> {
+  return {
+    status: 'passed',
+    examples: {},
+    drills: {},
+    practice: {},
+    attempts: 1,
+    passed: true,
+    review: { dueDay, intervalDays: 7, streak: 2, lapses: 0 },
+    correct: [],
+    firstPassedDay: dueDay - 3,
+  };
+}
+
+/** Seeds a course in the given theme before any app code runs. */
+async function useCourse(
+  page: Page,
+  theme: (typeof THEMES)[number],
+  lessons: Record<string, unknown> = {},
+): Promise<void> {
+  await page.addInitScript(
+    (seed: { theme: string; lessons: Record<string, unknown> }) => {
+      localStorage.setItem(
+        'rust-mastery:v3',
+        // Every key the storage schema requires: a payload missing one is
+        // discarded whole, and the app comes up empty.
+        JSON.stringify({
+          version: 3,
+          lessons: seed.lessons,
+          lastRecalledDay: {},
+          lastLessonId: null,
+          theme: seed.theme,
+        }),
+      );
+    },
+    { theme, lessons },
+  );
+}
+
+async function violations(page: Page, label: string): Promise<void> {
+  const results = await new AxeBuilder({ page }).withTags([...TAGS]).analyze();
+  expect(
+    results.violations.map((v) => `${v.id} (${v.impact ?? 'unknown'}): ${v.help}`),
+    `axe violations in ${label}`,
+  ).toEqual([]);
+}
+
 test.describe('accessibility', () => {
   for (const { name, hash } of PAGES) {
-    for (const theme of ['light', 'dark'] as const) {
+    for (const theme of THEMES) {
       test(`${name} has no axe violations in ${theme}`, async ({ page }) => {
-        await page.addInitScript((t) => {
-          localStorage.setItem(
-            'rust-mastery:v3',
-            JSON.stringify({
-              version: 3,
-              lessons: {},
-              lastRecalledDay: {},
-              lastLessonId: null,
-              theme: t,
-            }),
-          );
-        }, theme);
+        await useCourse(page, theme);
         await page.goto('./' + hash);
         await expect(page.locator('h1').first()).toBeVisible();
-
-        const results = await new AxeBuilder({ page })
-          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-          .analyze();
-
-        const summary = results.violations.map(
-          (v) => `${v.id} (${v.impact}): ${v.nodes.length} node(s) — ${v.help}`,
-        );
-        expect(summary, summary.join('\n')).toEqual([]);
+        await violations(page, `${name} / ${theme}`);
       });
     }
   }
+
+  test('a review session in progress is clean in both themes', async ({ page }) => {
+    // Due yesterday, so the queue has a card and the grade buttons are on screen.
+    const yesterday = Math.floor(new Date().setHours(0, 0, 0, 0) / 86_400_000) - 1;
+    await useCourse(page, 'light', { 'guessing-game': passedLesson(yesterday) });
+    await page.goto('./#/review');
+    await expect(page.locator('.card')).toBeVisible();
+    await violations(page, 'review / light');
+
+    await page.locator('.theme').click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await violations(page, 'review / dark');
+  });
 
   test('every page has exactly one level-one heading', async ({ page }) => {
     for (const { hash } of PAGES) {

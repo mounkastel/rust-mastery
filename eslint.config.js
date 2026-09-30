@@ -72,9 +72,11 @@ export default defineConfig(
     },
   },
   {
-    // Tests read the curriculum by id and index into arrays whose length the
-    // schema already guarantees. A non-null assertion there is a test
-    // convenience, not a runtime claim about unvalidated data.
+    // Tests look lessons up by id and index into arrays whose length the
+    // schema already guarantees, so a non-null assertion there is a test
+    // convenience rather than a runtime claim about unvalidated data. The
+    // other three are the same kind of accommodation: a test asserts against
+    // a value it just parsed, and the assertion is the point.
     files: ['tests/**/*.ts'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -84,13 +86,8 @@ export default defineConfig(
     },
   },
   {
-    files: ['scripts/**/*.ts'],
-    rules: {
-      'no-console': 'off',
-    },
-  },
-  {
-    files: ['*.config.ts', '*.config.js'],
+    // Build and check scripts report their result on stdout; that is the point.
+    files: ['scripts/**/*.ts', '*.config.ts', '*.config.js'],
     rules: { 'no-console': 'off' },
   },
 );
