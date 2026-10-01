@@ -4,7 +4,7 @@ name: Dependabot auto-merge
 # human push gets have passed. Written out by hand rather than using
 # `gh pr merge --auto`, because that only waits for *required* status checks and
 # master has no branch protection: without required checks it would merge
-# immediately, before CI had finished.
+# immediately, before CI had even started.
 #
 # A semver-major bump is never merged here. That is the one update a person
 # should read, and it is why this exists in this shape.
@@ -12,6 +12,12 @@ name: Dependabot auto-merge
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Pull request number to act on'
+        required: true
+        type: string
 
 permissions:
   pull-requests: write
@@ -19,7 +25,7 @@ permissions:
 # Keyed to the pull request, so an `opened` and a `synchronize` cannot both
 # try to merge the same thing.
 concurrency:
-  group: dependabot-merge-${{ github.event.pull_request.number }}
+  group: dependabot-merge-${{ inputs.pr || github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
@@ -28,9 +34,30 @@ jobs:
     # never fire for its pull requests. `pull_request_target` is the documented
     # way to act on them. Nothing here checks out the pull request's code, so
     # the write permission never touches untrusted files.
-    if: github.actor == 'dependabot[bot]'
+    #
+    # `workflow_dispatch` is for proving the thing works: Dependabot only
+    # re-fires this on `synchronize`, so a PR that has already been seen cannot
+    # be re-tested any other way.
+    if: github.event_name == 'workflow_dispatch' || github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
+      - name: Resolve the pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMBER: ${{ inputs.pr || github.event.pull_request.number }}
+        run: |
+          set -uo pipefail
+          url=$(gh pr view "$NUMBER" --json url,headRefOid,author \
+            --jq '"\(.url) \(.headRefOid) \(.author.login)"') || exit 1
+          echo "url=$(cut -d' ' -f1 <<<"$url")" >> "$GITHUB_OUTPUT"
+          echo "head=$(cut -d' ' -f2 <<<"$url")" >> "$GITHUB_OUTPUT"
+          echo "author=$(cut -d' ' -f3 <<<"$url")" >> "$GITHUB_OUTPUT"
+
+      - name: Refuse anything but a Dependabot pull request
+        if: github.event_name != 'workflow_dispatch' && steps.pr.outputs.author != 'dependabot[bot]'
+        run: echo "not a Dependabot pull request" >&2 && exit 1
+
       - name: Read the update metadata
         id: meta
         uses: dependabot/fetch-metadata@v2
@@ -41,7 +68,7 @@ jobs:
         if: steps.meta.outputs.update-type == 'version-update:semver-major'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_URL: ${{ steps.pr.outputs.url }}
           PACKAGE: ${{ steps.meta.outputs.dependency-name }}
         run: |
           gh pr comment "$PR_URL" --body \
@@ -49,18 +76,17 @@ jobs:
             if a peer range forbids it, which says nothing about whether the
             release notes describe a change you want. Read them, then merge.'
 
-          # The tracking issue says it closes itself. A pull request body has to
-          # say "Closes #7" for GitHub to close it, and Dependabot does not know
-          # the number, so the label is the link instead: when the major this
-          # issue watches for actually arrives, close it here.
+          # The tracking issue says it closes itself. A pull request body would
+          # have to say "Closes #7" for GitHub to close it, and Dependabot does
+          # not know the number, so the label is the link instead: when the
+          # major this issue watches for actually arrives, close it here.
           if [ "$PACKAGE" = "eslint" ]; then
-            gh issue list --label eslint-major --state open \
-              --json number --jq '.[].number' \
-              | while read -r number; do
-                  [ -n "$number" ] || continue
-                  gh issue close "$number" \
-                    --comment "The major bump this was tracking is open as $PR_URL."
-                done
+            gh issue list --label eslint-major --state open --json number \
+              --jq '.[].number' | while read -r number; do
+                [ -n "$number" ] || continue
+                gh issue close "$number" \
+                  --comment "The major bump this was tracking is open as $PR_URL."
+              done
           fi
 
       - name: Wait for verify and e2e
@@ -68,13 +94,17 @@ jobs:
         if: steps.meta.outputs.update-type != 'version-update:semver-major'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
+          HEAD: ${{ steps.pr.outputs.head }}
         run: |
           set -uo pipefail
           # The jobs deploy.yml runs, minus `deploy`: there is nothing to publish
           # for someone else's dependency bump. No `set -e`, and every network
           # call ends in `|| true`, so a gh hiccup reads as "not yet" rather than
           # abandoning the run.
+          #
+          # Every line written to $GITHUB_OUTPUT is name=value. A colon is not a
+          # delimiter and the runner rejects the file outright, which fails the
+          # step after the decision was already made.
           wanted=(verify e2e)
           for attempt in $(seq 1 40); do
             values=()
@@ -84,10 +114,10 @@ jobs:
                 --jq "[.check_runs[] | select(.name == \"$job\")] | first | (.conclusion // \"pending\")" \
                 2>/dev/null || true)
               # gh prints an error body on stdout as well as failing, so an
-              # unknown string here means the check has not reported, not that
-              # it failed. Anything unrecognised keeps polling and ends in the
-              # timeout message, which is honest; the alternative is reporting
-              # a failure that never happened.
+              # unknown string here means the check has not reported, not that it
+              # failed. Anything unrecognised keeps polling and ends in the
+              # timeout message, which is honest; the alternative is reporting a
+              # failure that never happened.
               case "$conclusion" in
                 success | failure | cancelled | timed_out | action_required | neutral | skipped | stale) ;;
                 *) conclusion=pending ;;
@@ -119,14 +149,14 @@ jobs:
         if: steps.checks.outputs.converged == 'success'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.pull_request.number }}
+          PR: ${{ steps.pr.outputs.url }}
         run: gh pr merge "$PR" --squash --delete-branch
 
       - name: Explain a failure
         if: steps.checks.outputs.converged == 'other'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.pull_request.number }}
+          PR: ${{ steps.pr.outputs.url }}
         run: |
           gh pr comment "$PR" --body \
             'CI did not pass, so this was left open on purpose. Fix the branch or
@@ -136,8 +166,8 @@ jobs:
         if: steps.checks.outputs.converged == 'timeout'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.pull_request.number }}
+          PR: ${{ steps.pr.outputs.url }}
         run: |
           gh pr comment "$PR" --body \
             'The checks did not finish within 20 minutes, so this was left open on
-            purpose. Re-run the workflow, or merge if the run is already green.'
+            purpose. Re-run this workflow, or merge if the run is already green.'
