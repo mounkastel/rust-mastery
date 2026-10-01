@@ -102,18 +102,18 @@ jobs:
                 continue
                 ;;
               *success*)
-                echo "converged: success" >> "$GITHUB_OUTPUT"
+                echo "converged=success" >> "$GITHUB_OUTPUT"
                 exit 0
                 ;;
               *)
                 echo "a check did not pass; leaving the pull request open"
-                echo "converged: other" >> "$GITHUB_OUTPUT"
+                echo "converged=other" >> "$GITHUB_OUTPUT"
                 exit 0
                 ;;
             esac
           done
           echo "checks did not converge within 20 minutes; leaving the pull request open"
-          echo "converged: timeout" >> "$GITHUB_OUTPUT"
+          echo "converged=timeout" >> "$GITHUB_OUTPUT"
 
       - name: Squash-merge
         if: steps.checks.outputs.converged == 'success'
