@@ -13,7 +13,6 @@ export const ch02: Chapter = {
       prereq: ['cargo-basics'],
       difficulty: 2,
       estMinutes: 30,
-      integrative: true,
       reading: [
         {
           num: '2',

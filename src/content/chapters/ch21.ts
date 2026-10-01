@@ -13,7 +13,6 @@ export const ch21: Chapter = {
       prereq: ['threads', 'message-passing', 'shared-state', 'box', 'closures', 'result', 'traits'],
       difficulty: 4,
       estMinutes: 120,
-      integrative: true,
       reading: [
         {
           num: '21',

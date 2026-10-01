@@ -13,7 +13,6 @@ export const bonus: Chapter = {
       prereq: ['functions'],
       difficulty: 2,
       estMinutes: 20,
-      bonus: true,
       reading: [
         {
           num: 'App. D',
@@ -96,7 +95,6 @@ export const bonus: Chapter = {
       prereq: ['traits', 'generics'],
       difficulty: 3,
       estMinutes: 35,
-      bonus: true,
       reading: [
         {
           num: 'App. C',
@@ -208,7 +206,6 @@ export const bonus: Chapter = {
       prereq: ['functions'],
       difficulty: 1,
       estMinutes: 25,
-      bonus: true,
       reading: [
         { num: 'App.', title: 'Appendix (index)', href: 'appendix-00.html' },
         { num: 'App. A', title: 'Keywords', href: 'appendix-01-keywords.html' },
@@ -297,7 +294,6 @@ export const bonus: Chapter = {
       prereq: ['functions'],
       difficulty: 2,
       estMinutes: 20,
-      bonus: true,
       reading: [],
       examples: [
         { title: 'Attributes', href: 'attribute.html', kind: 'exact' },

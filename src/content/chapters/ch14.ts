@@ -13,7 +13,6 @@ export const ch14: Chapter = {
       prereq: ['packages-crates'],
       difficulty: 2,
       estMinutes: 40,
-      integrative: true,
       reading: [
         {
           num: '14',

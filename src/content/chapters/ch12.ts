@@ -13,7 +13,6 @@ export const ch12: Chapter = {
       prereq: ['result', 'vectors', 'strings'],
       difficulty: 3,
       estMinutes: 60,
-      integrative: true,
       reading: [
         { num: '12', title: 'An I/O Project: minigrep', href: 'ch12-00-an-io-project.html' },
         {

@@ -43,8 +43,6 @@ const conceptSchema = v.object({
   difficulty: v.picklist([1, 2, 3, 4]),
   estMinutes: v.pipe(v.number(), v.integer(), v.minValue(5), v.maxValue(240)),
   fundamental: v.optional(v.boolean()),
-  integrative: v.optional(v.boolean()),
-  bonus: v.optional(v.boolean()),
   reading: v.pipe(
     v.array(v.object({ num: v.string(), title: v.string(), href: v.string() })),
     v.maxLength(12),
