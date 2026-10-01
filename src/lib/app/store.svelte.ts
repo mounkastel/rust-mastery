@@ -12,6 +12,7 @@ import {
 } from '../domain/quiz';
 import { dueLessonIds, initialReview, retention, schedule } from '../domain/srs';
 import {
+  emptyProgress,
   lesson,
   withLesson,
   type LessonProgress,
@@ -60,7 +61,7 @@ interface ImportOutcome {
  * re-render because of it, and Svelte forbids mutating state during a render.
  */
 export class CourseStore {
-  #progress = $state<Progress>(emptyCourse());
+  #progress = $state<Progress>(emptyProgress());
   #answers = $state<Answers>({});
   #optionOrder: Record<string, string[]> = {};
   #undo = $state<PendingUndo | null>(null);
@@ -279,10 +280,6 @@ export class CourseStore {
       }),
     );
   }
-}
-
-function emptyCourse(): Progress {
-  return { version: 3, lessons: {}, lastLessonId: null, theme: 'system' };
 }
 
 /** A tick is only accepted for an activity this lesson actually lists. */

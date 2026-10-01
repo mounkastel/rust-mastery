@@ -10,8 +10,5 @@ export default defineConfig({
   build: {
     target: 'es2022',
     modulePreload: { polyfill: false },
-    reportCompressedSize: true,
   },
-  server: { port: 5173 },
-  preview: { port: 4173 },
 });

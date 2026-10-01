@@ -16,7 +16,6 @@
     "noUnusedParameters": true,
     "allowUnreachableCode": false,
     "verbatimModuleSyntax": true,
-    "isolatedModules": true,
     "skipLibCheck": true,
     "noEmit": true
   },
