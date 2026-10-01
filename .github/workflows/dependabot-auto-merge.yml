@@ -42,11 +42,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          PACKAGE: ${{ steps.meta.outputs.dependency-name }}
         run: |
           gh pr comment "$PR_URL" --body \
             'Left for review on purpose: this is a major bump. `npm ci` fails only
             if a peer range forbids it, which says nothing about whether the
             release notes describe a change you want. Read them, then merge.'
+
+          # The tracking issue says it closes itself. A pull request body has to
+          # say "Closes #7" for GitHub to close it, and Dependabot does not know
+          # the number, so the label is the link instead: when the major this
+          # issue watches for actually arrives, close it here.
+          if [ "$PACKAGE" = "eslint" ]; then
+            gh issue list --label eslint-major --state open \
+              --json number --jq '.[].number' \
+              | while read -r number; do
+                  [ -n "$number" ] || continue
+                  gh issue close "$number" \
+                    --comment "The major bump this was tracking is open as $PR_URL."
+                done
+          fi
 
       - name: Wait for verify and e2e
         id: checks
