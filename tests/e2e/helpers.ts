@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 export const LESSON = './#/lesson/installation-hello';
 const LETTERS = ['a', 'b', 'c', 'd'] as const;
 
-export interface Review {
+interface Review {
   dueDay: number;
   intervalDays: number;
   streak: number;
