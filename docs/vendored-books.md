@@ -7,6 +7,10 @@ edit fails `npm run check:content` and therefore CI.
 Do not reformat, re-indent or "fix" anything in those trees. A diff in them is
 a signal that something upstream changed, not that our copy needs tidying.
 
+Refreshing any of them needs three tools that the project itself does not
+depend on: `mdbook` (to build the two books), `rsync` (to copy the Rustlings
+exercises), and `python3` (to run the link fix). Everything else is npm.
+
 ## Current builds
 
 | Tree                          | Upstream                    | Build                    | Notes                                                                                                 |
@@ -17,16 +21,17 @@ a signal that something upstream changed, not that our copy needs tidying.
 
 ## Rebuilding TRPL and Rust by Example
 
-Clone the upstream repositories somewhere outside this repo. Their own
-`.gitignore` entries (`book/`, `rust-by-example/`) exist so a checkout can live
-here; keeping them out of the repo is deliberate.
+Clone the upstream repositories into the repository root. Their directory names
+(`book/`, `rust-by-example/`, `rustlings-src/`) are in `.gitignore` so a
+checkout can sit here without being committed; delete them when you are done.
 
 ```sh
+cd "$REPO"
 git clone https://github.com/rust-lang/book
 git clone https://github.com/rust-lang/rust-by-example
 
-mdbook build book/src                     -d "$REPO/public/book-html"
-mdbook build rust-by-example/src          -d "$REPO/public/rbe-html"
+mdbook build book/src                     -d public/book-html
+mdbook build rust-by-example/src          -d public/rbe-html
 ```
 
 Then fix the links and refresh the checksums:
@@ -34,7 +39,7 @@ Then fix the links and refresh the checksums:
 ```sh
 cd "$REPO"
 python3 tools/fix-book-links.py public/book-html public/rbe-html
-node scripts/check-vendored.mjs --write   # see below
+npm run build && node scripts/check-vendored.ts   # see below
 ```
 
 ### Why the link fix exists
@@ -65,13 +70,15 @@ patched, on purpose.
 ### Refreshing the Rustlings exercises
 
 There is no build step; the tree is a copy of the upstream `exercises/`
-directory minus `info.toml` and any `answers/`:
+directory minus `info.toml` and any `answers/`. Clone
+`https://github.com/rust-lang/rustlings` as `rustlings-src/`, which is why that
+name is in `.gitignore`:
 
 ```sh
 cd "$REPO"
 rsync -a --delete \
   --exclude 'answers' --exclude 'info.toml' \
-  /path/to/rustlings/exercises/ public/rustlings/exercises/
+  rustlings-src/exercises/ public/rustlings/exercises/
 ```
 
 ### Updating the checksums
@@ -86,7 +93,7 @@ rm scripts/vendored-checksums.txt
 find public/book-html public/rbe-html public/rustlings -type f -print0 \
   | sort -z | xargs -0 sha256sum | sed 's|  public/|  |' \
   > scripts/vendored-checksums.txt
-node scripts/check-vendored.mjs
+npm run build && node scripts/check-vendored.ts
 ```
 
 Do not regenerate it to make a failing check pass. If the check fails because a
