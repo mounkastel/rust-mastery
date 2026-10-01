@@ -1,0 +1,128 @@
+name: Dependabot auto-merge
+
+# Merges the dependency pull requests Dependabot opens, once the same checks a
+# human push gets have passed. Written out by hand rather than using
+# `gh pr merge --auto`, because that only waits for *required* status checks and
+# master has no branch protection: without required checks it would merge
+# immediately, before CI had finished.
+#
+# A semver-major bump is never merged here. That is the one update a person
+# should read, and it is why this exists in this shape.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+
+# Keyed to the pull request, so an `opened` and a `synchronize` cannot both
+# try to merge the same thing.
+concurrency:
+  group: dependabot-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  auto-merge:
+    # Dependabot's own token cannot trigger workflows, so `pull_request` would
+    # never fire for its pull requests. `pull_request_target` is the documented
+    # way to act on them. Nothing here checks out the pull request's code, so
+    # the write permission never touches untrusted files.
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read the update metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Leave a major bump for review
+        if: steps.meta.outputs.update-type == 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr comment "$PR_URL" --body \
+            'Left for review on purpose: this is a major bump. `npm ci` fails only
+            if a peer range forbids it, which says nothing about whether the
+            release notes describe a change you want. Read them, then merge.'
+
+      - name: Wait for verify and e2e
+        id: checks
+        if: steps.meta.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -uo pipefail
+          # The jobs deploy.yml runs, minus `deploy`: there is nothing to publish
+          # for someone else's dependency bump. No `set -e`, and every network
+          # call ends in `|| true`, so a gh hiccup reads as "not yet" rather than
+          # abandoning the run.
+          wanted=(verify e2e)
+          for attempt in $(seq 1 40); do
+            values=()
+            for job in "${wanted[@]}"; do
+              conclusion=$(gh api \
+                "repos/$GITHUB_REPOSITORY/commits/$HEAD/check-runs" \
+                --jq "[.check_runs[] | select(.name == \"$job\")] | first | (.conclusion // \"pending\")" \
+                2>/dev/null || true)
+              # gh prints an error body on stdout as well as failing, so an
+              # unknown string here means the check has not reported, not that
+              # it failed. Anything unrecognised keeps polling and ends in the
+              # timeout message, which is honest; the alternative is reporting
+              # a failure that never happened.
+              case "$conclusion" in
+                success | failure | cancelled | timed_out | action_required | neutral | skipped | stale) ;;
+                *) conclusion=pending ;;
+              esac
+              values+=("$conclusion")
+            done
+
+            echo "attempt $attempt:$(printf ' %s' "${values[@]}")"
+            case " ${values[*]} " in
+              *pending*)
+                sleep 30
+                continue
+                ;;
+              *success*)
+                echo "converged: success" >> "$GITHUB_OUTPUT"
+                exit 0
+                ;;
+              *)
+                echo "a check did not pass; leaving the pull request open"
+                echo "converged: other" >> "$GITHUB_OUTPUT"
+                exit 0
+                ;;
+            esac
+          done
+          echo "checks did not converge within 20 minutes; leaving the pull request open"
+          echo "converged: timeout" >> "$GITHUB_OUTPUT"
+
+      - name: Squash-merge
+        if: steps.checks.outputs.converged == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: gh pr merge "$PR" --squash --delete-branch
+
+      - name: Explain a failure
+        if: steps.checks.outputs.converged == 'other'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR" --body \
+            'CI did not pass, so this was left open on purpose. Fix the branch or
+            run `npm run verify && npm run e2e` locally to see it.'
+
+      - name: Explain a timeout
+        if: steps.checks.outputs.converged == 'timeout'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR" --body \
+            'The checks did not finish within 20 minutes, so this was left open on
+            purpose. Re-run the workflow, or merge if the run is already green.'

@@ -1,0 +1,39 @@
+# Dependency updates arrive as pull requests and are merged by
+# .github/workflows/dependabot-auto-merge.yml once CI is green. Nothing here
+# needs a person except a major-version bump, which is meant to be read.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Europe/Athens
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: 'deps'
+    groups:
+      # Patch and minor bumps of one dependency belong together: a grouped PR
+      # runs CI once instead of once per package.
+      dev-dependencies:
+        applies-to: version-updates
+        dependency-type: development
+        patterns: ['*']
+        update-types: [minor, patch]
+      runtime-dependencies:
+        applies-to: version-updates
+        dependency-type: production
+        patterns: ['*']
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: [dependencies]
+    groups:
+      actions:
+        patterns: ['*']
