@@ -20,6 +20,10 @@ on:
         type: string
 
 permissions:
+  # Merging writes a commit, so contents:write is not optional: with only
+  # pull-requests:write the merge fails with "Resource not accessible by
+  # integration (mergePullRequest)".
+  contents: write
   pull-requests: write
 
 # Keyed to the pull request, so an `opened` and a `synchronize` cannot both
@@ -157,7 +161,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ steps.pr.outputs.url }}
-        run: gh pr merge "$PR" --squash --delete-branch
+        run: |
+          set -uo pipefail
+          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash
+          # `--delete-branch` needs a git checkout and there is none, so the
+          # branch goes through the API instead. Best effort: the merge is the
+          # part that matters, and a failure here must not look like one.
+          branch=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" \
+            --json headRefName --jq '.headRefName')
+          if [ -n "$branch" ] && [ "$branch" != "master" ]; then
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$branch" \
+              || echo "could not delete $branch, the merge stands"
+          fi
 
       - name: Explain a failure
         if: steps.checks.outputs.converged == 'other'
