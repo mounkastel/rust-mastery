@@ -7,7 +7,7 @@ Live site: <https://mounkastel.github.io/rust-mastery/>
 > **Deploy from a branch** makes Pages serve the repository root, which is Vite
 > source rather than a build, and the live site goes blank.
 
-One ordered Rust curriculum that sequences three upstream resources. Each of the
+One ordered Rust curriculum sequencing three upstream resources. Each of the
 54 lessons is: read the book section, see the same idea as a runnable example,
 do the exercises, then pass a checkpoint. Passing a checkpoint puts the lesson
 on a spaced-repetition schedule so it comes back before you forget it.
