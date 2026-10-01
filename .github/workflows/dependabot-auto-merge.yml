@@ -48,7 +48,7 @@ jobs:
           NUMBER: ${{ inputs.pr || github.event.pull_request.number }}
         run: |
           set -uo pipefail
-          url=$(gh pr view "$NUMBER" --json url,headRefOid,author \
+          url=$(gh pr view "$NUMBER" --repo "$GITHUB_REPOSITORY" --json url,headRefOid,author \
             --jq '"\(.url) \(.headRefOid) \(.author.login)"') || exit 1
           echo "url=$(cut -d' ' -f1 <<<"$url")" >> "$GITHUB_OUTPUT"
           echo "head=$(cut -d' ' -f2 <<<"$url")" >> "$GITHUB_OUTPUT"
@@ -81,7 +81,8 @@ jobs:
           # not know the number, so the label is the link instead: when the
           # major this issue watches for actually arrives, close it here.
           if [ "$PACKAGE" = "eslint" ]; then
-            gh issue list --label eslint-major --state open --json number \
+            gh issue list --repo "$GITHUB_REPOSITORY" --label eslint-major \
+              --state open --json number \
               --jq '.[].number' | while read -r number; do
                 [ -n "$number" ] || continue
                 gh issue close "$number" \
