@@ -29,19 +29,4 @@ export function parse(hash: string): Route {
   return { name: 'dashboard' };
 }
 
-export function href(route: Route): string {
-  switch (route.name) {
-    case 'dashboard':
-      return '#/';
-    case 'course':
-      return '#/course';
-    case 'review':
-      return '#/review';
-    case 'lesson':
-      return `#/lesson/${route.id}`;
-    case 'search':
-      return `#/search?q=${encodeURIComponent(route.query)}`;
-  }
-}
-
 export const lessonHref = (id: string): string => `#/lesson/${id}`;

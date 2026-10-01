@@ -12,19 +12,6 @@ export function startOfLocalDay(epochMs: number): number {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
 
-export function addLocalDays(epochMs: number, days: number): number {
-  const d = new Date(epochMs);
-  return new Date(
-    d.getFullYear(),
-    d.getMonth(),
-    d.getDate() + days,
-    d.getHours(),
-    d.getMinutes(),
-    d.getSeconds(),
-    d.getMilliseconds(),
-  ).getTime();
-}
-
 /**
  * A stable integer for "which local day is this". Derived from the local
  * midnight, so two instants on the same day always agree and two instants on
@@ -32,10 +19,6 @@ export function addLocalDays(epochMs: number, days: number): number {
  */
 export function localDayNumber(epochMs: number): number {
   return Math.round(startOfLocalDay(epochMs) / 86_400_000);
-}
-
-export function daysBetween(fromMs: number, toMs: number): number {
-  return localDayNumber(toMs) - localDayNumber(fromMs);
 }
 
 export function formatMinutes(total: number): string {

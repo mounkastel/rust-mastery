@@ -7,11 +7,9 @@ import {
   MATURE_INTERVAL_DAYS,
   dueLessonIds,
   initialReview,
-  recallQuestion,
   retention,
   schedule,
 } from '../../src/lib/domain/srs';
-import { conceptById } from '../../src/content';
 
 const now = new Date(2026, 5, 15, 9).getTime();
 
@@ -147,32 +145,6 @@ describe('retention', () => {
     expect(r.learning).toBe(1);
     expect(r.lapses).toBe(2);
     expect(r.stableRatio).toBe(0.5);
-  });
-});
-
-describe('recallQuestion', () => {
-  const concept = conceptById.get('ownership')!;
-
-  it('stays inside the question array', () => {
-    for (const r of [0, 0.25, 0.5, 0.99]) {
-      const i = recallQuestion(concept, emptyProgress(), () => r);
-      expect(i).toBeGreaterThanOrEqual(0);
-      expect(i).toBeLessThan(concept.questions.length);
-    }
-  });
-
-  it('prefers a question the learner has answered before', () => {
-    const target = concept.questions[3]!;
-    const p = withLesson(emptyProgress(), 'ownership', { correct: [target.id] });
-    expect(recallQuestion(concept, p, () => 0.5)).toBe(3);
-  });
-
-  it('never returns a question the learner got wrong when one was right', () => {
-    const target = concept.questions[2]!;
-    const p = withLesson(emptyProgress(), 'ownership', { correct: [target.id] });
-    for (const r of [0, 0.1, 0.4, 0.6, 0.9]) {
-      expect(recallQuestion(concept, p, () => r)).toBe(2);
-    }
   });
 });
 

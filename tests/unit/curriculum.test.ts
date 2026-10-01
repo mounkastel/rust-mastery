@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { concepts } from '../../src/content';
-import { lesson, withLesson, type Progress } from '../../src/lib/domain/state';
-import { lockState, nextLessonId, summarise } from '../../src/lib/domain/curriculum';
+import { emptyProgress, lesson, withLesson, type Progress } from '../../src/lib/domain/state';
+import { lockState, summarise } from '../../src/lib/domain/curriculum';
 
 /** Passes every prerequisite of `id`, breadth-first up the graph. */
 function withPrereqsPassed(progress: Progress, id: string): Progress {
@@ -13,15 +13,7 @@ function withPrereqsPassed(progress: Progress, id: string): Progress {
   return next;
 }
 
-const all = emptyCourse();
-function emptyCourse(): Progress {
-  return {
-    version: 3,
-    lessons: {},
-    lastLessonId: null,
-    theme: 'system',
-  };
-}
+const all = emptyProgress();
 
 describe('the curriculum graph', () => {
   it('has a single root', () => {
@@ -103,14 +95,16 @@ describe('lockState', () => {
   });
 });
 
-describe('nextLessonId', () => {
+describe('the next lesson', () => {
+  const nextId = (p: Progress): string | null => summarise(p).next;
+
   it('is the first available lesson in sequence order', () => {
-    expect(nextLessonId(all)).toBe(concepts[0]!.id);
+    expect(nextId(all)).toBe(concepts[0]!.id);
   });
 
   it('moves on once a lesson is passed', () => {
     const p = withLesson(all, concepts[0]!.id, { passed: true, status: 'passed' });
-    expect(nextLessonId(p)).toBe(concepts[1]!.id);
+    expect(nextId(p)).toBe(concepts[1]!.id);
   });
 
   it('does not advance past a prerequisite that is only in progress', () => {
@@ -118,7 +112,19 @@ describe('nextLessonId', () => {
     // prerequisite's checkpoint is passed.
     const p = withLesson(all, concepts[0]!.id, { status: 'in-progress' });
     expect(lockState(p, concepts[1]!)).toBe('locked');
-    expect(nextLessonId(p)).toBe(concepts[0]!.id);
+    expect(nextId(p)).toBe(concepts[0]!.id);
+  });
+
+  it('points back at a lesson that was passed and then failed', () => {
+    // `passed` is monotonic, so the status can be revisit while the lesson is
+    // still counted as done. Filtering on "not passed" alone would skip it and
+    // send the learner to something already finished.
+    const p = withLesson(all, concepts[0]!.id, {
+      passed: true,
+      status: 'revisit',
+      review: { dueDay: 0, intervalDays: 1, streak: 0, lapses: 1 },
+    });
+    expect(nextId(p)).toBe(concepts[0]!.id);
   });
 });
 

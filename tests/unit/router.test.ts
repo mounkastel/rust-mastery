@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parse, href } from '../../src/lib/app/router';
+import { lessonHref, parse } from '../../src/lib/app/router';
 import { concepts } from '../../src/content';
 
 describe('parse', () => {
@@ -43,23 +43,16 @@ describe('parse', () => {
   });
 });
 
-describe('href', () => {
-  it('round-trips every route it can produce', () => {
+describe('lessonHref', () => {
+  it('round-trips every lesson the curriculum has', () => {
     for (const id of concepts.map((c) => c.id)) {
-      expect(parse(href({ name: 'lesson', id }))).toEqual({ name: 'lesson', id });
+      expect(parse(lessonHref(id))).toEqual({ name: 'lesson', id });
     }
-    expect(parse(href({ name: 'dashboard' }))).toEqual({ name: 'dashboard' });
-    expect(parse(href({ name: 'course' }))).toEqual({ name: 'course' });
-    expect(parse(href({ name: 'review' }))).toEqual({ name: 'review' });
-    expect(parse(href({ name: 'search', query: 'a b&c' }))).toEqual({
-      name: 'search',
-      query: 'a b&c',
-    });
   });
 
   it('emits a fragment route, not a path route', () => {
     // A path route would 404 on a hard refresh, because GitHub Pages has no
     // rewrite rule. This is the property the whole routing choice rests on.
-    expect(href({ name: 'lesson', id: 'ownership' }).startsWith('#')).toBe(true);
+    expect(lessonHref('ownership').startsWith('#')).toBe(true);
   });
 });

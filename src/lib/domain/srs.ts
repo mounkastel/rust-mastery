@@ -1,6 +1,5 @@
 import { localDayNumber } from './clock';
-import type { Concept } from '../../content';
-import { lesson, type Progress, type Rating } from './state';
+import type { Progress, Rating } from './state';
 
 export const INTERVALS_DAYS = [1, 3, 7, 16, 35, 90] as const;
 const MAX_INTERVAL_DAYS = 365;
@@ -80,13 +79,4 @@ export function retention(progress: Progress): Retention {
   }
   const total = matured + learning;
   return { matured, learning, lapses, stableRatio: total === 0 ? 0 : matured / total };
-}
-
-/** Picks the recall card: rotates through the questions the learner got right. */
-export function recallQuestion(concept: Concept, progress: Progress, random: () => number): number {
-  const correct = lesson(progress.lessons, concept.id).correct;
-  const pool = concept.questions.filter((q) => correct.includes(q.id));
-  const source = pool.length > 0 ? pool : concept.questions;
-  const sourceIndex = Math.floor(random() * source.length);
-  return concept.questions.indexOf(source[sourceIndex] as (typeof source)[number]);
 }

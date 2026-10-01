@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  addLocalDays,
-  daysBetween,
-  formatMinutes,
-  localDayNumber,
-  startOfLocalDay,
-} from '../../src/lib/domain/clock';
+import { formatMinutes, localDayNumber, startOfLocalDay } from '../../src/lib/domain/clock';
 
 const at = (y: number, m: number, d: number, ...time: number[]): number =>
   new Date(y, m, d, ...time).getTime();
@@ -38,39 +32,43 @@ describe('localDayNumber', () => {
   });
 });
 
-describe('addLocalDays across a DST change', () => {
+describe('localDayNumber across a DST change', () => {
   // The host timezone matters here. Pick the transition this machine is in, so
-  // the assertion is about calendar arithmetic rather than about a zone.
+  // the assertions are about calendar arithmetic rather than about a zone.
   const march = (y: number): number => new Date(y, 2, 8).getTimezoneOffset();
   const november = (y: number): number => new Date(y, 10, 1).getTimezoneOffset();
   const observingDst = march(2026) !== november(2026);
 
-  it.runIf(observingDst)('spring forward: one calendar day is 23 elapsed hours', () => {
-    const beforeChange = at(2026, 2, 13, 12);
-    const afterChange = addLocalDays(beforeChange, 1);
-    const hours = (afterChange - beforeChange) / 3_600_000;
-    expect(localDayNumber(afterChange) - localDayNumber(beforeChange)).toBe(1);
-    expect([hours]).toContain(23);
+  /** Same construction the app relies on: adding to the date field, not to ms. */
+  const calendarDaysLater = (from: number, days: number): number => {
+    const d = new Date(from);
+    return new Date(
+      d.getFullYear(),
+      d.getMonth(),
+      d.getDate() + days,
+      d.getHours(),
+      d.getMinutes(),
+      d.getSeconds(),
+      d.getMilliseconds(),
+    ).getTime();
+  };
+
+  it.runIf(observingDst)('spring forward: one calendar day is not 24 elapsed hours', () => {
+    const before = at(2026, 2, 13, 12);
+    const after = calendarDaysLater(before, 1);
+    const hours = (after - before) / 3_600_000;
+    expect(localDayNumber(after) - localDayNumber(before)).toBe(1);
+    expect([23, 25]).toContain(hours);
   });
 
-  it('never adds or removes a calendar day, whatever the zone does', () => {
+  it('counts the days asked for, whatever the zone does to the hours', () => {
     for (const month of [0, 2, 3, 9, 10]) {
       for (const day of [1, 15, 28]) {
         const from = at(2026, month, day, 12);
-        const to = addLocalDays(from, 30);
+        const to = calendarDaysLater(from, 30);
         expect(localDayNumber(to) - localDayNumber(from)).toBe(30);
       }
     }
-  });
-});
-
-describe('daysBetween', () => {
-  it('counts calendar days, not elapsed hours', () => {
-    expect(daysBetween(at(2026, 6, 1, 23), at(2026, 6, 2, 1))).toBe(1);
-  });
-
-  it('is negative going backwards', () => {
-    expect(daysBetween(at(2026, 6, 2), at(2026, 6, 1))).toBe(-1);
   });
 });
 

@@ -47,17 +47,16 @@ export function lessonViews(progress: Progress): LessonView[] {
   });
 }
 
-export function nextLessonId(progress: Progress): string | null {
-  return lessonViews(progress).find((view) => view.isNext)?.concept.id ?? null;
-}
-
 export function summarise(progress: Progress): CourseSummary {
   const views = lessonViews(progress);
+  // `isNext` rather than the first unfinished lesson: a lesson that is passed
+  // but has since been failed is `revisit`, still the thing to do, and would be
+  // skipped by a "not passed" filter.
   const remaining = views.filter((view) => view.lock !== 'passed');
   return {
     passed: views.length - remaining.length,
     total: views.length,
     minutesLeft: remaining.reduce((sum, view) => sum + view.concept.estMinutes, 0),
-    next: remaining[0]?.concept.id ?? null,
+    next: views.find((view) => view.isNext)?.concept.id ?? null,
   };
 }

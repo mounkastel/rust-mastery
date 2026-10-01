@@ -195,18 +195,6 @@ export class CourseStore {
     );
   }
 
-  /** Opening a lesson is what marks it started, not ticking an activity. */
-  touch(conceptId: string): void {
-    if (!conceptById.has(conceptId)) return;
-    const current = this.lessonOf(conceptId);
-    if (this.#progress.lastLessonId === conceptId && current.status !== 'not-started') return;
-    this.#commit(
-      withLesson({ ...this.#progress, lastLessonId: conceptId }, conceptId, {
-        status: current.status === 'not-started' ? 'in-progress' : current.status,
-      }),
-    );
-  }
-
   rate(conceptId: string, rating: Rating): void {
     if (!conceptById.has(conceptId)) return;
     const current = this.lessonOf(conceptId);
