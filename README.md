@@ -27,8 +27,6 @@ refresh on a deep link works on a static host with no rewrite rule.
 
 ## Commands
 
-Each was run against a clean clone of `master` before it was merged.
-
 | Command                   | What it does                                                 |
 | ------------------------- | ------------------------------------------------------------ |
 | `npm ci`                  | install from `package-lock.json`                             |
@@ -93,3 +91,25 @@ not deploy.
 To roll back a bad deploy, push the revert. `deploy.yml` also takes a manual
 `workflow_dispatch`, but it publishes the current `master`, so a revert has to
 land first. Do not roll back by changing the Pages Source.
+
+## Dependencies
+
+[`.github/dependabot.yml`](.github/dependabot.yml) opens the updates and
+[`.github/workflows/dependabot-auto-merge.yml`](.github/workflows/dependabot-auto-merge.yml)
+squash-merges the patch and minor ones once `verify` and `e2e` are green. A
+semver-major bump stops with a comment asking for a person, which is the one
+kind of update worth reading.
+
+Run the auto-merge by hand with `workflow_dispatch` and a pull request number.
+Dependabot only re-triggers on `synchronize`, so this is the only way to
+re-test a pull request it has already opened.
+
+### Moving a pinned toolchain
+
+`eslint`, `typescript-eslint` and `eslint-plugin-svelte` are pinned together
+and have to move in one commit: the two plugins declare the peer range that
+forbids a new `eslint` major, so lifting `eslint` alone fails to resolve.
+
+After any such bump, expect a fresh `no-unnecessary-type-assertion` result.
+Newer plugin versions find assertions the old ones could not see, and each one
+it names is genuinely redundant.
