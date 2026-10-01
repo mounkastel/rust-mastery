@@ -2,7 +2,8 @@
   import { concepts, type Concept } from '../../content';
   import type { CourseStore } from '../../lib/app/store.svelte';
   import { lessonHref } from '../../lib/app/router';
-  import { lockState, type LockState } from '../../lib/domain/curriculum';
+  import { lockState } from '../../lib/domain/curriculum';
+  import { LOCK_WORD } from '../shell/lock-label';
 
   interface Props {
     store: CourseStore;
@@ -20,14 +21,6 @@
     concept: Concept;
     hits: Hit[];
   }
-
-  const LOCK_WORD: Record<LockState, string> = {
-    locked: 'Locked',
-    available: 'Not started',
-    started: 'In progress',
-    revisit: 'Retake due',
-    passed: 'Passed',
-  };
 
   /** Where in a lesson a query can match, and how to read the text out. */
   const HAYSTACKS: { field: string; read: (c: Concept) => string[] }[] = [

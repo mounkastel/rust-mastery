@@ -5,20 +5,12 @@
   import { formatMinutes } from '../../lib/domain/clock';
   import type { LockState } from '../../lib/domain/curriculum';
   import { MATURE_INTERVAL_DAYS } from '../../lib/domain/srs';
+  import { LOCK_ORDER, LOCK_WORD } from '../shell/lock-label';
 
   interface Props {
     store: CourseStore;
   }
   const { store }: Props = $props();
-
-  const LOCK_ORDER: LockState[] = ['available', 'started', 'revisit', 'locked', 'passed'];
-  const LOCK_WORD: Record<LockState, string> = {
-    locked: 'Locked',
-    available: 'Not started',
-    started: 'In progress',
-    revisit: 'Retake due',
-    passed: 'Passed',
-  };
 
   const summary = $derived(store.summarise());
   const due = $derived(store.dueToday());

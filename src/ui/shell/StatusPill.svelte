@@ -1,22 +1,15 @@
 <script lang="ts">
+  import { LOCK_WORD } from './lock-label';
   import type { NavRow } from './nav-row';
 
   interface Props {
     row: NavRow;
   }
   const { row }: Props = $props();
-
-  const LABEL = {
-    locked: 'Locked',
-    available: 'Not started',
-    started: 'In progress',
-    passed: 'Passed',
-    revisit: 'Retake due',
-  } as const;
 </script>
 
 <span class="dot" data-lock={row.lock} data-next={row.isNext}>
-  <span class="visually-hidden">{LABEL[row.lock]}</span>
+  <span class="visually-hidden">{LOCK_WORD[row.lock]}</span>
 </span>
 
 <style>
