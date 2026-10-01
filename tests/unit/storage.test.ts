@@ -47,7 +47,7 @@ function hostileStorage(): Storage {
     key: boom,
     removeItem: boom,
     setItem: boom,
-  } as unknown as Storage;
+  };
 }
 
 describe('loadProgress', () => {

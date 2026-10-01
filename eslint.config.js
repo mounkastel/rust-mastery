@@ -6,10 +6,10 @@ import tseslint from 'typescript-eslint';
 import svelteParser from 'svelte-eslint-parser';
 import { defineConfig } from 'eslint/config';
 
-// eslint is pinned to the newest 9.x, which is the ceiling: typescript-eslint
-// and eslint-plugin-svelte both declare a peer range of `^8.57 || ^9`. The 9.x
-// line carries an upstream "no longer supported" notice, but moving to 10 fails
-// peer resolution until those two widen their ranges, so this pin is deliberate.
+// eslint is pinned alongside typescript-eslint and eslint-plugin-svelte, which
+// together set the ceiling. Moving to a new eslint major means moving those two
+// in the same commit: their peer ranges are what forbid it, so a lone bump
+// fails to resolve.
 export default defineConfig(
   {
     ignores: [

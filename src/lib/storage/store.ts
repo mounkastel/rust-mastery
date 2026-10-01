@@ -87,7 +87,7 @@ export function loadProgress(store: Store): Progress {
     return emptyProgress();
   }
   const parsed = v.safeParse(progressSchema, json);
-  return parsed.success ? (parsed.output as Progress) : emptyProgress();
+  return parsed.success ? parsed.output : emptyProgress();
 }
 
 export function saveProgress(store: Store, progress: Progress): void {
@@ -142,5 +142,5 @@ export function importProgress(text: string): ImportResult {
   if (!parsed.success) {
     return { ok: false, reason: 'That file is damaged or was edited by hand.' };
   }
-  return { ok: true, progress: parsed.output as Progress };
+  return { ok: true, progress: parsed.output };
 }
