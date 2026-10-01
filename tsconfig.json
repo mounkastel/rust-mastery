@@ -18,13 +18,7 @@
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "noEmit": true,
-    "baseUrl": ".",
-    "paths": {
-      "$lib": ["./src/lib"],
-      "$lib/*": ["./src/lib/*"]
-    }
+    "noEmit": true
   },
   "include": [
     "src/**/*.ts",
